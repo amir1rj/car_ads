@@ -44,6 +44,9 @@ INSTALLED_APPS = [
     #apps
     'account.apps.AccountConfig',
     'ads.apps.AdsConfig',
+
+    #third party
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -155,3 +158,11 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30)
 }
+#arvan cloud
+# DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+# AWS_S3_ACCESS_KEY_ID=''
+# AWS_S3_SECRET_ACCESS_KEY=''
+# AWS_S3_ENDPOINT_URL=''
+# AWS_STORAGE_BUCKET_NAME=''
+# AWS_SERVISE_NAME=''
+# AWS_S3_FILE_OVERWRITE=False

@@ -36,6 +36,7 @@ class User(AbstractBaseUser,PermissionsMixin):
     verified = models.BooleanField(default=False)
     firstname = models.CharField(max_length=255, blank=True, null=True)
     lastname = models.CharField(max_length=255, blank=True, null=True)
+    profile = models.ImageField()
     objects = UserManager()
     USERNAME_FIELD = 'phone_number'
 
