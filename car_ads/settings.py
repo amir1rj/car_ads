@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'drf_spectacular',
     'django.contrib.admin',
     'django.contrib.auth',
@@ -44,6 +45,8 @@ INSTALLED_APPS = [
     #apps
     'account.apps.AccountConfig',
     'ads.apps.AdsConfig',
+    'chat.apps.ChatConfig',
+
 
     #third party
     'storages',
@@ -77,9 +80,16 @@ TEMPLATES = [
         },
     },
 ]
-
+ASGI_APPLICATION = "car_ads.asgi.application"
 WSGI_APPLICATION = 'car_ads.wsgi.application'
-
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
