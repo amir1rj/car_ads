@@ -5,31 +5,30 @@ from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer
 
 from account.models import User
-from chat.models import Message
+from chat.models import Message, Chat
 from chat.serializers import MessageSerializer
 
 from rest_framework.renderers import JSONRenderer
 
 
 class ChatConsumer(WebsocketConsumer):
-    def new_message(self, message, username, ):
+    def new_message(self, data, ):
+        username=data.get('username')
+        message=data.get('message')
+        roomName = data.get('roomName')
         username_model = User.objects.get(username=username)
-        message_model = Message.objects.create(author=username_model, content=message)
-
+        chat_model=Chat.objects.filter(roomName=roomName).first()
+        message_model = Message.objects.create(author=username_model, content=message,chat=chat_model)
         result = self.messgeSeialization(message_model)
-
         self.send_to_chat_message(eval(result))
-
-    def fetch_message(self, message=None, username=None):
-        qs = Message.last_messages(self)
-
+    def fetch_message(self, data):
+        roomName =data["roomName"]
+        qs = Message.last_messages(self, roomName)
         message_json = self.messgeSeialization(qs)
         content = {
             "message": eval(message_json),
             "command": "fetch_message",
-
         }
-
         self.chat_message(content)
 
     commands = {
@@ -38,7 +37,6 @@ class ChatConsumer(WebsocketConsumer):
         "fetch_message": fetch_message,
 
     }
-
     def messgeSeialization(self, qs):
         serialized = MessageSerializer(qs,
                                        many=(lambda qs: True if (qs.__class__.__name__ == 'QuerySet') else False)(qs))
@@ -69,11 +67,11 @@ class ChatConsumer(WebsocketConsumer):
         command = text_data_json.get('command')
         username = text_data_json.get('username')
 
-        self.commands[command](self, message, username)
+        self.commands[command](self, text_data_json)
         # Send message to room group
 
     def send_to_chat_message(self, message, ):
-        print("salammmmmmmmmmm")
+
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, {
                 "type": "chat.message",

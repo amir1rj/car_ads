@@ -9,9 +9,11 @@ def index(request):
 
 def room(request, room_name):
     username = request.user.username
+
     context = {
 
         'room_name': room_name,
         'username': mark_safe(json.dumps(username))
+
     }
     return render(request, "chat/room.html", context)

@@ -28,8 +28,8 @@
             for (let i = data["message"].length - 1; i >= 0; i--) {
                 document.querySelector('#chat-log').value += (data["message"][i]["content"] + '\n');
             }
-        }else {
-               document.querySelector('#chat-log').value += (data["message"]["content"]+ '\n');
+        } else {
+            document.querySelector('#chat-log').value += (data["message"]["content"] + '\n');
         }
 
 
@@ -40,7 +40,8 @@
 
         chatSocket.send(JSON.stringify({
 
-            'command': "fetch_message"
+            'command': "fetch_message",
+            'roomName': roomName
         }));
     }
 
@@ -62,8 +63,10 @@
         chatSocket.send(JSON.stringify({
             'message': message,
             'command': "new_message",
-            'username': username
+            'username': username,
+            'roomName': roomName
         }));
+
         messageInputDom.value = '';
     };
 </script>
