@@ -1,4 +1,5 @@
 <!-- chat/templates/chat/room.html -->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,11 +7,16 @@
     <title>Chat Room</title>
 </head>
 <body>
+<form action="/send-image" method="post" enctype="multipart/form-data">
 <textarea id="chat-log" cols="100" rows="20"></textarea><br>
 <input id="chat-message-input" type="text" size="100"><br>
 <input id="chat-message-submit" type="button" value="Send">
 {{ room_name|json_script:"room-name" }}
+    </form>
+</body>
+
 <script>
+
     const roomName = JSON.parse(document.getElementById('room-name').textContent);
     let username = {{ username }}
     const chatSocket = new WebSocket(
@@ -23,15 +29,16 @@
 
     chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
-        console.log(data)
+
         if (data["command"] == "fetch_message") {
             for (let i = data["message"].length - 1; i >= 0; i--) {
                 document.querySelector('#chat-log').value += (data["message"][i]["content"] + '\n');
+                console.log('salam')
             }
-        } else {
+        } else if (data["command"] == "new_message") {
             document.querySelector('#chat-log').value += (data["message"]["content"] + '\n');
-        }
 
+        }
 
     };
 
@@ -61,7 +68,7 @@
         const messageInputDom = document.querySelector('#chat-message-input');
         const message = messageInputDom.value;
         chatSocket.send(JSON.stringify({
-            'message': message,
+            'content': message,
             'command': "new_message",
             'username': username,
             'roomName': roomName
@@ -70,5 +77,29 @@
         messageInputDom.value = '';
     };
 </script>
-</body>
+
 </html>
+{#    function readFile() {#}
+{##}
+{#        if (this.files && this.files[0]) {#}
+{##}
+{#            var FR = new FileReader();#}
+{##}
+{#            FR.addEventListener("load", function (e) {#}
+{##}
+{#                chatSocket.send(JSON.stringify({#}
+{#                    'content': e.target.result,#}
+{#                    'command': 'img',#}
+{#                    'username': username,#}
+{#                    'roomName': roomName#}
+{#                }));#}
+{#            });#}
+{##}
+{#            FR.readAsDataURL(this.files[0]);#}
+{#        }#}
+{##}
+{#    }#}
+{##}
+{#    document.getElementById("inp").addEventListener("change", readFile);#}
+
+

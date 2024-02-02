@@ -24,6 +24,7 @@ class UserManager(BaseUserManager):
         """
         Creates and saves a User with the given username and password.
         """
+        print("im from normal")
         if not phone_number:
             raise ValueError("Users must have an phone number")
 
@@ -35,7 +36,24 @@ class UserManager(BaseUserManager):
         user.set_password(password)
         user.save(using=self._db)
         return user
+    def create_user_with_phone(self,data):
+        """
+        Creates and saves a User with the given username,phone number and password.
+        """
+        print(data)
+        print("im from phone")
+        if not data["phone"]:
+            raise ValueError("Users must have a phone number")
+        if not data['username']:
+            raise ValueError("Users must have a username")
+        user = self.model(
 
+            phone_number=data['phone_number'],username=data['username'],verified=True,password=data['password']
+        )
+
+        
+        user.save(using=self._db)
+        return user
     def create_superuser(self,phone_number, password=None):
         """
         Creates and saves a superuser with the given username and password.

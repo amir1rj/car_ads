@@ -7,36 +7,29 @@ from django.db import models
 from django.utils.timezone import now
 
 from account.managers import UserManager
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin,User
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, User
 from django.utils.translation import gettext_lazy as _
 
-from account.utils import TOKEN_TYPE_CHOICE, ROLE_CHOICE, default_role
+from account.utils import TOKEN_TYPE_CHOICE, ROLE_CHOICE, default_role, PROVINCES
 from car_ads import settings
 
 
-class User(AbstractBaseUser,PermissionsMixin):
+class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
         verbose_name=_('username'),
         max_length=40,
         unique=True,
     )
-    email = models.EmailField(
-        verbose_name=_("email"),
-        max_length=255,
-        unique=True,
-        null=True, blank=True
-    )
-    phone_number = models.CharField(max_length=12, verbose_name=_("phone number"),unique=True )
-    is_active = models.BooleanField(default=True, verbose_name=_("activity"),)
-    is_admin = models.BooleanField(default=False , verbose_name=_("admin"))
-    roles = models.CharField(max_length=20, blank=True, choices=ROLE_CHOICE, default=default_role)
-    last_login = models.DateTimeField(null=True, blank=True)
-    created_at = models.DateTimeField(auto_now_add=True,null=True, blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    verified = models.BooleanField(default=False)
-    firstname = models.CharField(max_length=255, blank=True, null=True)
-    lastname = models.CharField(max_length=255, blank=True, null=True)
-    profile = models.ImageField(null=True, blank=True, )
+
+    phone_number = models.CharField(max_length=12, verbose_name=_("phone number"), unique=True)
+    is_active = models.BooleanField(default=True, verbose_name=_("activity"), )
+    is_admin = models.BooleanField(default=False, verbose_name=_("admin"))
+    roles = models.CharField(max_length=20, blank=True, choices=ROLE_CHOICE, default=default_role,
+                             verbose_name=_("role"))
+    last_login = models.DateTimeField(null=True, blank=True, verbose_name=_("last login"))
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name=_("created at"))
+    updated_at = models.DateTimeField(auto_now=True, verbose_name=_("updated at"))
+    verified = models.BooleanField(default=False, verbose_name=_("verified"), )
     objects = UserManager()
     USERNAME_FIELD = 'phone_number'
 
@@ -62,8 +55,10 @@ class User(AbstractBaseUser,PermissionsMixin):
         self.last_login = datetime.now()
         self.save()
 
+
 class PendingUser(models.Model):
     phone = models.CharField(max_length=20)
+    username = models.CharField(max_length=50, null=True, blank=True)
     verification_code = models.CharField(max_length=8, blank=True, null=True)
     password = models.CharField(max_length=255, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -73,13 +68,14 @@ class PendingUser(models.Model):
 
     def is_valid(self) -> bool:
         """10 mins OTP validation"""
-        lifespan_in_seconds = float(settings.OTP_EXPIRE_TIME * 60)
+        lifespan_in_seconds = float(3 * 60)
         now = datetime.now(timezone.utc)
         time_diff = now - self.created_at
         time_diff = time_diff.total_seconds()
         if time_diff >= lifespan_in_seconds:
             return False
         return True
+
 
 class Token(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -93,7 +89,7 @@ class Token(models.Model):
         return f"{str(self.user)} {self.token}"
 
     def is_valid(self) -> bool:
-        lifespan_in_seconds = float(settings.TOKEN_LIFESPAN * 60 )
+        lifespan_in_seconds = float(settings.TOKEN_LIFESPAN * 60)
         now = datetime.now(timezone.utc)
         time_diff = now - self.created_at
         time_diff = time_diff.total_seconds()
@@ -106,3 +102,25 @@ class Token(models.Model):
         self.user.save()
 
 
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile", verbose_name=_("user"))
+    email = models.EmailField(
+        verbose_name=_("email"),
+        max_length=255,
+        unique=True,
+        null=True, blank=True
+    )
+    picture = models.ImageField(upload_to=f"images/profiles/{user}/", default="images/default.jpeg",
+                                verbose_name=_("picture"))
+    city = models.CharField(max_length=30, choices=PROVINCES, verbose_name=_("city"), blank=True, null=True)
+    first_name = models.CharField(max_length=255, blank=True, null=True, verbose_name=_("first name"))
+    last_name = models.CharField(max_length=255, verbose_name=_("last name"), blank=True, null=True)
+    gender = models.CharField(max_length=3, choices=(("مرد", "مرد"), ("زن", "زن")), verbose_name=_("gender"), null=True,
+                              blank=True)
+
+    @property
+    def username(self):
+        return self.user.username
+
+    def __str__(self):
+        return f"{self.user.username} Profile"

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from chat.models import Message, Chat
+from chat.models import Message, Chat, Chat_Image
 
 
 # Register your models here.
@@ -10,3 +10,4 @@ class MessageAdmin(admin.ModelAdmin):
     list_filter = ["timestamp"]
 
 admin.site.register(Chat)
+admin.site.register(Chat_Image)

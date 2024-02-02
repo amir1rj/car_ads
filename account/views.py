@@ -4,11 +4,12 @@ from rest_framework import viewsets, status, serializers
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-
-from account.models import User, Token
+from rest_framework.views import APIView
+from account.models import User, Token, Profile
+from account.permisions import IsOwnerOrReadOnly
 from account.serializers import CreateUserSerializer, ListUserSerializer, UpdateUserSerializer, UserNameSerializer, \
     AccountVerificationSerializer, InitiatePasswordResetSerializer, CreatePasswordFromResetOTPSerializer, \
-    PasswordChangeSerializer
+    PasswordChangeSerializer, ProfileSerializer
 from account.utils import TokenEnum, is_admin_user, IsAdmin
 
 
@@ -86,13 +87,14 @@ class AuthViewSets(viewsets.GenericViewSet):
         return Response({"success": True,
                          "message": "Temporary password sent to your mobile!"}, status=200)
 
-    @action(methods=['POST'], detail=False, serializer_class=CreatePasswordFromResetOTPSerializer, url_path='create-password')
+    @action(methods=['POST'], detail=False, serializer_class=CreatePasswordFromResetOTPSerializer,
+            url_path='create-password')
     def create_password(self, request, pk=None):
         """Create a new password given the reset OTP sent to user phone number"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         token: Token = Token.objects.filter(
-            token=request.data['otp'],  token_type=TokenEnum.PASSWORD_RESET).first()
+            token=request.data['otp'], token_type=TokenEnum.PASSWORD_RESET).first()
         if not token or not token.is_valid():
             return Response({'success': False, 'errors': 'Invalid password reset otp'}, status=400)
         token.reset_user_password(request.data['new_password'])
@@ -101,17 +103,51 @@ class AuthViewSets(viewsets.GenericViewSet):
 
 
 class PasswordChangeView(viewsets.GenericViewSet):
-        '''Allows password change to authenticated user'''
-        serializer_class = PasswordChangeSerializer
-        permission_classes = [IsAuthenticated]
+    '''Allows password change to authenticated user'''
+    serializer_class = PasswordChangeSerializer
+    permission_classes = [IsAuthenticated]
 
-        def create(self, request, *args, **kwargs):
-            context = {"request": request}
-            serializer = self.get_serializer(data=request.data, context=context)
-            serializer.is_valid(raise_exception=True)
+    def create(self, request, *args, **kwargs):
+        context = {"request": request}
+        serializer = self.get_serializer(data=request.data, context=context)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"message": "Your password has been updated."}, status.HTTP_200_OK)
+
+
+class ProfileViewSets(viewsets.ModelViewSet):
+    serializer_class = ProfileSerializer
+    permission_classes = [IsOwnerOrReadOnly]
+    queryset = Profile.objects.all()
+
+    def update(self, request, pk=None, **kwargs):
+        instance = Profile.objects.get(id=pk)
+        self.check_object_permissions(request, instance)
+        serializer = ProfileSerializer(data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.update(instance=instance, validated_data=serializer.validated_data)
+            return Response({"response": "updated"})
+        return Response({"response": serializer.errors})
+
+    def create(self, request, **kwargs):
+        serializer = ProfileSerializer(data=request.data, context={"request": request})
+        if serializer.is_valid():
+            serializer.validated_data["user"] = request.user
             serializer.save()
-            return Response({"message": "Your password has been updated."}, status.HTTP_200_OK)
+            return Response({"response": "done"})
+        return Response({"response": serializer.errors})
 
+    def get_queryset(self):
+        user = self.request.user
+
+        if is_admin_user(user):
+            return super().get_queryset().all()
+        else:
+            try:
+                profile = Profile.objects.get(user=user)
+            except Profile.DoesNotExist:
+                profile = Profile.objects.create(user=user)
+            return [profile]  # Return the Profile object
 
 # class UserViewsets(viewsets.ModelViewSet):
 #     queryset = get_user_model().objects.all()
