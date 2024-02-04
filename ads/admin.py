@@ -24,7 +24,7 @@ class CarAdmin(admin.ModelAdmin):
     ]
     list_filter = ['brand', 'model', 'year', 'fuel_type', 'status']
     search_fields = ['title', 'description', 'brand__name', 'model']
-    readonly_fields = ['vin', 'inspection_date']
+    # readonly_fields = ['vin', 'inspection_date']
     inlines = [ImageInline, FeatureInline]
 
 

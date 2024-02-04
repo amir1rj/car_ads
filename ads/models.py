@@ -56,8 +56,7 @@ class Car(models.Model):
     phone_numbers = models.CharField(max_length=12, verbose_name=_("phone number"))
     address = models.CharField(max_length=255, verbose_name=_("address"))
 
-    # تصاویر
-    images = models.ManyToManyField('Image', verbose_name=_("images"))
+
 
     # وضعیت آگهی
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="pending", verbose_name=_("status"))
@@ -76,7 +75,7 @@ class Car(models.Model):
 
 
 class Image(models.Model):
-    ad = models.ForeignKey(Car, on_delete=models.CASCADE, related_name="ad_images", null=True)
+    ad = models.ForeignKey(Car, on_delete=models.CASCADE, related_name="images", null=True,blank=True,)
     title = models.CharField(max_length=30)
     image = models.ImageField(upload_to="ads")
 
