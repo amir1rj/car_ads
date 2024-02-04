@@ -1,15 +1,9 @@
 import uuid
 from datetime import datetime, timezone
-
-from django.contrib.auth import models
-
 from django.db import models
-from django.utils.timezone import now
-
 from account.managers import UserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, User
 from django.utils.translation import gettext_lazy as _
-
 from account.utils import TOKEN_TYPE_CHOICE, ROLE_CHOICE, default_role, PROVINCES
 from car_ads import settings
 
@@ -124,3 +118,6 @@ class Profile(models.Model):
 
     def __str__(self):
         return f"{self.user.username} Profile"
+    class Meta:
+        verbose_name=_('Profile')
+        verbose_name_plural=_("Profiles")

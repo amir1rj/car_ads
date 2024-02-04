@@ -8,7 +8,7 @@ from django.db import models
 class Chat(models.Model):
     roomName = models.CharField(max_length=50)
     # ad = models.ForeignKey(Add,,,,,)
-    memeber = models.ManyToManyField(User, null=True, blank=True)
+
 
     def __str__(self):
         return self.roomName
@@ -25,6 +25,7 @@ class Message(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     #  should remove blank and null property
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name="messages", null=True, blank=True)
+
 
     def last_messages(self, roomName):
         return Message.objects.order_by('-timestamp').filter(chat__roomName=roomName)
