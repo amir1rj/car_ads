@@ -26,6 +26,7 @@ class CarAdmin(admin.ModelAdmin):
     search_fields = ['title', 'description', 'brand__name', 'model']
     # readonly_fields = ['vin', 'inspection_date']
     inlines = [ImageInline, FeatureInline]
+    list_editable = ["is_promoted"]
 
 
 @admin.register(Brand)

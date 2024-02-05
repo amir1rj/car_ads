@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.pagination import PageNumberPagination
 
 from ads.models import Car, Image, Feature, Brand, CarModel
 
@@ -28,6 +29,8 @@ class FeatureSerializer(serializers.ModelSerializer):
 
 
 class AdSerializer(serializers.ModelSerializer):
+    pagination_class = PageNumberPagination
+    page_size = 1
     images = ImageSerializer(many=True, read_only=False, required=False)
     features = FeatureSerializer(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)

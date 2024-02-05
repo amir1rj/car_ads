@@ -68,7 +68,7 @@ class Car(models.Model):
         return f"{self.title} ({self.brand} {self.model})"
 
     class Meta:
-        ordering = ['-created_at', '-is_promoted']
+        ordering = [ '-is_promoted',"-created_at"]
         verbose_name = _('car')
         verbose_name_plural = _('cars')
         get_latest_by = "created_at"
