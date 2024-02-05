@@ -126,7 +126,7 @@ class ProfileViewSets(viewsets.ModelViewSet):
         serializer = ProfileSerializer(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.update(instance=instance, validated_data=serializer.validated_data)
-            return Response({"response": "updated"})
+            return Response({"response": " your profile updated"},status.HTTP_200_OK)
         return Response({"response": serializer.errors})
 
     def create(self, request, **kwargs):

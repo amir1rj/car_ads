@@ -33,7 +33,7 @@ class Car(models.Model):
     مدل مربوط به آگهی خودرو
     """
     # اطلاعات کلی
-    seller = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("seller"), related_name="cars")
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name=_("seller"), related_name="cars")
     title = models.CharField(max_length=255, verbose_name=_("title"), )
     description = models.TextField(verbose_name=_("description"), )
     price = models.PositiveIntegerField(verbose_name=_("price"))
