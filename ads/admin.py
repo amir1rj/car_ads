@@ -15,18 +15,17 @@ class FeatureInline(admin.TabularInline):
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
     list_display = [
-        'title',
         'brand',
         'model',
         'price',
         "created_at",
         'is_promoted',
+        'status'
     ]
     list_filter = ['brand', 'model', 'year', 'fuel_type', 'status']
-    search_fields = ['title', 'description', 'brand__name', 'model']
-    # readonly_fields = ['vin', 'inspection_date']
+    search_fields = ['year', 'description',]
     inlines = [ImageInline, FeatureInline]
-    list_editable = ["is_promoted"]
+    list_editable = ["is_promoted","status"]
 
 
 @admin.register(Brand)

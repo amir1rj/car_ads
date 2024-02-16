@@ -1,4 +1,3 @@
-# chat/consumers.py
 import base64
 import json
 from channels.db import database_sync_to_async
@@ -15,21 +14,22 @@ from rest_framework.renderers import JSONRenderer
 
 class ChatConsumer(WebsocketConsumer):
     def new_message(self, data, ):
-        username, message,roomName=data.get('username'),data.get('content'),data.get('roomName')
+        username, message, roomName = data.get('username'), data.get('content'), data.get('roomName')
         username_model = User.objects.get(username=username)
-        chat_model=Chat.objects.filter(roomName=roomName).first()
-        message_model = Message.objects.create(author=username_model, content=message,chat=chat_model)
+        chat_model = Chat.objects.filter(roomName=roomName).first()
+        message_model = Message.objects.create(author=username_model, content=message, chat=chat_model)
         content = eval(self.messgeSeialization(message_model))
-        validated_content =check_message(content)
+        validated_content = check_message(content)
         result = {
-            "content":validated_content,
-            "username":username,
-            "command":"new_message"
+            "content": validated_content,
+            "username": username,
+            "command": "new_message"
         }
 
         self.send_to_chat_message(result)
+
     def fetch_message(self, data):
-        roomName =data["roomName"]
+        roomName = data["roomName"]
         qs = Message.last_messages(self, roomName)
         message_json = self.messgeSeialization(qs)
         content = {
@@ -40,14 +40,6 @@ class ChatConsumer(WebsocketConsumer):
 
     def image(self, data):
         pass
-
-    # @database_sync_to_async
-    # def get_user_model(self, username):
-    #     return User.objects.filter(user__username=username).first()
-    #
-    # @database_sync_to_async
-    # def get_chat_model(self, roomName):
-    #     return Chat.objects.filter(roomName=roomName).first()
 
     commands = {
 
@@ -90,13 +82,20 @@ class ChatConsumer(WebsocketConsumer):
         # Send message to room group
 
     def send_to_chat_message(self, message, ):
-
         async_to_sync(self.channel_layer.group_send)(
             self.room_group_name, {
-                "type": "chat.message","message": message.get('content'),"command": message.get('command'),"username":message.get('username'),
+                "type": "chat.message", "message": message.get('content'), "command": message.get('command'),
+                "username": message.get('username'),
             }
         )
 
     # Receive message from room group
     def chat_message(self, event):
         self.send(text_data=json.dumps(event))
+# @database_sync_to_async
+# def get_user_model(self, username):
+#     return User.objects.filter(user__username=username).first()
+#
+# @database_sync_to_async
+# def get_chat_model(self, roomName):
+#     return Chat.objects.filter(roomName=roomName).first()

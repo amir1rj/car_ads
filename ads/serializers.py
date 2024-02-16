@@ -19,7 +19,7 @@ class CarModelSerializer(serializers.ModelSerializer):
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
-        fields = ("id", "title", "image")
+        fields = ("id", "image")
 
 
 class FeatureSerializer(serializers.ModelSerializer):
@@ -75,16 +75,11 @@ class AdSerializer(serializers.ModelSerializer):
         request = self.context["request"]
         if request.user.is_authenticated:
             validated_data["user"] = request.user
-
         images_data = validated_data.pop('images', [])
         features_data = validated_data.pop('features', [])
-
         instance = super().update(instance, validated_data)
-
         for image_data in images_data:
             Image.objects.update_or_create(ad=instance, **image_data)
-
         for feature_data in features_data:
             Feature.objects.update_or_create(car=instance, **feature_data)
-
         return instance

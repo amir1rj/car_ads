@@ -7,35 +7,37 @@ import pyotp as pyotp
 from rest_framework import serializers, permissions
 
 from account import models
-from account.models import  User
-PROVINCES=[ ("آذربایجان شرقی", "آذربایجان شرقی"),
-    ("آذربایجان غربی", "آذربایجان غربی"),
-    ("اصفهان", "اصفهان"),
-    ("البرز", "البرز"),
-    ("ایلام", "ایلام"),
-    ("بوشهر", "بوشهر"),
-    ("تهران", "تهران"),
-    ("چهارمحال و بختیاری", "چهارمحال و بختیاری"),
-    ("خراسان جنوبی", "خراسان جنوبی"),
-    ("خراسان رضوی", "خراسان رضوی"),
-    ("خراسان شمالی", "خراسان شمالی"),
-    ("خوزستان", "خوزستان"),
-    ("زنجان", "زنجان"),
-    ("سمنان", "سمنان"),
-    ("سیستان و بلوچستان", "سیستان و بلوچستان"),
-    ("فارس", "فارس"),
-    ("قزوین", "قزوین"),
-    ("قم", "قم"),
-    ("کردستان", "کردستان"),
-    ("کرمان", "کرمان"),
-    ("کرمانشاه", "کرمانشاه"),
-    ("کهگیلویه و بویراحمد", "کهگیلویه و بویراحمد"),
-    ("گلستان", "گلستان"),
-    ("لرستان", "لرستان"),
-    ("گیلان", "گیلان"),
-    ("همدان", "همدان"),
-    ("یزد", "یزد")
-]
+from account.models import User
+
+
+PROVINCES = [("آذربایجان شرقی", "آذربایجان شرقی"),
+             ("آذربایجان غربی", "آذربایجان غربی"),
+             ("اصفهان", "اصفهان"),
+             ("البرز", "البرز"),
+             ("ایلام", "ایلام"),
+             ("بوشهر", "بوشهر"),
+             ("تهران", "تهران"),
+             ("چهارمحال و بختیاری", "چهارمحال و بختیاری"),
+             ("خراسان جنوبی", "خراسان جنوبی"),
+             ("خراسان رضوی", "خراسان رضوی"),
+             ("خراسان شمالی", "خراسان شمالی"),
+             ("خوزستان", "خوزستان"),
+             ("زنجان", "زنجان"),
+             ("سمنان", "سمنان"),
+             ("سیستان و بلوچستان", "سیستان و بلوچستان"),
+             ("فارس", "فارس"),
+             ("قزوین", "قزوین"),
+             ("قم", "قم"),
+             ("کردستان", "کردستان"),
+             ("کرمان", "کرمان"),
+             ("کرمانشاه", "کرمانشاه"),
+             ("کهگیلویه و بویراحمد", "کهگیلویه و بویراحمد"),
+             ("گلستان", "گلستان"),
+             ("لرستان", "لرستان"),
+             ("گیلان", "گیلان"),
+             ("همدان", "همدان"),
+             ("یزد", "یزد")
+             ]
 TOKEN_TYPE_CHOICE = (
     ("PASSWORD_RESET", "PASSWORD_RESET"),
 )
@@ -44,8 +46,11 @@ ROLE_CHOICE = (
     ("CUSTOMER", "CUSTOMER"),
 
 )
+
+
 def default_role():
     return ["CUSTOMER"]
+
 
 @dataclass
 class SystemRoleEnum:
@@ -59,9 +64,10 @@ class TokenEnum:
     PASSWORD_RESET = "PASSWORD_RESET"
 
 
-
 def check_message(message):
     return message
+
+
 def check_phone(value):
     """
     Validate the phone number based on Iranian format
@@ -85,13 +91,13 @@ def check_phone(value):
     raise serializers.ValidationError(f'{value} is not a valid phone')
 
 
-def generate_otp()->int:
+def generate_otp() -> int:
     totp = pyotp.TOTP(base64.b32encode(os.urandom(16)).decode('utf-8'))
     otp = totp.now()
     return otp
 
 
-def is_admin_user(user:User)->bool:
+def is_admin_user(user: User) -> bool:
     """
     Check an authenticated user is an admin or not
     """

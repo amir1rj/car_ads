@@ -126,7 +126,7 @@ class ProfileViewSets(viewsets.ModelViewSet):
         serializer = ProfileSerializer(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.update(instance=instance, validated_data=serializer.validated_data)
-            return Response({"response": " your profile updated"},status.HTTP_200_OK)
+            return Response({"response": " your profile updated"}, status.HTTP_200_OK)
         return Response({"response": serializer.errors})
 
     def create(self, request, **kwargs):
@@ -137,17 +137,21 @@ class ProfileViewSets(viewsets.ModelViewSet):
             return Response({"response": "done"})
         return Response({"response": serializer.errors})
 
-    def get_queryset(self):
-        user = self.request.user
 
-        if is_admin_user(user):
-            return super().get_queryset().all()
-        else:
-            try:
-                profile = Profile.objects.get(user=user)
-            except Profile.DoesNotExist:
-                profile = Profile.objects.create(user=user)
-            return [profile]  # Return the Profile object
+  # try:
+  #               profile = Profile.objects.get(user=user)
+  #           except Profile.DoesNotExist:
+  #               profile = Profile.objects.create(user=user)
+  #           return [profile]  # Return the Profile object
+
+
+
+
+
+
+
+
+
 
 # class UserViewsets(viewsets.ModelViewSet):
 #     queryset = get_user_model().objects.all()

@@ -15,7 +15,7 @@ class CreateUserSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=6)
 
     def validate(self, attrs: dict):
-        phone_number,username = attrs.get('phone_number'), attrs.get('username')
+        phone_number, username = attrs.get('phone_number'), attrs.get('username')
         strip_number = phone_number.lower().strip()
         cleaned_number = check_phone(strip_number)
         if User.objects.filter(phone_number__iexact=cleaned_number).exists():
@@ -25,6 +25,7 @@ class CreateUserSerializer(serializers.Serializer):
             raise serializers.ValidationError({'username': 'Username already exists'})
         attrs['phone'] = cleaned_number
         return super().validate(attrs)
+
     # def create(self, validated_data):
     #     phone_number = validated_data.get('phone_number')
     #     password= validated_data.get('password')
@@ -32,9 +33,9 @@ class CreateUserSerializer(serializers.Serializer):
     #     return user
     def create(self, validated_data: dict):
         otp = generate_otp()
-        phone_number,username = validated_data.get('phone'),validated_data.get('username')
+        phone_number, username = validated_data.get('phone'), validated_data.get('username')
         user, _ = PendingUser.objects.update_or_create(
-            phone=phone_number,username=username,
+            phone=phone_number, username=username,
             defaults={
                 "phone": phone_number,
                 "verification_code": otp,
@@ -61,11 +62,11 @@ class AccountVerificationSerializer(serializers.Serializer):
         mobile: str = check_phone(phone_number)
         pending_user: PendingUser = PendingUser.objects.filter(
             phone=mobile, verification_code=attrs.get('otp')).first()
-        username=pending_user.username
+        username = pending_user.username
         if pending_user and pending_user.is_valid():
             attrs['phone'] = mobile
             attrs['password'] = pending_user.password
-            attrs['pending_user'],attrs["username"] = pending_user,username
+            attrs['pending_user'], attrs["username"] = pending_user, username
         else:
             raise serializers.ValidationError(
                 {'otp': 'Verification failed. Invalid OTP or Number'})
@@ -75,7 +76,8 @@ class AccountVerificationSerializer(serializers.Serializer):
     def create(self, validated_data: dict):
         validated_data.pop('otp')
         pending_user = validated_data.pop('pending_user')
-        User.objects.create_user_with_phone(validated_data)
+        user = User.objects.create_user_with_phone(validated_data)
+        Profile.objects.get_or_create(user=user)
         pending_user.delete()
         return validated_data
 
@@ -118,6 +120,7 @@ class InitiatePasswordResetSerializer(serializers.Serializer):
         print(message_info)
         return token
 
+
 class CreatePasswordFromResetOTPSerializer(serializers.Serializer):
     otp = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
@@ -147,7 +150,7 @@ class ListUserSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "username",
-           'phone_number',
+            'phone_number',
             "verified",
             "created_at",
             "roles",
@@ -193,7 +196,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 
 
 class UserNameSerializer(serializers.Serializer):
-    username = serializers.CharField(required=True,max_length=255)
+    username = serializers.CharField(required=True, max_length=255)
 
 
 class ProfileSerializer(serializers.ModelSerializer):
@@ -205,7 +208,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         email = attrs.get('email')
-        if email is not None :
+        if email is not None:
             if Profile.objects.filter(email=email).exists():
                 raise serializers.ValidationError("your email is already exists")
         return attrs
@@ -215,5 +218,3 @@ class ProfileSerializer(serializers.ModelSerializer):
         if request.user.is_authenticated:
             validated_data["user"] = request.user
         return Profile.objects.get_or_create(**validated_data)
-
-
