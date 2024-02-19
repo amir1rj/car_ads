@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'daphne',
+    "haystack",
     'drf_spectacular',
     "admin_persian",
     'django.contrib.admin',
@@ -161,7 +162,7 @@ SPECTACULAR_SETTINGS = {
 
     # OTHER SETTINGS
 }
-
+PAGINATION_PAGE_SIZE =1
 LOCALE_PATHS = os.path.join(BASE_DIR, 'locale/'),
 
 SIMPLE_JWT = {
@@ -176,3 +177,16 @@ SIMPLE_JWT = {
 # AWS_STORAGE_BUCKET_NAME=''
 # AWS_SERVISE_NAME=''
 # AWS_S3_FILE_OVERWRITE=False
+# haystack
+
+WHOOSH_INDEX = os.path.join(BASE_DIR, 'whoosh/')
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': WHOOSH_INDEX,
+        'TOKENIZER': 'haystack.analysis.PersianAnalyzer',
+    },
+}
+
+HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework.pagination import PageNumberPagination
-
 from ads.models import Car, Image, Feature, Brand, CarModel
+from ads.search_indexes import CarIndex
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -31,6 +31,7 @@ class FeatureSerializer(serializers.ModelSerializer):
 class AdSerializer(serializers.ModelSerializer):
     pagination_class = PageNumberPagination
     page_size = 1
+    # autocomplete = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, read_only=False, required=False)
     features = FeatureSerializer(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)
@@ -44,6 +45,9 @@ class AdSerializer(serializers.ModelSerializer):
     def get_images(self, obj):
         serializer = ImageSerializer(instance=obj.images.all(), many=True, )
         return serializer.data
+
+    # def get_autocomplete(self, obj):
+    #     return CarIndex.prepare_autocomplete(obj)
 
     def get_features(self, obj):
         serializer = FeatureSerializer(instance=obj.features.all(), many=True, )
@@ -83,3 +87,4 @@ class AdSerializer(serializers.ModelSerializer):
         for feature_data in features_data:
             Feature.objects.update_or_create(car=instance, **feature_data)
         return instance
+

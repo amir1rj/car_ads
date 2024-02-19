@@ -47,7 +47,7 @@ class Car(models.Model):
     kilometer = models.PositiveIntegerField(verbose_name="کارکرد کیلومتر")
     body_type = models.CharField(max_length=255, choices=BODY_TYPE_CHOICES, verbose_name="نوع بدنه")
     color = models.CharField(max_length=255, verbose_name="رنگ")
-    color_description = models.TextField(blank=True, null=True,verbose_name="جزعیات رنگ شدگی")
+    color_description = models.TextField(blank=True, null=True, verbose_name="جزعیات رنگ شدگی")
     transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس")
     fuel_type = models.CharField(max_length=255, choices=FUEL_TYPE_CHOICES, verbose_name="نوع سوخت")
     body_condition = models.CharField(
@@ -60,7 +60,6 @@ class Car(models.Model):
     chassis_condition = models.CharField(
         max_length=255, choices=CHASSIS_CONDITION_CHOICES, default=("سالم", "سالم"), verbose_name="وضعیت شاسی"
     )
-
 
     # اطلاعات تماس
     phone_numbers = models.CharField(max_length=12, verbose_name="شماره تلفن")
