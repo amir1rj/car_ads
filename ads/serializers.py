@@ -30,7 +30,7 @@ class FeatureSerializer(serializers.ModelSerializer):
 
 class AdSerializer(serializers.ModelSerializer):
     pagination_class = PageNumberPagination
-    page_size = 1
+    page_size = 3
     # autocomplete = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, read_only=False, required=False)
     features = FeatureSerializer(many=True, read_only=False, required=False)

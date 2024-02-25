@@ -5,16 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/ads/filter.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ads/pagination.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ads/search_indexes.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ads/signals.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/managers.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/managers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ads/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ads/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/views.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/car_ads/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_a19kuekbqvpiq8z5.seg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/whoosh/_MAIN_1.toc" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -159,9 +156,9 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Django Server.car_ads" />
-      <item itemvalue="Python.utils" />
       <item itemvalue="Python.manage" />
+      <item itemvalue="Python.utils" />
+      <item itemvalue="Django Server.car_ads" />
     </list>
     <recent_temporary>
       <list>
@@ -224,6 +221,9 @@
       <workItem from="1708185578087" duration="6850000" />
       <workItem from="1708294239214" duration="7857000" />
       <workItem from="1708372603333" duration="5145000" />
+      <workItem from="1708696689608" duration="609000" />
+      <workItem from="1708714736856" duration="1970000" />
+      <workItem from="1708760344302" duration="5183000" />
     </task>
     <servers />
   </component>

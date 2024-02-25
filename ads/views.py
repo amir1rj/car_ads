@@ -7,12 +7,78 @@ from ads.serializers import AdSerializer
 from ads.models import Car
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.types import OpenApiTypes
 
 
 class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
     queryset = Car.objects.filter(status="active")
     serializer_class = AdSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    @extend_schema(
+        description="Search for ads based on various filters.",
+        parameters=[
+            OpenApiParameter(name='brand', description='Filter by car brand.', required=False, type=str),
+            OpenApiParameter(name='model', description='Filter by car model.', required=False, type=str),
+            OpenApiParameter(name='color', description='Filter by car color', required=False, type=str),
+            OpenApiParameter(name='transmission', description='Filter by car transmission', required=False, type=str),
+            OpenApiParameter(name='body_condition', description='Filter by car body_condition', required=False,
+                             type=str),
+            OpenApiParameter(
+                name='price',
+                type=str,
+                description='Filter by price range (format: "min,max").',
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='Filter for ads with prices between 5000 and 10000',
+                        description='you should use price_min and price_max',
+                        value='5000,10000'
+                    ),
+                ]
+            ),
+            OpenApiParameter(
+                name='kilometer',
+                type=str,
+                description='Filter by kilometer range (format: "min,max").',
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='Filter for ads with kilometers between 10000 and 50000',
+                        description='you should use kilometer_min and kilometer_max',
+                        value='10000,50000'
+                    ),
+                ]
+            ),
+            OpenApiParameter(
+                name='year',
+                type=str,
+                description='Filter by year range (format: "min,max").',
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='Filter for ads from years 2015 to 2020',
+                        description='you should use year_min and year_max',
+                        value='2015,2020'
+                    ),
+                ]
+            ),
+
+        ],
+
+    )
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        filter_set = CarFilter(request.GET, queryset=queryset)
+        filtered_queryset = filter_set.qs
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(filtered_queryset, many=True)
+        return Response(serializer.data)
 
     def create(self, request, **kwargs):
         serializer = AdSerializer(data=request.data, context={"request": request})
@@ -22,7 +88,80 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
             return Response({"response": " your ad was successfully created", }, status.HTTP_201_CREATED)
         return Response({"response": serializer.errors})
 
-    @action(methods=['get',"post"], detail=False)
+    @extend_schema(
+        description="Search for ads based on various filters.",
+        parameters=[
+            OpenApiParameter(name='brand', description='Filter by car brand.', required=False, type=str),
+            OpenApiParameter(name='model', description='Filter by car model.', required=False, type=str),
+            OpenApiParameter(name='color', description='Filter by car color', required=False, type=str),
+            OpenApiParameter(name='transmission', description='Filter by car transmission', required=False, type=str),
+            OpenApiParameter(name='body_condition', description='Filter by car body_condition', required=False,
+                             type=str),
+            OpenApiParameter(
+                name='price',
+                type=str,
+                description='Filter by price range (format: "min,max").',
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='Filter for ads with prices between 5000 and 10000',
+                        description='you should use price_min and price_max',
+                        value='5000,10000'
+                    ),
+                ]
+            ),
+            OpenApiParameter(
+                name='kilometer',
+                type=str,
+                description='Filter by kilometer range (format: "min,max").',
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='Filter for ads with kilometers between 10000 and 50000',
+                        description='you should use kilometer_min and kilometer_max',
+                        value='10000,50000'
+                    ),
+                ]
+            ),
+            OpenApiParameter(
+                name='year',
+                type=str,
+                description='Filter by year range (format: "min,max").',
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='Filter for ads from years 2015 to 2020',
+                        description='you should use year_min and year_max',
+                        value='2015,2020'
+                    ),
+                ]
+            ),
+            OpenApiParameter(
+                name='q',
+                description="Search query. Supports full-text search and filtering by brand, model, and description.",
+                required=True,
+                type=str,
+                location=OpenApiParameter.QUERY,
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='Search for cars with "BMW" in brand or model',
+                        description='',
+                        value='BMW'
+                    ),
+                    OpenApiExample(
+                        'Example 2',
+                        summary='Search for cars with "fast" in description ',
+                        description='',
+                        value='fast'
+                    ),
+                ]
+            ),
+
+        ],
+
+    )
+    @action(methods=['get'], detail=False)
     def search(self, request):
         """
         Endpoint for searching ads.
@@ -34,10 +173,10 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
         queryset = CarIndex.objects.filter(text__icontains=query)
         car_ids = [obj.pk for obj in queryset]
         cars = self.queryset.filter(pk__in=car_ids)
-        filterset = CarFilter(request.POST, queryset=cars)
+        filter_set = CarFilter(request.GET, queryset=cars)
 
         # Apply additional filters
-        filtered_cars = filterset.qs
+        filtered_cars = filter_set.qs
 
         # Paginate filtered results
         result = self.paginate_queryset(filtered_cars)

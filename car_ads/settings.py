@@ -162,7 +162,7 @@ SPECTACULAR_SETTINGS = {
 
     # OTHER SETTINGS
 }
-PAGINATION_PAGE_SIZE =1
+PAGINATION_PAGE_SIZE =3
 LOCALE_PATHS = os.path.join(BASE_DIR, 'locale/'),
 
 SIMPLE_JWT = {
@@ -188,5 +188,6 @@ HAYSTACK_CONNECTIONS = {
         'TOKENIZER': 'haystack.analysis.PersianAnalyzer',
     },
 }
+HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 
 HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
