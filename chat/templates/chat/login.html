@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<form method="post">
+    {% csrf_token %}
+
+    <div class="control-group" style="width: 100%">
+        {% for eror in form.username.errors %}
+            <p class="alert alert-danger">{{ eror }}</p>
+        {% endfor %}
+        {{ form.username }}
+        <p class="help-block text-danger"></p>
+    </div>
+
+    <div class="control-group">
+        {{ form.password }}
+        <p class="help-block text-danger"></p>
+    </div>
+
+
+    <div>
+        <button class="btn btn-primary py-2 px-4" type="submit" id="sendMessageButton">login
+        </button>
+    </div>
+  
+</form>
+</body>
+</html>
