@@ -123,6 +123,12 @@ class ProfileViewSets(viewsets.ModelViewSet):
     def update(self, request, pk=None, **kwargs):
         instance = Profile.objects.get(id=pk)
         self.check_object_permissions(request, instance)
+        data = request.data.copy()
+        # حذف ایمیل از داده ها در صورت عدم تغییر
+        if data.get('email') == instance.email:
+            del request.data['email']
+        print(data)
+
         serializer = ProfileSerializer(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.update(instance=instance, validated_data=serializer.validated_data)

@@ -88,11 +88,14 @@ class InitiatePasswordResetSerializer(serializers.Serializer):
     def validate(self, attrs: dict):
         phone = attrs.get('phone')
         strip_number = phone.lower().strip()
-        mobile = check_phone(strip_number)
-        user = User().objects.filter(phone=mobile, is_active=True).first()
+        print("1")
+        cleaned_number = check_phone(strip_number)
+        print(cleaned_number)
+        user = User.objects.filter(phone_number=cleaned_number, is_active=True).first()
+
         if not user:
             raise serializers.ValidationError({'phone': 'Phone number not registered.'})
-        attrs['phone'] = mobile
+        attrs['phone'] = cleaned_number
         attrs['user'] = user
         return super().validate(attrs)
 
@@ -206,6 +209,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
         fields = "__all__"
 
+
     def validate(self, attrs):
         email = attrs.get('email')
         if email is not None:
@@ -213,8 +217,33 @@ class ProfileSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError("your email is already exists")
         return attrs
 
+    def update(self, instance, validated_data):
+        """
+        آپدیت نمونه پروفایل موجود بر اساس داده های ارائه شده.
+
+        - فیلدهای اختیاری را با بررسی وجود آنها در `validated_data` مدیریت می کند.
+        - اعتبارسنجی منحصر به فرد بودن ایمیل را با در نظر گرفتن نمونه فعلی تضمین می کند.
+        """
+
+        # تکرار در تمام فیلدها و آپدیت فقط موارد موجود در `validated_data`
+        for field, value in validated_data.items():
+            if hasattr(instance, field):
+                setattr(instance, field, value)
+
+        # بررسی خاص برای آپدیت ایمیل
+        if 'email' in validated_data:
+            email = validated_data['email']
+            if email and email != instance.email:
+                if Profile.objects.filter(email=email).exclude(pk=instance.pk).exists():
+                    raise serializers.ValidationError("پروفایل با این ایمیل از قبل موجود است")
+
+        instance.save()
+        return instance
+
     def create(self, validated_data):
         request = self.context["request"]
         if request.user.is_authenticated:
             validated_data["user"] = request.user
+        if Profile.objects.get(user=validated_data.get("user")) is not None:
+            raise serializers.ValidationError("پروفایل از قبل وجود دارد ")
         return Profile.objects.get_or_create(**validated_data)

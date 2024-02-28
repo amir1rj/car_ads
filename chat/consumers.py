@@ -1,14 +1,11 @@
-import base64
+
 import json
 from channels.db import database_sync_to_async
-from asgiref.sync import async_to_sync
 from channels.generic.websocket import WebsocketConsumer, AsyncJsonWebsocketConsumer
-
 from account.models import User
 from account.utils import check_message
 from chat.models import Message, Chat, Chat_Image
 from chat.serializers import MessageSerializer
-
 from rest_framework.renderers import JSONRenderer
 
 
@@ -76,7 +73,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         return eval(content)
 
     async def connect(self):
-        print("trying to connect------------------------")
         self.room_name = self.scope["url_route"]["kwargs"]["room_name"]
         self.room_group_name = f"chat_{self.room_name}"
 
@@ -97,7 +93,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
     async def notif(self, data):
         members_list = await self.get_chat_members(data.get('roomName'))
-        print(data.get('content').get('content'))
         await self.channel_layer.group_send(
             'chat_listener',
             {
@@ -108,6 +103,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
 
             }
         )
+
 
     async def disconnect(self, close_code):
         await self.channel_layer.group_discard(

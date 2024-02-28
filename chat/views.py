@@ -38,6 +38,7 @@ class UserLogin(View):
 def index(request):
     return render(request, "chat/index.html")
 
+
 def room(request, room_name):
     username = request.user.username
     context = {
@@ -48,16 +49,21 @@ def room(request, room_name):
     return render(request, "chat/room.html", context)
 
 
-class CurrentUserDefaultFilter(filters.BaseFilterBackend):
-    def filter_queryset(self, request, queryset, view):
-        return queryset.filter(users=request.user)
+# class CurrentUserDefaultFilter(filters.BaseFilterBackend):
+#     def filter_queryset(self, request, queryset, view):
+#         return queryset.filter(users=request.user)
 
 
 class ListRoomsAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = Chat.objects.all()
     serializer_class = ChatSerializer
-    filter_backends = (CurrentUserDefaultFilter,)
+
+    def get_serializer_context(self):
+        return {"request": self.request}
+
+    def get_queryset(self):
+        return self.queryset.filter(users=self.request.user)
 
 
 class LeaveRoomAPIView(APIView):
