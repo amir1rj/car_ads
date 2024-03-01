@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'account.apps.AccountConfig',
     'ads.apps.AdsConfig',
     'chat.apps.ChatConfig',
+    "auction.apps.AuctionConfig",
 
     # third party
     'storages',
@@ -158,14 +159,14 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30)
 }
-# arvan cloud
-# DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
-# AWS_S3_ACCESS_KEY_ID=''
-# AWS_S3_SECRET_ACCESS_KEY=''
-# AWS_S3_ENDPOINT_URL=''
-# AWS_STORAGE_BUCKET_NAME=''
-# AWS_SERVISE_NAME=''
-# AWS_S3_FILE_OVERWRITE=False
+# arvan cloud storages
+DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
+AWS_S3_ACCESS_KEY_ID='b9189c7f-1727-4604-ba04-71d2a053857d'
+AWS_S3_SECRET_ACCESS_KEY='96df442355aee0f2b73e429f56f3d3523256696816560f9ad0d098149a2db449'
+AWS_S3_ENDPOINT_URL='https://s3.ir-tbz-sh1.arvanstorage.ir'
+AWS_STORAGE_BUCKET_NAME='django-car-ads'
+AWS_SERVISE_NAME='s3'
+AWS_S3_FILE_OVERWRITE=False
 # haystack
 
 WHOOSH_INDEX = os.path.join(BASE_DIR, 'whoosh/')

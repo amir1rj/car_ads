@@ -25,7 +25,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = [
         (None, {"fields": ["password", "username"]}),
         ("اظلاعات شخصی", {"fields": ["phone_number"]}),
-        ("دسترسی ها", {"fields": ["is_admin", "groups", "verified", "is_active", 'user_permissions']}),
+        ("دسترسی ها", {"fields": ["is_admin", "groups", "verified", "is_active", "roles",'user_permissions']}),
     ]
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.

@@ -3,8 +3,8 @@ from ads.search_indexes import CarIndex
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly
-from ads.serializers import AdSerializer
-from ads.models import Car
+from ads.serializers import AdSerializer, ExhibitionSerializer
+from ads.models import Car, View, Exhibition
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
@@ -68,6 +68,22 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
         ],
 
     )
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if user has already viewed this ad
+        if request.user.is_authenticated:
+            viewed = View.objects.filter(user=request.user, ad=instance).exists()
+
+            # If not viewed, create a new View record and increment view count (optional)
+            if not viewed:
+                View.objects.create(user=request.user, ad=instance)
+                instance.view_count += 1
+                instance.save()
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         filter_set = CarFilter(request.GET, queryset=queryset)
@@ -182,3 +198,14 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
         result = self.paginate_queryset(filtered_cars)
         serializer = AdSerializer(result, many=True)
         return self.get_paginated_response(serializer.data)
+
+
+class ExhibitionViewSet(viewsets.ModelViewSet):
+    queryset = Exhibition.objects.all()
+    serializer_class = ExhibitionSerializer
+    permission_classes = [IsOwnerOrReadOnly]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["request"] = self.request
+        return context

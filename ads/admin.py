@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Car, Image, Feature, Brand, CarModel
+from .models import Car, Image, Feature, Brand, CarModel,ExhibitionVideo,Exhibition
 
 
 class ImageInline(admin.TabularInline):
@@ -37,3 +37,10 @@ class BrandAdmin(admin.ModelAdmin):
 class CarModelAdmin(admin.ModelAdmin):
     list_display = ["title", "brand"]
 
+@admin.register(Exhibition)
+class ExhibitionAdmin(admin.ModelAdmin):
+    list_display =["company_name"]
+
+@admin.register(ExhibitionVideo)
+class ExhibitionVideoAdmin(admin.ModelAdmin):
+    list_display =["description"]

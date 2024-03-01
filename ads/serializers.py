@@ -1,7 +1,5 @@
 from rest_framework import serializers
-from rest_framework.pagination import PageNumberPagination
-from ads.models import Car, Image, Feature, Brand, CarModel
-from ads.search_indexes import CarIndex
+from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -28,9 +26,13 @@ class FeatureSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
+class ExhibitionVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExhibitionVideo
+        exclude = ["exhibition"]
+
+
 class AdSerializer(serializers.ModelSerializer):
-    pagination_class = PageNumberPagination
-    page_size = 3
     # autocomplete = serializers.SerializerMethodField()
     images = ImageSerializer(many=True, read_only=False, required=False)
     features = FeatureSerializer(many=True, read_only=False, required=False)
@@ -88,3 +90,40 @@ class AdSerializer(serializers.ModelSerializer):
             Feature.objects.update_or_create(car=instance, **feature_data)
         return instance
 
+
+class ExhibitionSerializer(serializers.ModelSerializer):
+    videos = ExhibitionVideoSerializer(many=True, read_only=False, required=False)
+    user = serializers.SlugRelatedField("username", read_only=True)
+
+    class Meta:
+        model = Exhibition
+        fields = "__all__"
+
+    def create(self, validated_data):
+        print(validated_data)
+        videos_data = validated_data.pop('videos', [])
+        user = self.context["request"].user
+        print(user)
+        if user.is_authenticated and user.roles == "EXHIBITOR":
+            validated_data["user"] = user
+            exhibition = Exhibition.objects.create(**validated_data)
+            print(videos_data)
+            for video in videos_data:
+                ExhibitionVideo.objects.create(exhibition=exhibition, **video)
+        else:
+            raise serializers.ValidationError("شما دسترسی ثبت نمایشگاه را ندارید")
+        return exhibition
+
+    def update(self, instance, validated_data):
+        request = self.context["request"]
+        if request.user.is_authenticated:
+            validated_data["user"] = request.user
+        videos_data = validated_data.pop('videos', [])
+        instance = super().update(instance, validated_data)
+        for video in videos_data:
+            ExhibitionVideo.objects.update_or_create(exhibition=instance, **video)
+        return instance
+
+    def get_videos(self, obj):
+        serializer = ExhibitionVideoSerializer(instance=obj.videos.all(), many=True, )
+        return serializer.data

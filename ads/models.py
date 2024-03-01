@@ -70,6 +70,7 @@ class Car(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان بروزرسانی")
     is_promoted = models.BooleanField(default=False, verbose_name="پیشنهادی")
+    view_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return f" ({self.brand} {self.model}) {self.description[:20]}"
@@ -107,3 +108,57 @@ class Feature(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class View(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    ad = models.ForeignKey(Car, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'ad')
+
+
+class Exhibition(models.Model):
+    """
+    مدل مربوط به اطلاعات غرفه داران
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, verbose_name="کاربر")
+
+    # اطلاعات پایه ای
+    company_name = models.CharField(max_length=255, unique=True, verbose_name="نام شرکت")
+    contact_name = models.CharField(max_length=100, blank=True, verbose_name="نام نماینده ")
+    contact_email = models.EmailField(blank=True, verbose_name="ایمیل تماس")
+    contact_phone = models.CharField(max_length=20, blank=True, verbose_name="تلفن تماس")
+
+    # موقعیت مکانی (اختیاری)
+    city = models.CharField(max_length=50, blank=True, verbose_name="شهر")
+    address = models.CharField(max_length=255, blank=True, verbose_name="آدرس")
+
+    # اطلاعات توصیفی
+    description = models.TextField(blank=True, verbose_name="توضیحات")
+
+    social_media_links = models.TextField(blank=True, default=dict, verbose_name="لینک‌های شبکه‌های اجتماعی")
+    logo = models.ImageField(upload_to='exhibition_logos', blank=True, verbose_name="لوگو", null=True,)
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
+
+    def __str__(self):
+        return self.company_name
+
+
+class ExhibitionVideo(models.Model):
+    """
+    مدل مربوط به ویدیوهای آپلود شده توسط غرفه داران
+    """
+    exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE, verbose_name="غرفه دار", related_name="videos")
+    title = models.CharField(max_length=255, verbose_name="عنوان")
+    description = models.TextField(blank=True, verbose_name="توضیحات")
+    video_file = models.FileField(upload_to='exhibition_videos',
+                                  verbose_name="فایل ویدیو", null=True, blank=True)
+
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ آپلود")
+
+    def __str__(self):
+        return self.title
