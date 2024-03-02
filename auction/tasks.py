@@ -6,10 +6,6 @@ from django.utils import timezone
 
 
 @shared_task
-def salam():
-    time.sleep(10)
-
-
 def update_auction_status():
     """
     Updates the status of all expired auctions to 'ENDED'.
@@ -19,3 +15,4 @@ def update_auction_status():
     for auction in expired_auctions:
         auction.status = 'ENDED'
         auction.save()
+

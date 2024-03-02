@@ -10,8 +10,6 @@ from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
-from auction.tasks import salam
-
 
 class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
     queryset = Car.objects.filter(status="active")
@@ -278,9 +276,8 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
 
         # Apply additional filters
         filtered_exh = filter_set.qs
-        salam.delay()
 
         # Paginate filtered results
         result = self.paginate_queryset(filtered_exh)
-        serializer = ExhibitionSerializer(result, many=True,context={"request": request})
+        serializer = ExhibitionSerializer(result, many=True, context={"request": request})
         return self.get_paginated_response(serializer.data)

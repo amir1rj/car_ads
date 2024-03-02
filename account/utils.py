@@ -2,13 +2,10 @@ import base64
 import os
 import re
 from dataclasses import dataclass
-
 import pyotp as pyotp
 from rest_framework import serializers, permissions
-
 from account import models
 from account.models import User
-
 
 PROVINCES = [("آذربایجان شرقی", "آذربایجان شرقی"),
              ("آذربایجان غربی", "آذربایجان غربی"),

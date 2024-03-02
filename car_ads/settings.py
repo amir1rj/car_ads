@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     # third party
     'storages',
     'django_celery_results',
-    "django_celery_beat",
+
 ]
 
 MIDDLEWARE = [
@@ -189,6 +189,7 @@ CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELETY_TASK_DEFAULT_QUEUE = "default"
-# CELERY_IMPORTS = [
-#     'account.tasks',
-# ]
+CELERY_IMPORTS = [
+    'account.tasks',
+    'auction.tasks',
+]

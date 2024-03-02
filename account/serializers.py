@@ -3,7 +3,7 @@ from account.tasks import send_sms
 from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from rest_framework import serializers
-
+import re
 from account.models import User, PendingUser, Token, Profile
 from account.utils import check_phone, generate_otp, TokenEnum, is_admin_user
 
@@ -13,6 +13,28 @@ class CreateUserSerializer(serializers.Serializer):
     phone_number = serializers.CharField(required=True, allow_blank=False)
     username = serializers.CharField(required=True, allow_blank=False)
     password = serializers.CharField(min_length=6)
+
+    def validate_username(self, value):
+        """Validates username format and uniqueness."""
+        username_regex = r"^[a-zA-Z0-9_]+$"  # Only letters, numbers, and underscores
+        if not re.match(username_regex, value):
+            raise serializers.ValidationError("Username can only contain letters, numbers, and underscores.")
+        if User.objects.filter(username__iexact=value).exists():
+            raise serializers.ValidationError("Username already exists.")
+        return value
+
+    def validate_password(self, value):
+        """Validates password strength."""
+        # Implement your password strength requirements here
+        # For example:
+        if not any(char.isdigit() for char in value):
+            raise serializers.ValidationError("Password must contain at least one digit.")
+        if not any(char.islower() for char in value):
+            raise serializers.ValidationError("Password must contain at least one lowercase letter.")
+        if not any(char.isupper() for char in value):
+            raise serializers.ValidationError("Password must contain at least one uppercase letter.")
+        # Consider adding more requirements as needed
+        return value
 
     def validate(self, attrs: dict):
         phone_number, username = attrs.get('phone_number'), attrs.get('username')
@@ -26,11 +48,6 @@ class CreateUserSerializer(serializers.Serializer):
         attrs['phone'] = cleaned_number
         return super().validate(attrs)
 
-    # def create(self, validated_data):
-    #     phone_number = validated_data.get('phone_number')
-    #     password= validated_data.get('password')
-    #     user= User.objects.create_user(phone_number=phone_number,password=password)
-    #     return user
     def create(self, validated_data: dict):
         otp = generate_otp()
         phone_number, username = validated_data.get('phone'), validated_data.get('username')
@@ -45,7 +62,7 @@ class CreateUserSerializer(serializers.Serializer):
             }
         )
         message_info = {
-            'message': f"Account Verification!\nYour OTP for BotoApp is {otp}.\nIt expires in 10 minutes",
+            'message': f"Account Verification!\nYour OTP for BotoApp is {otp}.\nIt expires in 5 minutes",
             'phone': user.phone
         }
         send_sms.delay(message_info)
@@ -62,14 +79,17 @@ class AccountVerificationSerializer(serializers.Serializer):
         mobile: str = check_phone(phone_number)
         pending_user: PendingUser = PendingUser.objects.filter(
             phone=mobile, verification_code=attrs.get('otp')).first()
-        username = pending_user.username
-        if pending_user and pending_user.is_valid():
+        if pending_user:
+            if not pending_user.is_valid():  # Check token lifespan
+                raise serializers.ValidationError(
+                    {'otp': 'Verification failed. OTP has expired.'})
             attrs['phone'] = mobile
             attrs['password'] = pending_user.password
-            attrs['pending_user'], attrs["username"] = pending_user, username
+            attrs['pending_user'] = pending_user
+            attrs["username"] = pending_user.username
         else:
             raise serializers.ValidationError(
-                {'otp': 'Verification failed. Invalid OTP or Number'})
+                {'otp': 'Verification failed. Invalid OTP or number'})
         return super().validate(attrs)
 
     @transaction.atomic
@@ -88,9 +108,7 @@ class InitiatePasswordResetSerializer(serializers.Serializer):
     def validate(self, attrs: dict):
         phone = attrs.get('phone')
         strip_number = phone.lower().strip()
-        print("1")
         cleaned_number = check_phone(strip_number)
-        print(cleaned_number)
         user = User.objects.filter(phone_number=cleaned_number, is_active=True).first()
 
         if not user:
@@ -115,7 +133,7 @@ class InitiatePasswordResetSerializer(serializers.Serializer):
         )
 
         message_info = {
-            'message': f"Password Reset!\nUse {otp} to reset your password.\nIt expires in 10 minutes",
+            'message': f"Password Reset!\nUse {otp} to reset your password.\nIt expires in 5 minutes",
             'phone': phone
         }
 
@@ -134,7 +152,6 @@ class PasswordChangeSerializer(serializers.Serializer):
 
     def validate_old_password(self, value):
         request = self.context["request"]
-
         if not request.user.check_password(value):
             raise serializers.ValidationError("Old password is incorrect.")
         return value
@@ -207,7 +224,6 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = "__all__"
-
 
     def validate(self, attrs):
         email = attrs.get('email')

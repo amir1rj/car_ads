@@ -4,6 +4,6 @@ from celery import shared_task
 
 
 @shared_task
-def send_sms():
-    print(" ")
+def send_sms(message):
+    print(message)
 

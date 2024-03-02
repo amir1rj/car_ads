@@ -142,31 +142,3 @@ class ProfileViewSets(viewsets.ModelViewSet):
             return Response({"response": "done"})
         return Response({"response": serializer.errors})
 
-# try:
-#               profile = Profile.objects.get(user=user)
-#           except Profile.DoesNotExist:
-#               profile = Profile.objects.create(user=user)
-#           return [profile]  # Return the Profile object
-
-
-# class UserViewsets(viewsets.ModelViewSet):
-#     queryset = get_user_model().objects.all()
-#     serializer_class = ListUserSerializer
-#     permission_classes = [IsAuthenticated]
-#     http_method_names = ["get", "post", "patch", "delete"]
-#
-#
-#     search_fields = ["email", "firstname", "lastname", "phone"]
-#     ordering_fields = [
-#         "created_at",
-#         "email",
-#         "firstname",
-#         "lastname",
-#         "phone",
-#     ]
-#
-#     def get_queryset(self):
-#         user: User = self.request.user
-#         if is_admin_user(user):
-#             return super().get_queryset().all()
-#         return super().get_queryset().filter(id=user.id)
