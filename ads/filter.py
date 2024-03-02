@@ -1,5 +1,5 @@
-from django_filters import FilterSet, CharFilter, NumberFilter, RangeFilter
-from ads.models import Car
+from django_filters import FilterSet, CharFilter, RangeFilter
+from ads.models import Car, Exhibition
 
 
 class CarFilter(FilterSet):
@@ -14,4 +14,11 @@ class CarFilter(FilterSet):
 
     class Meta:
         model = Car
-        fields = ['brand', 'model', 'price', 'kilometer', 'year',"fuel_type","body_condition","transmission","color"]
+        fields = ['brand', 'model', 'price', 'kilometer', 'year', "fuel_type", "body_condition", "transmission",
+                  "color"]
+
+
+class ExhibitionFilter(FilterSet):
+    class Meta:
+        model = Exhibition
+        fields = ["city"]

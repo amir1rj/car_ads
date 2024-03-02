@@ -1,5 +1,5 @@
-from ads.filter import CarFilter
-from ads.search_indexes import CarIndex
+from ads.filter import CarFilter, ExhibitionFilter
+from ads.search_indexes import CarIndex, ExhibitionIndex
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly
@@ -10,11 +10,29 @@ from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
+from auction.tasks import salam
+
 
 class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
     queryset = Car.objects.filter(status="active")
     serializer_class = AdSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if user has already viewed this ad
+        if request.user.is_authenticated:
+            viewed = View.objects.filter(user=request.user, ad=instance).exists()
+
+            # If not viewed, create a new View record and increment view count (optional)
+            if not viewed:
+                View.objects.create(user=request.user, ad=instance)
+                instance.view_count += 1
+                instance.save()
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @extend_schema(
         description="Search for ads based on various filters.",
@@ -68,22 +86,6 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
         ],
 
     )
-    def retrieve(self, request, *args, **kwargs):
-        instance = self.get_object()
-
-        # Check if user has already viewed this ad
-        if request.user.is_authenticated:
-            viewed = View.objects.filter(user=request.user, ad=instance).exists()
-
-            # If not viewed, create a new View record and increment view count (optional)
-            if not viewed:
-                View.objects.create(user=request.user, ad=instance)
-                instance.view_count += 1
-                instance.save()
-
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
-
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         filter_set = CarFilter(request.GET, queryset=queryset)
@@ -200,7 +202,7 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
         return self.get_paginated_response(serializer.data)
 
 
-class ExhibitionViewSet(viewsets.ModelViewSet):
+class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
     queryset = Exhibition.objects.all()
     serializer_class = ExhibitionSerializer
     permission_classes = [IsOwnerOrReadOnly]
@@ -209,3 +211,76 @@ class ExhibitionViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context["request"] = self.request
         return context
+
+    @extend_schema(
+        description="Search for ads based on various filters.",
+        parameters=[
+            OpenApiParameter(name='city', description='Filter by car city.', required=False, type=str),
+
+        ],
+
+    )
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        filter_set = ExhibitionFilter(request.GET, queryset=queryset)
+        filtered_queryset = filter_set.qs
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(filtered_queryset, many=True)
+        return Response(serializer.data)
+
+    @extend_schema(
+        description="Search for ads based on various filters.",
+        parameters=[
+            OpenApiParameter(name='city', description='Filter by car city.', required=False, type=str),
+
+            OpenApiParameter(
+                name='q',
+                description="Search query. Supports full-text search and company name and description.",
+                required=True,
+                type=str,
+                location=OpenApiParameter.QUERY,
+                examples=[
+                    OpenApiExample(
+                        'Example 1',
+                        summary='Search for cars with "امیر " in brand or model',
+                        description='',
+                        value='امیر'
+                    ),
+                    OpenApiExample(
+                        'Example 2',
+                        summary='Search for cars with "معتبر" in description ',
+                        description='',
+                        value='معتبر'
+                    ),
+                ]
+            ),
+
+        ],
+
+    )
+    @action(methods=['get'], detail=False)
+    def search(self, request):
+        """
+        Endpoint for searching ads.
+        """
+        query = request.GET.get('q')
+        if not query:
+            return Response({"error": "Missing query parameter 'q'."})
+
+        queryset = ExhibitionIndex.objects.filter(text__icontains=query)
+        exhibition_ids = [obj.pk for obj in queryset]
+        exhibitions = self.queryset.filter(pk__in=exhibition_ids)
+        filter_set = ExhibitionFilter(request.GET, queryset=exhibitions)
+
+        # Apply additional filters
+        filtered_exh = filter_set.qs
+        salam.delay()
+
+        # Paginate filtered results
+        result = self.paginate_queryset(filtered_exh)
+        serializer = ExhibitionSerializer(result, many=True,context={"request": request})
+        return self.get_paginated_response(serializer.data)

@@ -1,5 +1,5 @@
 from haystack import indexes
-from .models import Car
+from .models import Car, Exhibition
 from ftfy import fix_text
 
 
@@ -21,4 +21,18 @@ class CarIndex(indexes.SearchIndex, indexes.Indexable):
             obj.description,
             obj.brand.name,
             obj.model.title,
+        ])
+
+
+class ExhibitionIndex(indexes.SearchIndex, indexes.Indexable):
+    text = indexes.CharField(document=True)
+
+    def get_model(self):
+        return Exhibition
+
+    def prepare_text(self, obj):
+        return ' '.join([
+            obj.description,
+            obj.company_name,
+
         ])

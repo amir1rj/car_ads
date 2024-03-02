@@ -25,4 +25,5 @@ urlpatterns = [
     path('accounts/', include('account.urls')),
     path("chat/", include("chat.urls")),
     path("ads/", include("ads.urls")),
+    path("auction/", include("auction.urls")),
 ]

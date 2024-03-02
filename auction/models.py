@@ -1,6 +1,7 @@
 from datetime import timezone, datetime
 from django.db import models
 
+
 class Auction(models.Model):
     title = models.CharField(max_length=255, verbose_name="عنوان")
     description = models.TextField(blank=True, verbose_name="توضیحات")
@@ -17,7 +18,6 @@ class Auction(models.Model):
 
     def __str__(self):
         return self.title
-
 
     @property
     def is_active(self):

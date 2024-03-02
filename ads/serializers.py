@@ -124,6 +124,14 @@ class ExhibitionSerializer(serializers.ModelSerializer):
             ExhibitionVideo.objects.update_or_create(exhibition=instance, **video)
         return instance
 
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        method = request.resolver_match.url_name
+        if method in ['exhibition-list',"exhibition-search"]:
+            representation.pop('videos')
+        return representation
+
     def get_videos(self, obj):
         serializer = ExhibitionVideoSerializer(instance=obj.videos.all(), many=True, )
         return serializer.data

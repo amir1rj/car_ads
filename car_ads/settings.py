@@ -39,6 +39,8 @@ INSTALLED_APPS = [
 
     # third party
     'storages',
+    'django_celery_results',
+    "django_celery_beat",
 ]
 
 MIDDLEWARE = [
@@ -152,7 +154,7 @@ SPECTACULAR_SETTINGS = {
 
     # OTHER SETTINGS
 }
-PAGINATION_PAGE_SIZE =3
+PAGINATION_PAGE_SIZE = 3
 LOCALE_PATHS = os.path.join(BASE_DIR, 'locale/'),
 
 SIMPLE_JWT = {
@@ -161,16 +163,14 @@ SIMPLE_JWT = {
 }
 # arvan cloud storages
 DEFAULT_FILE_STORAGE = "storages.backends.s3.S3Storage"
-AWS_S3_ACCESS_KEY_ID='b9189c7f-1727-4604-ba04-71d2a053857d'
-AWS_S3_SECRET_ACCESS_KEY='96df442355aee0f2b73e429f56f3d3523256696816560f9ad0d098149a2db449'
-AWS_S3_ENDPOINT_URL='https://s3.ir-tbz-sh1.arvanstorage.ir'
-AWS_STORAGE_BUCKET_NAME='django-car-ads'
-AWS_SERVISE_NAME='s3'
-AWS_S3_FILE_OVERWRITE=False
+AWS_S3_ACCESS_KEY_ID = 'b9189c7f-1727-4604-ba04-71d2a053857d'
+AWS_S3_SECRET_ACCESS_KEY = '96df442355aee0f2b73e429f56f3d3523256696816560f9ad0d098149a2db449'
+AWS_S3_ENDPOINT_URL = 'https://s3.ir-tbz-sh1.arvanstorage.ir'
+AWS_STORAGE_BUCKET_NAME = 'django-car-ads'
+AWS_SERVISE_NAME = 's3'
+AWS_S3_FILE_OVERWRITE = False
 # haystack
-
 WHOOSH_INDEX = os.path.join(BASE_DIR, 'whoosh/')
-
 HAYSTACK_CONNECTIONS = {
     'default': {
         'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
@@ -179,5 +179,16 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
-
 HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
+# celery😗
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELETY_TASK_DEFAULT_QUEUE = "default"
+# CELERY_IMPORTS = [
+#     'account.tasks',
+# ]

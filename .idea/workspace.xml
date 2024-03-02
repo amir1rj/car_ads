@@ -5,21 +5,26 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/car_ads.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/car_ads.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/account/tasks.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/auction/tasks.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/auction/urls.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/car_ads/celery.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/permisions.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/permisions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/account/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/account/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/filter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/search_indexes.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/search_indexes.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ads/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/signals.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ads/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auction/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/auction/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/auction/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/auction/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/car_ads/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/car_ads/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_d9p0kn9im4nm2aoq.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_ge0lk8upq9ca4zbv.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_j0xbd317z0b1ypud.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_s7hq2k12vulwefca.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/_MAIN_14.toc" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/car_ads/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/urls.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_pb8vi3mlr8tfqqkc.seg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/whoosh/_MAIN_16.toc" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -241,6 +246,8 @@
       <workItem from="1709138271055" duration="2506000" />
       <workItem from="1709237952675" duration="3029000" />
       <workItem from="1709278690637" duration="6563000" />
+      <workItem from="1709291605367" duration="6627000" />
+      <workItem from="1709360214859" duration="4995000" />
     </task>
     <servers />
   </component>
@@ -265,6 +272,11 @@
           <url>file://$PROJECT_DIR$/ads/models.py</url>
           <line>138</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/ads/views.py</url>
+          <line>108</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-
+from account.tasks import send_sms
 from django.contrib.auth.hashers import make_password
 from django.db import transaction
 from rest_framework import serializers
@@ -48,8 +48,8 @@ class CreateUserSerializer(serializers.Serializer):
             'message': f"Account Verification!\nYour OTP for BotoApp is {otp}.\nIt expires in 10 minutes",
             'phone': user.phone
         }
-        # send_phone_notification.delay(message_info)
-        print(message_info)
+        send_sms.delay(message_info)
+
         return user
 
 
@@ -119,8 +119,7 @@ class InitiatePasswordResetSerializer(serializers.Serializer):
             'phone': phone
         }
 
-        # send_phone_notification.delay(message_info)
-        print(message_info)
+        send_sms.delay(message_info)
         return token
 
 

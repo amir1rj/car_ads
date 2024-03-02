@@ -127,7 +127,6 @@ class ProfileViewSets(viewsets.ModelViewSet):
         # حذف ایمیل از داده ها در صورت عدم تغییر
         if data.get('email') == instance.email:
             del request.data['email']
-        print(data)
 
         serializer = ProfileSerializer(data=request.data, partial=True)
         if serializer.is_valid():
@@ -143,20 +142,11 @@ class ProfileViewSets(viewsets.ModelViewSet):
             return Response({"response": "done"})
         return Response({"response": serializer.errors})
 
-
-  # try:
-  #               profile = Profile.objects.get(user=user)
-  #           except Profile.DoesNotExist:
-  #               profile = Profile.objects.create(user=user)
-  #           return [profile]  # Return the Profile object
-
-
-
-
-
-
-
-
+# try:
+#               profile = Profile.objects.get(user=user)
+#           except Profile.DoesNotExist:
+#               profile = Profile.objects.create(user=user)
+#           return [profile]  # Return the Profile object
 
 
 # class UserViewsets(viewsets.ModelViewSet):

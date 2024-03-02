@@ -4,7 +4,7 @@ from auction.models import Auction
 from account.permisions import ReadOnly
 
 
-class AuctionViewSet(viewsets.ModelViewSet):
+class AuctionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AuctionSerializer
     permission_classes = [ReadOnly]
 
