@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition
+from ads.utils import is_not_mobile_phone
+import re
 
 
 class BrandSerializer(serializers.ModelSerializer):
@@ -94,20 +96,46 @@ class AdSerializer(serializers.ModelSerializer):
 class ExhibitionSerializer(serializers.ModelSerializer):
     videos = ExhibitionVideoSerializer(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)
+    cars = serializers.SerializerMethodField(read_only=True, required=False)
 
     class Meta:
         model = Exhibition
         fields = "__all__"
 
+    def validate_contact_phone(self, value):
+        """
+        Validates a comma-separated list of Iranian static phone numbers.
+        """
+        if value:
+            phones = value.split(",")
+            validated_phones = []
+            for phone in phones:
+                phone = is_not_mobile_phone(phone.strip())  # Remove leading/trailing whitespaces
+
+                if not phone.isdigit():
+                    raise serializers.ValidationError(
+                        f"you should only enter numbers not{phone}. (e.g., 2122334567)")
+                # Mobile number check (optional, can be removed if not needed)
+
+                validated_phones.append(phone)
+            return validated_phones  # Return a list of validated phone numbers
+        return value  # Allow empty static_phones
+
+    def validate(self, attrs):
+        name = attrs.get('company_name')
+        if name is not None:
+            if Exhibition.objects.filter(company_name=name).exists():
+                raise serializers.ValidationError("your company name is already exists")
+        return attrs
+
     def create(self, validated_data):
-        print(validated_data)
+        validated_data['contact_phone'] = ", ".join(validated_data['contact_phone'])  # Join back for storage
         videos_data = validated_data.pop('videos', [])
         user = self.context["request"].user
-        print(user)
+
         if user.is_authenticated and user.roles == "EXHIBITOR":
             validated_data["user"] = user
             exhibition = Exhibition.objects.create(**validated_data)
-            print(videos_data)
             for video in videos_data:
                 ExhibitionVideo.objects.create(exhibition=exhibition, **video)
         else:
@@ -115,6 +143,7 @@ class ExhibitionSerializer(serializers.ModelSerializer):
         return exhibition
 
     def update(self, instance, validated_data):
+        validated_data['contact_phone'] = ", ".join(validated_data['contact_phone'])  # Join back for storage
         request = self.context["request"]
         if request.user.is_authenticated:
             validated_data["user"] = request.user
@@ -128,10 +157,15 @@ class ExhibitionSerializer(serializers.ModelSerializer):
         representation = super().to_representation(instance)
         request = self.context.get('request')
         method = request.resolver_match.url_name
-        if method in ['exhibition-list',"exhibition-search"]:
+        if method in ['exhibition-list', "exhibition-search"]:
             representation.pop('videos')
+            representation.pop('cars')
         return representation
 
     def get_videos(self, obj):
         serializer = ExhibitionVideoSerializer(instance=obj.videos.all(), many=True, )
         return serializer.data
+
+    def get_cars(self, obj):
+        car_serializer = AdSerializer(instance=obj.cars.filter(status="active"), many=True)
+        return car_serializer.data

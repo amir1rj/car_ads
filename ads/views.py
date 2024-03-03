@@ -4,7 +4,7 @@ from rest_framework import viewsets, status
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly
 from ads.serializers import AdSerializer, ExhibitionSerializer
-from ads.models import Car, View, Exhibition
+from ads.models import Car, View, Exhibition, ExhView
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
@@ -209,6 +209,34 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
         context = super().get_serializer_context()
         context["request"] = self.request
         return context
+
+    def update(self, request, pk=None, **kwargs):
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        data = request.data.copy()
+        if data.get('company_name') == instance.company_name:
+            del request.data['company_name']
+        serializer = ExhibitionSerializer(data=request.data, partial=True, context={"request": request})
+        if serializer.is_valid():
+            serializer.update(instance=instance, validated_data=serializer.validated_data)
+            return Response({"response": " your exhibition updated"}, status.HTTP_200_OK)
+        return Response({"response": serializer.errors})
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Check if user has already viewed this ad
+        if request.user.is_authenticated:
+            viewed = ExhView.objects.filter(user=request.user, exh=instance).exists()
+
+            # If not viewed, create a new View record and increment view count (optional)
+            if not viewed:
+                ExhView.objects.create(user=request.user, exh=instance)
+                instance.view_count += 1
+                instance.save()
+
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     @extend_schema(
         description="Search for ads based on various filters.",

@@ -5,16 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/ads/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/signals.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/tasks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ads/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auction/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/auction/tasks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/car_ads/celery.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/celery.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/car_ads/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_shvt4qrawlz4g53q.seg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_wz66lhi27g8m8zu6.seg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_z1omhrxgfxrew1gj.seg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/whoosh/_MAIN_3.toc" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -240,6 +239,8 @@
       <workItem from="1709360214859" duration="4995000" />
       <workItem from="1709391668713" duration="4359000" />
       <workItem from="1709402530514" duration="1960000" />
+      <workItem from="1709440945515" duration="5909000" />
+      <workItem from="1709478108668" duration="5834000" />
     </task>
     <servers />
   </component>
@@ -260,11 +261,6 @@
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/ads/models.py</url>
-          <line>138</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/ads/views.py</url>
           <line>106</line>
