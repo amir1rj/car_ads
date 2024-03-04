@@ -6,7 +6,6 @@ import pyotp as pyotp
 from rest_framework import serializers, permissions
 from account import models
 from account.models import User
-
 PROVINCES = [("آذربایجان شرقی", "آذربایجان شرقی"),
              ("آذربایجان غربی", "آذربایجان غربی"),
              ("اصفهان", "اصفهان"),
@@ -42,6 +41,11 @@ ROLE_CHOICE = (
     ("EXHIBITOR", "EXHIBITOR"),
     ("CUSTOMER", "CUSTOMER"),
 
+)
+LOGIN_TYPE_CHOICE = (
+    ("login", "login"),
+    ("logout", "logout"),
+    ("login_failed", "login_failed"),
 )
 
 
@@ -108,4 +112,5 @@ class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
-        return models.is_admin_user(request.user)
+        return is_admin_user(request.user)
+

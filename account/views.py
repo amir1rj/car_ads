@@ -1,16 +1,19 @@
-from django.contrib.auth import get_user_model
-from django.shortcuts import render
-from rest_framework import viewsets, status, serializers
+from django.contrib.auth import user_logged_in
+from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 from account.models import User, Token, Profile
 from account.permisions import IsOwnerOrReadOnly
 from account.serializers import CreateUserSerializer, ListUserSerializer, UpdateUserSerializer, UserNameSerializer, \
     AccountVerificationSerializer, InitiatePasswordResetSerializer, CreatePasswordFromResetOTPSerializer, \
-    PasswordChangeSerializer, ProfileSerializer
+    PasswordChangeSerializer, ProfileSerializer, JWTSerializer
 from account.utils import TokenEnum, is_admin_user, IsAdmin
+from rest_framework_simplejwt.views import TokenObtainPairView
+
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = JWTSerializer
 
 
 class UserViewSets(viewsets.ModelViewSet):
@@ -141,4 +144,3 @@ class ProfileViewSets(viewsets.ModelViewSet):
             serializer.save()
             return Response({"response": "done"})
         return Response({"response": serializer.errors})
-

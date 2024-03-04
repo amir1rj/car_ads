@@ -16,6 +16,10 @@ class Auction(models.Model):
     status = models.CharField(max_length=255, choices=[('ACTIVE', 'فعال'), ('ENDED', 'پایان یافته')], default='ACTIVE',
                               verbose_name="وضعیت")
 
+    class Meta:
+        verbose_name_plural = "مزایده ها"
+        verbose_name = "مزایده"
+
     def __str__(self):
         return self.title
 

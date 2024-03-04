@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     # third party
     'storages',
     'django_celery_results',
-
+    'django_user_agents',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +51,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
 ROOT_URLCONF = 'car_ads.urls'
@@ -132,7 +133,7 @@ MEDIA_URL = "media/"
 REST_FRAMEWORK = {
     # YOUR SETTINGS
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-    'PAGE_SIZE': 1,
+    'PAGE_SIZE': 10,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
 
@@ -167,7 +168,7 @@ AWS_S3_ACCESS_KEY_ID = 'b9189c7f-1727-4604-ba04-71d2a053857d'
 AWS_S3_SECRET_ACCESS_KEY = '96df442355aee0f2b73e429f56f3d3523256696816560f9ad0d098149a2db449'
 AWS_S3_ENDPOINT_URL = 'https://s3.ir-tbz-sh1.arvanstorage.ir'
 AWS_STORAGE_BUCKET_NAME = 'django-car-ads'
-AWS_SERVISE_NAME = 's3'
+AWS_SERVICE_NAME = 's3'
 AWS_S3_FILE_OVERWRITE = False
 # haystack
 WHOOSH_INDEX = os.path.join(BASE_DIR, 'whoosh/')

@@ -4,7 +4,7 @@ from django.db import models
 from account.managers import UserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, User
 from django.utils.translation import gettext_lazy as _
-from account.utils import TOKEN_TYPE_CHOICE, ROLE_CHOICE, default_role, PROVINCES
+from account.utils import TOKEN_TYPE_CHOICE, ROLE_CHOICE, default_role, PROVINCES, LOGIN_TYPE_CHOICE
 from car_ads import settings
 
 
@@ -133,3 +133,14 @@ class Profile(models.Model):
         verbose_name = "پروفایل"
         verbose_name_plural = "پروفایل‌ها"
 
+
+class Log(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True)
+    ip_address = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    type = models.CharField(max_length=255, choices=LOGIN_TYPE_CHOICE)
+    browser = models.CharField(max_length=255, null=True, blank=True)
+    operating_system = models.CharField(max_length=255, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.type}  {self.user}  from {self.ip_address} at {self.timestamp}"

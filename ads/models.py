@@ -32,6 +32,10 @@ class Exhibition(models.Model):
     def __str__(self):
         return self.company_name
 
+    class Meta:
+        verbose_name = "نمایشگاه"
+        verbose_name_plural = " نمایشگاه ها"
+
 
 class ExhibitionVideo(models.Model):
     """
@@ -60,6 +64,7 @@ class ExhView(models.Model):
 
 class Brand(models.Model):
     name = models.CharField(max_length=255, verbose_name="برند")
+    logo = models.ImageField(upload_to="brand/logos", null=True, blank=True, verbose_name="لوگو")
 
     class Meta:
         verbose_name = "برند"

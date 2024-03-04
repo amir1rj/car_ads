@@ -3,7 +3,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 
 from .forms import UserChangeForm, UserCreationForm
-from .models import User, PendingUser, Token, Profile
+from .models import User, PendingUser, Token, Profile, Log
 
 
 class ProfileInline(admin.StackedInline):
@@ -25,7 +25,7 @@ class UserAdmin(BaseUserAdmin):
     fieldsets = [
         (None, {"fields": ["password", "username"]}),
         ("اظلاعات شخصی", {"fields": ["phone_number"]}),
-        ("دسترسی ها", {"fields": ["is_admin", "groups", "verified", "is_active", "roles",'user_permissions']}),
+        ("دسترسی ها", {"fields": ["is_admin", "groups", "verified", "is_active", "roles", 'user_permissions']}),
     ]
     # add_fieldsets is not a standard ModelAdmin attribute. UserAdmin
     # overrides get_fieldsets to use this attribute when creating a user.
@@ -49,5 +49,9 @@ admin.site.register(Token)
 admin.site.register(PendingUser)
 admin.site.register(Profile)
 
-# ... and, since we're not using Django's built-in permissions,
-# unregister the Group model from admin.
+
+@admin.register(Log)
+class LogAdmin(admin.ModelAdmin):
+    list_display = ["user", "type","ip_address","browser"]
+    list_filter = ["type","browser"]
+    search_fields = ["ip_address",'user']

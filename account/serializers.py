@@ -6,6 +6,15 @@ from rest_framework import serializers
 import re
 from account.models import User, PendingUser, Token, Profile
 from account.utils import check_phone, generate_otp, TokenEnum, is_admin_user
+from django.contrib.auth import authenticate, user_logged_in
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+
+class JWTSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs: dict):
+        user = User.objects.get(phone_number=attrs.get("phone_number"))
+        user_logged_in.send(sender=user.__class__, request=self.context['request'], user=user)
+        return super().validate(attrs)
 
 
 class CreateUserSerializer(serializers.Serializer):
