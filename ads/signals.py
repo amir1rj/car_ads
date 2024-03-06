@@ -1,8 +1,18 @@
 from django.db.models.signals import post_save, post_delete
 from haystack import signals
 from django.db.models.signals import receiver
+from django.db.models.signals import post_save
+from account.models import User, Profile
+from ads.models import Car, Exhibition
 
-from ads.models import Car,Exhibition
+
+@receiver(post_save, sender=User)
+def create_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance, **kwargs)
+
+
+post_save.connect(create_profile, sender=User)
 
 
 @receiver(post_save, sender=Car)

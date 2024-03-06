@@ -29,6 +29,7 @@ django-admin-persian-fonts==0.2
 django-celery-results==2.5.1
 django-filter==23.5
 django-haystack==3.2.1
+django-ratelimit==4.1.0
 django-storages==1.14.2
 django-stubs-ext==4.2.7
 django-user-agents==0.4.0

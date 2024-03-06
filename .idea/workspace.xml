@@ -6,27 +6,18 @@
   <component name="ChangeListManager">
     <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/apps.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/account/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/serializers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/account/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/signals.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/account/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/account/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/account/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auction/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/auction/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/auction/apps.py" beforeDir="false" afterPath="$PROJECT_DIR$/auction/apps.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/serializers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/signals.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/signals.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/utils.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/auction/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/auction/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/car_ads/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/chat/consumers.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chat/templates/chat/room.html" beforeDir="false" afterPath="$PROJECT_DIR$/chat/templates/chat/room.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_5bej5fj1ticjl1ne.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_blvaamfclcu059jo.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_k1hqdqic1mzu3yla.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_kpmqv20mkxhd7c58.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/MAIN_pfop4gnx9i0r3oy8.seg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/whoosh/_MAIN_23.toc" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -255,7 +246,10 @@
       <workItem from="1709440945515" duration="5909000" />
       <workItem from="1709478108668" duration="5834000" />
       <workItem from="1709532549165" duration="9308000" />
-      <workItem from="1709550653205" duration="2459000" />
+      <workItem from="1709550653205" duration="2909000" />
+      <workItem from="1709677245133" duration="431000" />
+      <workItem from="1709704774274" duration="8166000" />
+      <workItem from="1709722191375" duration="6651000" />
     </task>
     <servers />
   </component>

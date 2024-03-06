@@ -111,7 +111,6 @@ class ExhibitionSerializer(serializers.ModelSerializer):
             validated_phones = []
             for phone in phones:
                 phone = is_not_mobile_phone(phone.strip())  # Remove leading/trailing whitespaces
-
                 if not phone.isdigit():
                     raise serializers.ValidationError(
                         f"you should only enter numbers not{phone}. (e.g., 2122334567)")

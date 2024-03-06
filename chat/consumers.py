@@ -22,7 +22,6 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         content = await self.messgeSeialization(message_model)
 
         validated_content = check_message(content)
-        print(f"validated content: %s" % validated_content)
         result = {
             "content": validated_content,
             "command": "new_message",

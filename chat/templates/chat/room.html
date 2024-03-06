@@ -28,6 +28,7 @@
         + roomName
         + '/'
     );
+   
     const chatSocket2 = new WebSocket(
         'ws://'
         + window.location.host
@@ -47,7 +48,7 @@
                 if (data['username'] != username) {
 
                     if (data['roomName'] != roomName) {
-
+                    
 
                         if (!("Notification" in window)) {
                             alert("This browser does not support desktop notification");
@@ -64,7 +65,7 @@
                             Notification.requestPermission().then(function (permission) {
                                 // If the user accepts, let's create a notification
                                 if (permission === "granted") {
-                                    var notification = new Notification("Hi there!");
+                                    var Notification = new Notification("Hi there!");
                                 }
                             });
                         }

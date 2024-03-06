@@ -11,7 +11,6 @@ class Auction(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
 
-    # فیلدهای جدید
     base_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="قیمت پایه")
     status = models.CharField(max_length=255, choices=[('ACTIVE', 'فعال'), ('ENDED', 'پایان یافته')], default='ACTIVE',
                               verbose_name="وضعیت")

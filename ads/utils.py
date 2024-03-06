@@ -12,9 +12,6 @@ def is_not_mobile_phone(value):
     patter2 = re.compile("^09\d{9}$")
     patter3 = re.compile("^00989\d{9}$")
     patter4 = re.compile("^\+989\d{9}$")
-    print("salam")
-    print(value)
-    print(bool(patter1.match(value)),bool(patter2.match(value)),bool(patter3.match(value)),bool(patter4.match(value)))
     if bool(patter1.match(value)) or bool(patter2.match(value)) or bool(patter3.match(value)) or bool(
             patter4.match(value)):
 

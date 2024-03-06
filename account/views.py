@@ -1,4 +1,3 @@
-from django.contrib.auth import user_logged_in
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -10,8 +9,11 @@ from account.serializers import CreateUserSerializer, ListUserSerializer, Update
     PasswordChangeSerializer, ProfileSerializer, JWTSerializer
 from account.utils import TokenEnum, is_admin_user, IsAdmin
 from rest_framework_simplejwt.views import TokenObtainPairView
+from django.utils.decorators import method_decorator
+from django_ratelimit.decorators import ratelimit
 
 
+@method_decorator(ratelimit(key='ip', rate='3/h', block=True, method='POST'), name='post')
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = JWTSerializer
 
@@ -63,19 +65,21 @@ class AuthViewSets(viewsets.GenericViewSet):
             permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
+    @method_decorator(ratelimit(key='ip', rate='3/h', block=True, method='POST'))
     @action(
         methods=["POST"],
         detail=False,
         serializer_class=AccountVerificationSerializer,
         url_path="verify-account",
     )
-    def verify_account(self, request, pk=None):
+    def verify_account(self, request):
         """Activate a user account using the verification(OTP) sent to the user phone"""
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"success": True, "message": "Account Verification Successful"}, status=200)
 
+    @method_decorator(ratelimit(key='ip', rate='3/h', block=True, method='POST'))
     @action(
         methods=["POST"],
         detail=False,
@@ -110,6 +114,7 @@ class PasswordChangeView(viewsets.GenericViewSet):
     serializer_class = PasswordChangeSerializer
     permission_classes = [IsAuthenticated]
 
+    @method_decorator(ratelimit(key='ip', rate='3/h', block=True, method='POST'))
     def create(self, request, *args, **kwargs):
         context = {"request": request}
         serializer = self.get_serializer(data=request.data, context=context)
