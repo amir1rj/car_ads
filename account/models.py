@@ -103,7 +103,6 @@ class Token(models.Model):
         self.user.set_password(password)
         self.user.save()
 
-
 class Profile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="profile", verbose_name="کاربر"
@@ -111,7 +110,7 @@ class Profile(models.Model):
     email = models.EmailField(verbose_name="ایمیل", max_length=255, unique=True, null=True, blank=True)
     picture = models.ImageField(
         upload_to=f"images/profiles/{user}/",
-        default="images/default.jpeg",
+        default="images/profiles/default/default.jpeg",
         verbose_name="تصویر پروفایل",
     )
     city = models.CharField(

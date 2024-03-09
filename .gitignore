@@ -38,6 +38,9 @@ sdist/
 var/
 wheels/
 share/python-wheels/
+whoosh/
+whoosh_index/
+
 *.egg-info/
 .installed.cfg
 *.egg

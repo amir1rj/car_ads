@@ -168,6 +168,7 @@ AWS_S3_ACCESS_KEY_ID = 'b9189c7f-1727-4604-ba04-71d2a053857d'
 AWS_S3_SECRET_ACCESS_KEY = '96df442355aee0f2b73e429f56f3d3523256696816560f9ad0d098149a2db449'
 AWS_S3_ENDPOINT_URL = 'https://s3.ir-tbz-sh1.arvanstorage.ir'
 AWS_STORAGE_BUCKET_NAME = 'django-car-ads'
+AWS_QUERYSTRING_AUTH = False
 AWS_SERVICE_NAME = 's3'
 AWS_S3_FILE_OVERWRITE = False
 # haystack
@@ -194,4 +195,3 @@ CELERY_IMPORTS = [
     'account.tasks',
     'auction.tasks',
 ]
-

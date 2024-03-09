@@ -85,8 +85,9 @@ class JoinRoomAPIView(APIView):
             car = Car.objects.get(id=car)
             seller, user = car.user, request.user
             chat = get_or_create_chat_with_users(seller, user)
-            seller_profile =ProfileListSerializer(instance=seller.profile)
+            seller_profile = ProfileListSerializer(instance=seller.profile)
 
-            return Response({'success': True, "roomName": {chat.roomName},"username":request.user.username,"profile":seller_profile.data})
+            return Response({'success': True, "roomName": {chat.roomName}, "username": request.user.username,
+                             "profile": seller_profile.data})
         else:
             return Response({'success': False, "message": "you are not authenticated"})
