@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from ads.models import Car
 from chat.forms import LoginForm
 from chat.models import Chat
-from chat.serializers import ChatSerializer
+from chat.serializers import ChatSerializer, ProfileListSerializer
 from chat.utils import get_or_create_chat_with_users, generate_unique_room_name
 from django.contrib.auth.decorators import login_required
 from django.views import View
@@ -85,7 +85,8 @@ class JoinRoomAPIView(APIView):
             car = Car.objects.get(id=car)
             seller, user = car.user, request.user
             chat = get_or_create_chat_with_users(seller, user)
+            seller_profile =ProfileListSerializer(instance=seller.profile)
 
-            return Response({'success': True, "roomName": {chat.roomName}})
+            return Response({'success': True, "roomName": {chat.roomName},"username":request.user.username,"profile":seller_profile.data})
         else:
             return Response({'success': False, "message": "you are not authenticated"})

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition
 from ads.utils import is_not_mobile_phone
-import re
+
 
 
 class BrandSerializer(serializers.ModelSerializer):

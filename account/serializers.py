@@ -6,7 +6,7 @@ from rest_framework import serializers
 import re
 from account.models import User, PendingUser, Token, Profile
 from account.utils import check_phone, generate_otp, TokenEnum, is_admin_user
-from django.contrib.auth import authenticate, user_logged_in
+from django.contrib.auth import  user_logged_in
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 

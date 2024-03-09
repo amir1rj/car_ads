@@ -1,12 +1,12 @@
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime
 from django.db import models
 from account.managers import UserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, User
-from django.utils.translation import gettext_lazy as _
 from account.utils import TOKEN_TYPE_CHOICE, ROLE_CHOICE, PROVINCES, LOGIN_TYPE_CHOICE
 from car_ads import settings
 from django.utils import timezone
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
@@ -18,7 +18,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=12, verbose_name="شماره تلفن", unique=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال")
     is_admin = models.BooleanField(default=False, verbose_name="مدیر")
-    roles = models.CharField(max_length=20, blank=True, choices=ROLE_CHOICE, default= ("EXHIBITOR", "EXHIBITOR"),
+    roles = models.CharField(max_length=20, blank=True, choices=ROLE_CHOICE, default=("EXHIBITOR", "EXHIBITOR"),
                              verbose_name="نقش")
     last_login = models.DateTimeField(null=True, blank=True, verbose_name="آخرین ورود")
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="تاریخ ایجاد")
@@ -92,7 +92,7 @@ class Token(models.Model):
 
     def is_valid(self) -> bool:
         lifespan_in_seconds = float(settings.TOKEN_LIFESPAN * 60)
-        now = datetime.now(timezone.utc)
+        now = timezone.now()
         time_diff = now - self.created_at
         time_diff = time_diff.total_seconds()
         if time_diff >= lifespan_in_seconds:
@@ -136,7 +136,7 @@ class Profile(models.Model):
 
 
 class Log(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True,blank=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     ip_address = models.CharField(max_length=255)
     timestamp = models.DateTimeField(auto_now_add=True)
     type = models.CharField(max_length=255, choices=LOGIN_TYPE_CHOICE)

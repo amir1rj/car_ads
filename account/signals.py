@@ -36,7 +36,7 @@ def log_user_login(sender, user, request, **kwargs):
 @receiver(user_logged_out)
 def log_user_logout(sender, user, request, **kwargs):
     ip_address = request.META['REMOTE_ADDR']
-    timestamp = datetime.now(timezone.utc)
+
     browser = request.user_agent.browser.family
     operating_system = request.user_agent.os
     Log.objects.create(
@@ -52,7 +52,7 @@ def log_user_logout(sender, user, request, **kwargs):
 @receiver(user_login_failed)
 def log_user_login_failed(sender, credentials, request, **kwargs):
     ip_address = request.META['REMOTE_ADDR']
-    timestamp = datetime.now(timezone.utc)
+
     browser = request.user_agent.browser.family
     operating_system = request.user_agent.os
     Log.objects.create(

@@ -156,7 +156,6 @@ class Car(models.Model):
         return super().clean()
 
 
-
 class Image(models.Model):
     ad = models.ForeignKey(Car, on_delete=models.CASCADE, related_name="images", null=True, blank=True,
                            verbose_name="آگهی")
