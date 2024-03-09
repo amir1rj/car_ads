@@ -65,7 +65,7 @@ class AuthViewSets(viewsets.GenericViewSet):
             permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
-    @method_decorator(ratelimit(key='ip', rate='3/h', block=True, method='POST'))
+    @method_decorator(ratelimit(key='ip', rate='3/h', method='POST'))
     @action(
         methods=["POST"],
         detail=False,
@@ -79,7 +79,7 @@ class AuthViewSets(viewsets.GenericViewSet):
         serializer.save()
         return Response({"success": True, "message": "Account Verification Successful"}, status=200)
 
-    @method_decorator(ratelimit(key='ip', rate='3/h', block=True, method='POST'))
+    @method_decorator(ratelimit(key='user', rate='3/h', method='POST'))
     @action(
         methods=["POST"],
         detail=False,
@@ -114,7 +114,7 @@ class PasswordChangeView(viewsets.GenericViewSet):
     serializer_class = PasswordChangeSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(ratelimit(key='ip', rate='3/h', block=True, method='POST'))
+    @method_decorator(ratelimit(key='user', rate='3/h', method='POST'))
     def create(self, request, *args, **kwargs):
         context = {"request": request}
         serializer = self.get_serializer(data=request.data, context=context)
@@ -135,7 +135,6 @@ class ProfileViewSets(viewsets.ModelViewSet):
         # حذف ایمیل از داده ها در صورت عدم تغییر
         if data.get('email') == instance.email:
             del request.data['email']
-
         serializer = ProfileSerializer(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.update(instance=instance, validated_data=serializer.validated_data)
@@ -147,5 +146,5 @@ class ProfileViewSets(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.validated_data["user"] = request.user
             serializer.save()
-            return Response({"response": "done"})
+            return Response({"response": "done"},status= status.HTTP_201_CREATED)
         return Response({"response": serializer.errors})

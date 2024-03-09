@@ -1,5 +1,6 @@
 from datetime import timezone, datetime
 from django.db import models
+from account.utils import PROVINCES
 
 
 class Auction(models.Model):
@@ -10,10 +11,11 @@ class Auction(models.Model):
     end_date = models.DateField(verbose_name="تاریخ پایان")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
-
     base_price = models.DecimalField(max_digits=10, decimal_places=2, verbose_name="قیمت پایه")
     status = models.CharField(max_length=255, choices=[('ACTIVE', 'فعال'), ('ENDED', 'پایان یافته')], default='ACTIVE',
                               verbose_name="وضعیت")
+    city = models.CharField(
+        max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
 
     class Meta:
         verbose_name_plural = "مزایده ها"

@@ -12,8 +12,9 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 class JWTSerializer(TokenObtainPairSerializer):
     def validate(self, attrs: dict):
-        user = User.objects.get(phone_number=attrs.get("phone_number"))
-        user_logged_in.send(sender=user.__class__, request=self.context['request'], user=user)
+        user = User.objects.filter(phone_number=attrs.get("phone_number")).first()
+        if user:
+            user_logged_in.send(sender=user.__class__, request=self.context['request'], user=user)
         return super().validate(attrs)
 
 
@@ -27,9 +28,10 @@ class CreateUserSerializer(serializers.Serializer):
         """Validates username format and uniqueness."""
         username_regex = r"^[a-zA-Z0-9_]+$"  # Only letters, numbers, and underscores
         if not re.match(username_regex, value):
-            raise serializers.ValidationError("Username can only contain letters, numbers, and underscores.")
+            raise serializers.ValidationError("Username can only contain letters, numbers, and underscores.",
+                                              code="Invalid username")
         if User.objects.filter(username__iexact=value).exists():
-            raise serializers.ValidationError("Username already exists.")
+            raise serializers.ValidationError("Username already exists.", "existed username")
         return value
 
     def validate_password(self, value):
@@ -37,11 +39,11 @@ class CreateUserSerializer(serializers.Serializer):
         # Implement your password strength requirements here
         # For example:
         if not any(char.isdigit() for char in value):
-            raise serializers.ValidationError("Password must contain at least one digit.")
+            raise serializers.ValidationError("Password must contain at least one digit.", code="easy password")
         if not any(char.islower() for char in value):
-            raise serializers.ValidationError("Password must contain at least one lowercase letter.")
+            raise serializers.ValidationError("", code="easy password")
         if not any(char.isupper() for char in value):
-            raise serializers.ValidationError("Password must contain at least one uppercase letter.")
+            raise serializers.ValidationError("رمزعبور شما حداقل باید شامل یک حرف بزرگ باشد", code="easy password")
         # Consider adding more requirements as needed
         return value
 

@@ -8,7 +8,6 @@ from ads.models import Car, View, Exhibition, ExhView
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
-from drf_spectacular.types import OpenApiTypes
 
 
 class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
@@ -36,11 +35,29 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
         description="Search for ads based on various filters.",
         parameters=[
             OpenApiParameter(name='brand', description='Filter by car brand.', required=False, type=str),
+
             OpenApiParameter(name='model', description='Filter by car model.', required=False, type=str),
             OpenApiParameter(name='color', description='Filter by car color', required=False, type=str),
             OpenApiParameter(name='transmission', description='Filter by car transmission', required=False, type=str),
             OpenApiParameter(name='body_condition', description='Filter by car body_condition', required=False,
                              type=str),
+            OpenApiParameter(name='city', description='Filter by car city',
+                             required=False, type=str,
+                             examples=[
+                                 OpenApiExample(
+                                     'Example 1',
+                                     summary='Filter for all cities',
+                                     description='if we dont need to filter by city',
+                                     value='همه شهر ها'
+                                 ),
+                                 OpenApiExample(
+                                     'Example 2',
+                                     summary='filter by"اصفهان" in cities ',
+                                     description='',
+                                     value='اصفهان'
+                                 ),
+                             ]
+                             ),
             OpenApiParameter(
                 name='price',
                 type=str,
@@ -86,7 +103,12 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
     )
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        filter_set = CarFilter(request.GET, queryset=queryset)
+        modified_get = request.GET.copy()
+        if not modified_get.get("city"):
+            modified_get["city"] = self.request.user.profile.city
+        if modified_get.get("city") == "همه شهر ها":
+            del modified_get["city"]
+        filter_set = CarFilter(modified_get, queryset=queryset)
         filtered_queryset = filter_set.qs
         page = self.paginate_queryset(filtered_queryset)
         if page is not None:

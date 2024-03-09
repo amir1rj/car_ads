@@ -194,3 +194,4 @@ CELERY_IMPORTS = [
     'account.tasks',
     'auction.tasks',
 ]
+

@@ -1,5 +1,6 @@
 from django.db import models
 from account.models import User
+from account.utils import PROVINCES
 from ads.constants import *
 from django.core.exceptions import ValidationError
 
@@ -16,7 +17,9 @@ class Exhibition(models.Model):
     contact_phone = models.CharField(max_length=100, blank=True, verbose_name="تلفن تماس")
 
     # موقعیت مکانی (اختیاری)
-    city = models.CharField(max_length=50, blank=True, verbose_name="شهر")
+    city = models.CharField(
+        max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
+
     address = models.CharField(max_length=255, blank=True, verbose_name="آدرس")
 
     # اطلاعات توصیفی
@@ -100,6 +103,8 @@ class Car(models.Model):
     description = models.TextField(verbose_name="توضیحات")
     price = models.PositiveIntegerField(verbose_name="قیمت")
     is_negotiable = models.BooleanField(default=True, verbose_name="قابل مذاکره")
+    city = models.CharField(
+        max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
 
     # اطلاعات خودرو
     car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
@@ -149,6 +154,7 @@ class Car(models.Model):
         if self.exhibition and not (self.user.roles == "EXHIBITOR"):
             raise ValidationError("this car could not have exhibition")
         return super().clean()
+
 
 
 class Image(models.Model):

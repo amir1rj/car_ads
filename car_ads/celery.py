@@ -12,6 +12,16 @@ app.conf.beat_schedule = {
         "task": "auction.tasks.update_auction_status",
         "schedule": crontab(hour=0, minute=0),
 
-    }
+    },
+    "delete_pending_users": {
+        "task": "account.tasks.delete_pending_users",
+        "schedule": crontab(hour=0, minute=0),
+
+    },
+    "update_ads_status": {
+        "task": "ads.tasks.update_ads_status",
+        "schedule": crontab(hour=0, minute=0),
+
+    },
 
 }

@@ -4,9 +4,9 @@ from django.db import models
 from account.managers import UserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, User
 from django.utils.translation import gettext_lazy as _
-from account.utils import TOKEN_TYPE_CHOICE, ROLE_CHOICE, default_role, PROVINCES, LOGIN_TYPE_CHOICE
+from account.utils import TOKEN_TYPE_CHOICE, ROLE_CHOICE, PROVINCES, LOGIN_TYPE_CHOICE
 from car_ads import settings
-
+from django.utils import timezone
 
 class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(
@@ -65,9 +65,10 @@ class PendingUser(models.Model):
         return f"{str(self.phone)} {self.verification_code}"
 
     def is_valid(self) -> bool:
-        """10 mins OTP validation"""
+        """5 mins OTP validation"""
         lifespan_in_seconds = float(settings.TOKEN_LIFESPAN * 60)
-        now = datetime.now(timezone.utc)
+
+        now = timezone.now()
         time_diff = now - self.created_at
         time_diff = time_diff.total_seconds()
         if time_diff >= lifespan_in_seconds:

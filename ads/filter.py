@@ -14,7 +14,7 @@ class CarFilter(FilterSet):
 
     class Meta:
         model = Car
-        fields = ['brand', 'model', 'price', 'kilometer', 'year', "fuel_type", "body_condition", "transmission",
+        fields = ['brand',"city", 'model', 'price', 'kilometer', 'year', "fuel_type", "body_condition", "transmission",
                   "color"]
 
 
