@@ -20,7 +20,7 @@ class VideoInline(admin.StackedInline):
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
     list_display = [
-        'brand','model','price',"created_at",
+        '__str__','price',"created_at",
         'is_promoted','status',"view_count","created_at",
     ]
     list_filter = ['brand', 'model', 'fuel_type', 'status']

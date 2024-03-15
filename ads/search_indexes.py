@@ -12,16 +12,19 @@ class CarIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return Car
 
-    @staticmethod
-    def prepare_autocomplete(obj):
-        return fix_text(" ".join((obj.description, obj.brand.name, obj.model.title,)))
+
 
     def prepare_text(self, obj):
-        return ' '.join([
-            obj.description,
-            obj.brand.name,
-            obj.model.title,
-        ])
+        if (obj.model is None ) or (obj.model is None):
+            print("salam")
+            return None
+        else:
+            print("miad")
+            return ' '.join([
+                obj.description,
+                obj.brand.name,
+                obj.model.title,
+            ])
 
 
 class ExhibitionIndex(indexes.SearchIndex, indexes.Indexable):

@@ -35,6 +35,8 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
         description="Search for ads based on various filters.",
         parameters=[
             OpenApiParameter(name='brand', description='Filter by car brand.', required=False, type=str),
+            OpenApiParameter(name='car_type', description='Filter by car car type.', required=False, type=str),
+            OpenApiParameter(name='body type', description='Filter by car body type.', required=False, type=str),
 
             OpenApiParameter(name='model', description='Filter by car model.', required=False, type=str),
             OpenApiParameter(name='color', description='Filter by car color', required=False, type=str),
@@ -135,6 +137,8 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
             OpenApiParameter(name='transmission', description='Filter by car transmission', required=False, type=str),
             OpenApiParameter(name='body_condition', description='Filter by car body_condition', required=False,
                              type=str),
+            OpenApiParameter(name='car_type', description='Filter by car car type.', required=False, type=str),
+            OpenApiParameter(name='body type', description='Filter by car body type.', required=False, type=str),
             OpenApiParameter(
                 name='price',
                 type=str,

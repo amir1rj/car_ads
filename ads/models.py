@@ -108,8 +108,11 @@ class Car(models.Model):
 
     # اطلاعات خودرو
     car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
-    brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند")
-    model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو")
+    brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند", blank=True, null=True)
+    model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True, blank=True)
+    # optionall
+    promoted_model = models.CharField(max_length=255, verbose_name="مدل پیشنهادی ", null=True, blank=True)
+
     year = models.PositiveIntegerField(verbose_name="سال ساخت")
     kilometer = models.PositiveIntegerField(verbose_name="کارکرد کیلومتر")
     body_type = models.CharField(max_length=255, choices=BODY_TYPE_CHOICES, verbose_name="نوع بدنه")
@@ -140,7 +143,10 @@ class Car(models.Model):
     view_count = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f" ({self.brand} {self.model}) {self.description[:20]}"
+        if self.brand and self.model:
+            return f" ({self.brand} {self.model}) "
+        else:
+            return f"{self.promoted_model}  "
 
     class Meta:
         ordering = ["-is_promoted", "-created_at"]
@@ -153,6 +159,8 @@ class Car(models.Model):
             raise ValidationError("اگر وضعیت بدنه خودرو رنگ شدگی است، توضیحات رنگ الزامی است.")
         if self.exhibition and not (self.user.roles == "EXHIBITOR"):
             raise ValidationError("this car could not have exhibition")
+        if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
+            raise ValidationError("you must fill brand and model or promoted model")
         return super().clean()
 
 
