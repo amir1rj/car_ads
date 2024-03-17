@@ -17,7 +17,6 @@ def delete_pending_users():
     expired_otp_tokens = PendingUser.objects.all()
     for p_user in expired_otp_tokens:
         if not p_user.is_valid():
-            print(p_user)
             p_user.delete()
 
 

@@ -97,7 +97,7 @@ class Car(models.Model):
     مدل مربوط به آگهی خودرو
     """
     # اطلاعات کلی
-    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="فروشنده", related_name="cars")
+    user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="فروشنده", related_name="cars")
     exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE, verbose_name="نمایشگاه", related_name="cars",
                                    null=True, blank=True)
     description = models.TextField(verbose_name="توضیحات")
@@ -154,10 +154,23 @@ class Car(models.Model):
         verbose_name_plural = "خودروها"
         get_latest_by = "created_at"
 
-    def clean(self):
+    def save(self, *args, **kwargs):
         if self.body_condition == 'رنگ شدگی' and not self.color_description:
             raise ValidationError("اگر وضعیت بدنه خودرو رنگ شدگی است، توضیحات رنگ الزامی است.")
         if self.exhibition and not (self.user.roles == "EXHIBITOR"):
+            raise ValidationError("this car could not have exhibition")
+        if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
+            raise ValidationError("you must fill brand and model or promoted model")
+        if not self.user.roles == "EXHIBITOR":
+
+            if self.user.cars.filter(status="active").count() > 3:
+                raise ValidationError("you can not have more than 3 cars")
+        return super().save(*args, **kwargs)
+
+    def clean(self):
+        if (self.body_condition == 'رنگ شدگی') and not self.color_description:
+            raise ValidationError("اگر وضعیت بدنه خودرو رنگ شدگی است، توضیحات رنگ الزامی است.")
+        if (self.exhibition) and not (self.user.roles == "EXHIBITOR"):
             raise ValidationError("this car could not have exhibition")
         if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
             raise ValidationError("you must fill brand and model or promoted model")

@@ -88,8 +88,15 @@ CHANNEL_LAYERS = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'car_ads_db',
+        'USER': 'root',
+        'PASSWORD': 'amir1234amir',
+        'HOST': 'localhost',
+        'PORT': '5432',
+        'OPTIONS': {
+            "server_side_binding": True,
+        },
     }
 }
 

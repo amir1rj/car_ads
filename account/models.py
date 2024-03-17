@@ -18,7 +18,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number = models.CharField(max_length=12, verbose_name="شماره تلفن", unique=True)
     is_active = models.BooleanField(default=True, verbose_name="فعال")
     is_admin = models.BooleanField(default=False, verbose_name="مدیر")
-    roles = models.CharField(max_length=20, blank=True, choices=ROLE_CHOICE, default=("EXHIBITOR", "EXHIBITOR"),
+    roles = models.CharField(max_length=100, blank=True, choices=ROLE_CHOICE, default=("EXHIBITOR", "EXHIBITOR"),
                              verbose_name="نقش")
     last_login = models.DateTimeField(null=True, blank=True, verbose_name="آخرین ورود")
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True, verbose_name="تاریخ ایجاد")

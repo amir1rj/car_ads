@@ -5,9 +5,17 @@ from django.db import transaction
 from rest_framework import serializers
 import re
 from account.models import User, PendingUser, Token, Profile
-from account.utils import check_phone, generate_otp, TokenEnum, is_admin_user
-from django.contrib.auth import  user_logged_in
+from account.utils import check_phone, generate_otp, TokenEnum, is_admin_user, validate_password_strength
+from django.contrib.auth import user_logged_in
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+from ads.models import Car
+
+
+class DemoAdsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Car
+        fields = '__all__'
 
 
 class JWTSerializer(TokenObtainPairSerializer):
@@ -37,14 +45,7 @@ class CreateUserSerializer(serializers.Serializer):
     def validate_password(self, value):
         """Validates password strength."""
         # Implement your password strength requirements here
-        # For example:
-        if not any(char.isdigit() for char in value):
-            raise serializers.ValidationError("Password must contain at least one digit.", code="easy password")
-        if not any(char.islower() for char in value):
-            raise serializers.ValidationError("", code="easy password")
-        if not any(char.isupper() for char in value):
-            raise serializers.ValidationError("رمزعبور شما حداقل باید شامل یک حرف بزرگ باشد", code="easy password")
-        # Consider adding more requirements as needed
+        validate_password_strength(value)
         return value
 
     def validate(self, attrs: dict):
@@ -139,7 +140,6 @@ class InitiatePasswordResetSerializer(serializers.Serializer):
                 "user": user,
                 "token_type": TokenEnum.PASSWORD_RESET,
                 "token": otp,
-                "created_at": datetime.now(timezone.utc)
             }
         )
 
@@ -156,15 +156,33 @@ class CreatePasswordFromResetOTPSerializer(serializers.Serializer):
     otp = serializers.CharField(required=True)
     new_password = serializers.CharField(required=True)
 
+    def validate_new_password(self, value):
+        """Validates password strength """
+
+        validate_password_strength(value)
+        return value
+
 
 class PasswordChangeSerializer(serializers.Serializer):
     old_password = serializers.CharField(max_length=128, required=False)
     new_password = serializers.CharField(max_length=128, min_length=5)
 
+    def validate(self, attrs):
+        new_password, old_password = attrs.get("new_password"), attrs.get("old_password")
+        if old_password == new_password:
+            raise serializers.ValidationError({"new_password": "New password cannot be same as old password."})
+        return super().validate(attrs)
+
     def validate_old_password(self, value):
         request = self.context["request"]
         if not request.user.check_password(value):
             raise serializers.ValidationError("Old password is incorrect.")
+        return value
+
+    def validate_new_password(self, value):
+        """Validates password strength """
+
+        validate_password_strength(value)
         return value
 
     def save(self):
@@ -231,6 +249,7 @@ class UserNameSerializer(serializers.Serializer):
 
 class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField("username", read_only=True)
+    cars = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Profile
@@ -273,3 +292,20 @@ class ProfileSerializer(serializers.ModelSerializer):
         if Profile.objects.get(user=validated_data.get("user")) is not None:
             raise serializers.ValidationError("پروفایل از قبل وجود دارد ")
         return Profile.objects.get_or_create(**validated_data)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        request = self.context.get('request')
+        method = request.resolver_match.url_name
+        if method in ['profile-list', ]:
+            representation.pop('cars')
+
+        return representation
+
+    def get_cars(self, obj):
+        request = self.context.get('request')
+        if request.user == obj.user:
+            cars = Car.objects.filter(user=obj.user)
+        else:
+            cars = Car.objects.filter(status="active").filter(user=obj.user)
+        return DemoAdsSerializer(cars, many=True).data

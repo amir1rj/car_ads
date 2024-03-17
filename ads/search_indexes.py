@@ -16,10 +16,10 @@ class CarIndex(indexes.SearchIndex, indexes.Indexable):
 
     def prepare_text(self, obj):
         if (obj.model is None ) or (obj.model is None):
-            print("salam")
+
             return None
         else:
-            print("miad")
+
             return ' '.join([
                 obj.description,
                 obj.brand.name,

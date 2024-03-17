@@ -5,6 +5,7 @@ from dataclasses import dataclass
 import pyotp as pyotp
 from rest_framework import serializers, permissions
 from account.models import User
+
 PROVINCES = [("آذربایجان شرقی", "آذربایجان شرقی"),
              ("آذربایجان غربی", "آذربایجان غربی"),
              ("اصفهان", "اصفهان"),
@@ -114,3 +115,14 @@ class IsAdmin(permissions.BasePermission):
             return False
         return is_admin_user(request.user)
 
+
+def validate_password_strength(value):
+    """Validates password strength."""
+
+    if not any(char.isdigit() for char in value):
+        raise serializers.ValidationError("Password must contain at least one digit.", code="easy password")
+    if not any(char.islower() for char in value):
+        raise serializers.ValidationError("", code="easy password")
+    if not any(char.isupper() for char in value):
+        raise serializers.ValidationError("رمزعبور شما حداقل باید شامل یک حرف بزرگ باشد", code="easy password")
+    return value
