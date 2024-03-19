@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # third party
     'storages',
     'django_celery_results',
+    'django_celery_beat',
     'django_user_agents',
 ]
 
@@ -78,7 +79,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("127.0.0.1", 6379)],
+            "hosts": [("redis", 6379)],
         },
     },
 }
@@ -92,7 +93,7 @@ DATABASES = {
         'NAME': 'car_ads_db',
         'USER': 'root',
         'PASSWORD': 'amir1234amir',
-        'HOST': 'localhost',
+        'HOST': 'postgres',
         'PORT': '5432',
         'OPTIONS': {
             "server_side_binding": True,
@@ -190,8 +191,8 @@ HAYSTACK_CONNECTIONS = {
 HAYSTACK_SIGNAL_PROCESSOR = 'haystack.signals.RealtimeSignalProcessor'
 HAYSTACK_SEARCH_RESULTS_PER_PAGE = 10
 # celery😗
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_BROKER_URL = "redis://redis:6379"
+CELERY_RESULT_BACKEND = 'redis://redis:6379'
 CELERY_ACCEPT_CONTENT = ["application/json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"

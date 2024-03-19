@@ -6,15 +6,6 @@
   <component name="ChangeListManager">
     <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/tasks.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/account/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/account/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/search_indexes.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/search_indexes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/serializers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ads/tasks.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/tasks.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/car_ads/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/settings.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
@@ -263,7 +254,11 @@
       <workItem from="1710011322281" duration="3439000" />
       <workItem from="1710139914743" duration="357000" />
       <workItem from="1710525829436" duration="2150000" />
-      <workItem from="1710660777393" duration="13488000" />
+      <workItem from="1710660777393" duration="13906000" />
+      <workItem from="1710745166188" duration="12528000" />
+      <workItem from="1710787627987" duration="9737000" />
+      <workItem from="1710834998139" duration="8983000" />
+      <workItem from="1710872615206" duration="678000" />
     </task>
     <servers />
   </component>

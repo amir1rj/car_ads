@@ -1,0 +1,84 @@
+version: '3.9'
+
+services:
+
+
+  redis:
+    image: "redis:latest"
+    ports:
+       - "6379:6379"
+    networks:
+      - car_ads
+    restart: always
+
+  celery_worker:
+    container_name: celery_worker
+    command: "celery -A car_ads worker -l INFO"
+    depends_on:
+      - main
+      - redis
+      - postgres
+    build: .
+
+    environment:
+      - C_FORCE_ROOT="true"
+      - DB_HOST=postgres
+      - DB_USER=root
+      - DB_NAME=car_ads_db
+      - DB_PASS=amir1234amir
+    networks:
+      - car_ads
+    volumes:
+      - .:/source/
+    restart: always
+
+  celery_beat:
+    container_name: celery_beat
+    command: "celery -A car_ads beat -l info"
+    build: .
+    depends_on:
+      - main
+      - postgres
+      - redis
+      - celery_worker
+    environment:
+      - C_FORCE_ROOT="true"
+      - DB_HOST=postgres
+      - DB_USER=root
+      - DB_NAME=car_ads_db
+      - DB_PASS=amir1234amir
+    networks:
+      - car_ads
+    volumes:
+      - .:/source/
+    restart: always
+  main:
+    build: .
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000 "
+    container_name: car_ads_container
+    volumes:
+      - .:/source/
+    ports:
+      - "8000:8000"
+    networks:
+      - car_ads
+    restart: always
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    environment:
+      - POSTGRES_DB=car_ads_db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=amir1234amir
+    networks:
+      - car_ads
+    ports:
+      - "5432:5432"
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+networks:
+  car_ads:
+
+volumes:
+  postgres_data:
