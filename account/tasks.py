@@ -3,9 +3,12 @@ from django.db import transaction
 from account.models import PendingUser
 from django.utils import timezone
 from datetime import timedelta
+from kavenegar import *
 @shared_task
 def send_sms(message):
     print(message)
+    print(message.get("message"))
+    print(message.get("phone"))
 
 
 @shared_task
