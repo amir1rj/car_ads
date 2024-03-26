@@ -4,7 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="" />
+    <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/car_ads/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/urls.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,7 +62,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
-    "git-widget-placeholder": "master",
+    "git-widget-placeholder": "deploy",
     "last_opened_file_path": "/home/amir/Desktop/car_ads",
     "list.type.of.created.stylesheet": "CSS",
     "node.js.detected.package.eslint": "true",
@@ -259,7 +263,7 @@
       <workItem from="1711099696994" duration="1441000" />
       <workItem from="1711116539506" duration="2730000" />
       <workItem from="1711386711109" duration="493000" />
-      <workItem from="1711473059847" duration="2850000" />
+      <workItem from="1711473059847" duration="3138000" />
     </task>
     <servers />
   </component>

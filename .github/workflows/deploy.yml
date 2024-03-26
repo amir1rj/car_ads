@@ -19,15 +19,14 @@ jobs:
           pip install --upgrade pip  
           pip install -r requirements.txt
       - name: Build Docker images
-        run: docker-compose build --no-cache  #
+        run: docker-compose build
       - name: Connect to server using SSH
         uses: actions/checkout@v3
         with:
           host: 82.115.18.105
-          username: root  #
+          username: root
           key: ${{ secrets.SSH_KEY }}
       - name: Deploy with Docker Compose on server
         run: |
-          ssh root@82.115.18.105 << EOF
+          ssh root@82.115.18.105 
           docker-compose up -d  
-          EOF
