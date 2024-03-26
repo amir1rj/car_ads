@@ -21,7 +21,7 @@ jobs:
       - name: Build Docker images
         run: docker-compose build --no-cache  #
       - name: Connect to server using SSH
-        uses: shivfu/ssh-action@v2
+        uses: actions/checkout@v3
         with:
           host: 82.115.18.105
           username: root  #
