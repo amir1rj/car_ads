@@ -18,16 +18,13 @@ jobs:
         run: |
           pip install --upgrade pip  
           pip install -r requirements.txt
-
-      - name: Create ~/.ssh directory if it doesn't exist
-        run: mkdir -p ~/.ssh
-      - name: Trust SSH host
-        run: ssh-keyscan -H 82.115.18.105 >> ~/.ssh/known_hosts
+      - name: Build Docker images
+        run: docker-compose build -
       - name: Connect to server using SSH
-        uses: actions/checkout@v3
+        uses: nwiemann/ssh-action@v2
         with:
           host: 82.115.18.105
-          username: root
+          username: root  #
           key: ${{ secrets.SSH_KEY }}
       - name: Deploy with Docker Compose on server
         run: |
