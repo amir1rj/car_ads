@@ -96,7 +96,7 @@ class Car(models.Model):
     """
     مدل مربوط به آگهی خودرو
     """
-    # اطلاعات کلی
+    # general information of ads
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="فروشنده", related_name="cars")
     exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE, verbose_name="نمایشگاه", related_name="cars",
                                    null=True, blank=True)
@@ -106,20 +106,23 @@ class Car(models.Model):
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
 
-    # اطلاعات خودرو
+    # general information of car
     car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند", blank=True, null=True)
     model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True, blank=True)
-    # optionall
+    # optional
     promoted_model = models.CharField(max_length=255, verbose_name="مدل پیشنهادی ", null=True, blank=True)
 
     year = models.PositiveIntegerField(verbose_name="سال ساخت")
     kilometer = models.PositiveIntegerField(verbose_name="کارکرد کیلومتر")
-    body_type = models.CharField(max_length=255, choices=BODY_TYPE_CHOICES, verbose_name="نوع بدنه")
-    color = models.CharField(max_length=255, verbose_name="رنگ")
+    body_type = models.CharField(max_length=255, choices=BODY_TYPE_CHOICES, verbose_name="نوع بدنه", null=True,
+                                 blank=True)
+    color = models.CharField(max_length=255, verbose_name="رنگ", null=True, blank=True)
     color_description = models.TextField(blank=True, null=True, verbose_name="جزعیات رنگ شدگی")
-    transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس")
     fuel_type = models.CharField(max_length=255, choices=FUEL_TYPE_CHOICES, verbose_name="نوع سوخت")
+    # Passenger Cars optional
+    transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس", null=True,
+                                    blank=True)
     body_condition = models.CharField(
         max_length=255,
         choices=BODY_CONDITION_CHOICES,
@@ -128,14 +131,17 @@ class Car(models.Model):
         verbose_name="وضعیت بدنه خودرو",
     )
     chassis_condition = models.CharField(
-        max_length=255, choices=CHASSIS_CONDITION_CHOICES, default=("سالم", "سالم"), verbose_name="وضعیت شاسی"
+        max_length=255, choices=CHASSIS_CONDITION_CHOICES, default=("سالم", "سالم"), verbose_name="وضعیت شاسی",
+        null=True, blank=True
     )
-
-    # اطلاعات تماس
+    # Heavyweights optional
+    weight = models.IntegerField(verbose_name="وزن ماشین", null=True, blank=True)
+    payload_capacity = models.IntegerField(verbose_name="حداکثر وزن ناخالص مجاز وسیله نقلیه", null=True, blank=True)
+    wheel_number = models.SmallIntegerField(verbose_name="تعداد چرخ" , default=4)
+    # contact information
     phone_numbers = models.CharField(max_length=12, verbose_name="شماره تلفن")
     address = models.CharField(max_length=255, verbose_name="آدرس")
-
-    # وضعیت آگهی
+    # ads status
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="pending", verbose_name="وضعیت")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان بروزرسانی")
@@ -162,9 +168,10 @@ class Car(models.Model):
         if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
             raise ValidationError("you must fill brand and model or promoted model")
         if not self.user.roles == "EXHIBITOR":
-
             if self.user.cars.filter(status="active").count() > 3:
                 raise ValidationError("you can not have more than 3 cars")
+        if self.car_type == 'ماشین‌آلات سنگین' and not (self.weight or self.payload_capacity or self.wheel_number):
+            raise ValidationError("you must fill weight, payload_capacity and wheel_number")
         return super().save(*args, **kwargs)
 
     def clean(self):
@@ -174,6 +181,8 @@ class Car(models.Model):
             raise ValidationError("this car could not have exhibition")
         if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
             raise ValidationError("you must fill brand and model or promoted model")
+        if self.car_type == 'ماشین‌آلات سنگین' and not (self.weight or self.payload_capacity or self.wheel_number):
+            raise ValidationError("you must fill weight, payload_capacity and wheel_number")
         return super().clean()
 
 
@@ -189,7 +198,7 @@ class Image(models.Model):
 
 class Feature(models.Model):
     car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name="features",
-                            verbose_name="خودرو")  # Add this line
+                            verbose_name="خودرو")
     name = models.CharField(max_length=255, verbose_name="امکانات")
 
     class Meta:

@@ -1,0 +1,33 @@
+name: Django Deployment with Docker Compose
+
+on:
+  push:
+    branches: [ deploy ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Python 3.x
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.10.13'
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip  
+          pip install -r requirements.txt
+      - name: Build Docker images
+        run: docker-compose build --no-cache  #
+      - name: Connect to server using SSH
+        uses: shivfu/ssh-action@v2
+        with:
+          host: 82.115.18.105
+          username: root  #
+          key: ${{ secrets.SSH_KEY }}
+      - name: Deploy with Docker Compose on server
+        run: |
+          ssh root@82.115.18.105 << EOF
+          docker-compose up -d  
+          EOF

@@ -5,8 +5,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/car_ads/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/filter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/views.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +66,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;deploy&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/amir/Desktop/car_ads&quot;,
     &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -260,7 +265,9 @@
       <workItem from="1710872615206" duration="678000" />
       <workItem from="1710931922231" duration="1321000" />
       <workItem from="1711099696994" duration="1441000" />
-      <workItem from="1711116539506" duration="430000" />
+      <workItem from="1711116539506" duration="2730000" />
+      <workItem from="1711386711109" duration="493000" />
+      <workItem from="1711473059847" duration="2051000" />
     </task>
     <servers />
   </component>

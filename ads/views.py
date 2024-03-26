@@ -37,7 +37,18 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
             OpenApiParameter(name='brand', description='Filter by car brand.', required=False, type=str),
             OpenApiParameter(name='car_type', description='Filter by car car type.', required=False, type=str),
             OpenApiParameter(name='body type', description='Filter by car body type.', required=False, type=str),
-
+            OpenApiParameter(name='chassis_condition', description='Filter by car chassis_condition.', required=False,
+                             type=str),
+            OpenApiParameter(name='payload_capacity ',
+                             description='Filter by car payload_capacity.( this argument is required only for heavy weight machins)',
+                             required=False,
+                             type=str),
+            OpenApiParameter(name='weight',
+                             description='Filter by car weight( this argument is required only for heavy weight machins)',
+                             required=False, type=str),
+            OpenApiParameter(name='wheel_number',
+                             description='Filter by car wheel_number( this argument is required only for heavy weight machins)',
+                             required=False, type=str),
             OpenApiParameter(name='model', description='Filter by car model.', required=False, type=str),
             OpenApiParameter(name='color', description='Filter by car color', required=False, type=str),
             OpenApiParameter(name='transmission', description='Filter by car transmission', required=False, type=str),
@@ -120,6 +131,50 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
         serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data)
 
+    @extend_schema(
+        description="""
+    **Required Fields:**
+
+    * `user` (ForeignKey): This field links the ad to the registered user who is submitting it.
+    * `description` (TextField): Provide a detailed description of the car, highlighting its features and condition.
+    * `price` (PositiveIntegerField): Enter the asking price of the car.
+    * `is_negotiable` (BooleanField): Indicate whether the price is negotiable (default: True).
+    * `city` (CharField, choices=PROVINCES): Select the city where the car is located from the provided choices.
+    * `car_type` (CharField, choices=CAR_TYPE_CHOICES): Choose the type of car (e.g., Passenger Car, Heavy Machinery).
+    * `year` (PositiveIntegerField): Specify the year the car was manufactured.
+    * `kilometer` (PositiveIntegerField): Enter the car's current mileage.
+    * `fuel_type` (CharField, choices=FUEL_TYPE_CHOICES): Select the car's fuel type (e.g., Gasoline, Diesel).
+    * `phone_numbers` (CharField, max_length=12): Provide your phone number(s) for potential buyers to contact you.
+    * `address` (CharField, max_length=255): Enter the car's location (optional, but recommended for serious inquiries).
+
+    **Optional Fields:**
+
+    * `exhibition` (ForeignKey, null=True, blank=True): Link the ad to an exhibition if it's part of one (only applicable for users with "EXHIBITOR" role).
+    * `brand` (ForeignKey, null=True, blank=True): Specify the car's brand (e.g., Toyota, Honda).
+    * `model` (ForeignKey, null=True, blank=True): If known, enter the car's specific model (e.g., Camry, Accord).
+    * `promoted_model` (CharField, max_length=255, null=True, blank=True): Provide a custom model name if the brand and model are unknown.
+    * `body_type` (CharField, choices=BODY_TYPE_CHOICES): Select the car's body type (e.g., Sedan, SUV).
+    * `color` (CharField, max_length=255, null=True, blank=True): Indicate the car's exterior color.
+    * `color_description` (TextField, blank=True, null=True): If the body condition is "رنگ شدگی" (painted), provide details about the paint job.
+    * `transmission` (CharField, choices=TRANSMISSION_CHOICES): Specify the car's transmission type (applicable to Passenger Cars).
+    * `body_condition` (CharField, choices=BODY_CONDITION_CHOICES): Choose the condition of the car's body.
+    * `chassis_condition` (CharField, choices=CHASSIS_CONDITION_CHOICES): Select the condition of the car's chassis (default: "سالم" - healthy).
+    * `weight` (IntegerField, null=True, blank=True): Enter the weight of the car (applicable to Heavy Machinery).
+    * `payload_capacity` (IntegerField, null=True, blank=True): Specify the maximum weight the car can carry (applicable to Heavy Machinery).
+    * `wheel_number` (SmallIntegerField, default=4): Indicate the number of wheels (default: 4).
+
+    **Validation Rules:**
+
+
+
+    * Color Description: If the body condition is "رنگ شدگی" (painted), then `color_description` must be provided.
+    * Exhibition: Only users with the "EXHIBITOR" role can link their ads to an exhibition.
+    * Brand/Model or Promoted Model: At least one of brand, model, or promoted_model must be filled.
+    * Number of Active Ads (Non-EXHIBITOR Users): A user can have a maximum of 3 active car ads if they don't have the "EXHIBITOR" role.
+    * Heavy Machinery Fields: If `car_type` is "ماشین‌آلات سنگین" (Heavy Machinery), then `weight`, `payload_capacity`, and `wheel_number` must be provided.
+    * A user can only have one pending ad at a time. If a user tries to submit another ad while they already have one pending ad, they will receive a 406 error code.
+    """,
+    )
     def create(self, request, **kwargs):
         serializer = AdSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
@@ -137,6 +192,18 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
             OpenApiParameter(name='transmission', description='Filter by car transmission', required=False, type=str),
             OpenApiParameter(name='body_condition', description='Filter by car body_condition', required=False,
                              type=str),
+            OpenApiParameter(name='chassis_condition', description='Filter by car chassis_condition.', required=False,
+                             type=str),
+            OpenApiParameter(name='payload_capacity ',
+                             description='Filter by car payload_capacity.( this argument is required only for heavy weight machins)',
+                             required=False,
+                             type=str),
+            OpenApiParameter(name='weight',
+                             description='Filter by car weight( this argument is required only for heavy weight machins)',
+                             required=False, type=str),
+            OpenApiParameter(name='wheel_number',
+                             description='Filter by car wheel_number( this argument is required only for heavy weight machins)',
+                             required=False, type=str),
             OpenApiParameter(name='car_type', description='Filter by car car type.', required=False, type=str),
             OpenApiParameter(name='body type', description='Filter by car body type.', required=False, type=str),
             OpenApiParameter(
