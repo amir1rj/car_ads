@@ -22,9 +22,9 @@ jobs:
         uses: actions/checkout@v2
         with:
           host: 82.115.18.105
-          username: root  #
+          username: root
           key: ${{ secrets.SSH_KEY }}
       - name: Deploy with Docker Compose on server
         run: |
-          ssh root@82.115.18.105 
+          ssh ${{ secrets.SSH_KEY }} root@82.115.18.105 
           docker-compose up -d  
