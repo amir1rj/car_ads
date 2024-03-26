@@ -18,6 +18,8 @@ jobs:
         run: |
           pip install --upgrade pip  
           pip install -r requirements.txt
+      - name: Trust SSH host
+        run: ssh-keyscan -H 82.115.18.105 >> ~/.ssh/known_hosts
       - name: Connect to server using SSH
         uses: actions/checkout@v3
         with:
