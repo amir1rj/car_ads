@@ -19,7 +19,7 @@ jobs:
           pip install --upgrade pip  
           pip install -r requirements.txt
       - name: Connect to server using SSH
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
         with:
           host: 82.115.18.105
           username: root  #
