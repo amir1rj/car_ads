@@ -26,5 +26,5 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
       - name: Deploy with Docker Compose on server
         run: |
-          ssh -i ${{ secrets.SSH_KEY }} root@82.115.18.105 
+          ssh -i  root@82.115.18.105 
           docker-compose up -d  
