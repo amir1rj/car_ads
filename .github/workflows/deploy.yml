@@ -18,7 +18,7 @@ jobs:
       - name: Connect to server using SSH
         run: |
           mkdir -p ~/.ssh/
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/github
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/github
           chmod 600 ~/.ssh/github
           cat >>~/.ssh/config << 'END'
           host target
