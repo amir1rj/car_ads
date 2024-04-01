@@ -154,9 +154,9 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Django Server.car_ads" />
       <item itemvalue="Python.manage" />
       <item itemvalue="Python.utils" />
+      <item itemvalue="Django Server.car_ads" />
     </list>
     <recent_temporary>
       <list>
