@@ -4,7 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="" />
+    <list default="true" id="0870ec62-3cce-44a6-9983-709a14f334e6" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ads/pagination.py" beforeDir="false" afterPath="$PROJECT_DIR$/ads/pagination.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/car_ads/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/car_ads/settings.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nginx.conf" beforeDir="false" afterPath="$PROJECT_DIR$/nginx.conf" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,7 +63,7 @@
     &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;django.template.preview.state&quot;: &quot;SHOW_EDITOR_AND_PREVIEW&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;deploy&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;local&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/amir/Desktop/car_ads&quot;,
     &quot;list.type.of.created.stylesheet&quot;: &quot;CSS&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -262,7 +267,11 @@
       <workItem from="1711473059847" duration="5750000" />
       <workItem from="1711485970899" duration="1535000" />
       <workItem from="1711537842042" duration="4800000" />
+<<<<<<< HEAD
       <workItem from="1712040154599" duration="2686000" />
+=======
+      <workItem from="1712046341869" duration="1499000" />
+>>>>>>> local
     </task>
     <servers />
   </component>
