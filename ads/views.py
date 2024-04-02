@@ -10,14 +10,13 @@ from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 
 
-class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
+class AdViewSets(viewsets.ModelViewSet):
     queryset = Car.objects.filter(status="active")
     serializer_class = AdSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
-
         # Check if user has already viewed this ad
         if request.user.is_authenticated:
             viewed = View.objects.filter(user=request.user, ad=instance).exists()
@@ -71,6 +70,56 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
                                  ),
                              ]
                              ),
+            OpenApiParameter(name='order_by', description='sort data',
+                             required=False, type=str,
+                             examples=[
+                                 OpenApiExample(
+                                     'Example 1',
+                                     summary='sort bu newest',
+                                     description='it will sort data from newest',
+                                     value="جدیدترین"
+                                 ), OpenApiExample(
+                                     'Example 2',
+                                     summary='sort bu oldest',
+                                     description='it will sort data from oldest',
+                                     value="قدیمی ترین"
+                                 ), OpenApiExample(
+                                     'Example 3',
+                                     summary='sort bu highest_price',
+                                     description='it will sort data from newest',
+                                     value="گران ترین"
+                                 ),
+                                 OpenApiExample(
+                                     'Example 4',
+                                     summary='sort bu lowest_price',
+                                     description='it will sort data from lowest_price',
+                                     value="ارزان ترین"
+                                 ),
+                                 OpenApiExample(
+                                     'Example 5',
+                                     summary='sort bu kilometer(low to high)',
+                                     description='it will sort data from kilometer(low to high)',
+                                     value="کم کار کرده ترین"
+                                 ), OpenApiExample(
+                                     'Example 6',
+                                     summary='sort bu kilometer(high to low )',
+                                     description='it will sort data from kilometer(high to low )',
+                                     value='زیاد کار رده ترین'
+                                 ), OpenApiExample(
+                                     'Example 7',
+                                     summary='sort bu year(new to old)',
+                                     description='it will sort data from year(new to old)',
+                                     value= "نو ترین"
+                                 ),
+                                 OpenApiExample(
+                                     'Example 8',
+                                     summary='sort bu year(old to new )',
+                                     description='it will sort data from year(old to new )',
+                                     value="کهنه ترین"
+                                 ),
+
+                             ]
+                             ),
             OpenApiParameter(
                 name='price',
                 type=str,
@@ -116,6 +165,25 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
     )
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
+        order_by = request.query_params.get('order_by')
+
+        if order_by == 'جدیدترین':
+            queryset = queryset.order_by('-created_at')
+        elif order_by == 'قدیمی ترین':
+            queryset = queryset.order_by('created_at')
+        elif order_by == 'گران ترین':
+            queryset = queryset.order_by('-price')
+        elif order_by == 'ارزان ترین':
+            queryset = queryset.order_by('price')
+        elif order_by == "کم کار کرده ترین":
+            queryset = queryset.order_by('kilometer')
+        elif order_by == 'زیاد کار رده ترین':
+            queryset = queryset.order_by('-kilometer')
+        elif order_by == "نو ترین":
+            queryset = queryset.order_by('-year')
+        elif order_by == "کهنه ترین":
+            queryset = queryset.order_by('year')
+
         modified_get = request.GET.copy()
         if not modified_get.get("city"):
             modified_get["city"] = self.request.user.profile.city
@@ -123,11 +191,6 @@ class AdViewSets(viewsets.ModelViewSet, StandardResultSetPagination):
             del modified_get["city"]
         filter_set = CarFilter(modified_get, queryset=queryset)
         filtered_queryset = filter_set.qs
-        page = self.paginate_queryset(filtered_queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data)
 
