@@ -109,7 +109,7 @@ class AdViewSets(viewsets.ModelViewSet):
                                      'Example 7',
                                      summary='sort bu year(new to old)',
                                      description='it will sort data from year(new to old)',
-                                     value= "نو ترین"
+                                     value="نو ترین"
                                  ),
                                  OpenApiExample(
                                      'Example 8',
@@ -191,6 +191,10 @@ class AdViewSets(viewsets.ModelViewSet):
             del modified_get["city"]
         filter_set = CarFilter(modified_get, queryset=queryset)
         filtered_queryset = filter_set.qs
+        page = self.paginate_queryset(filtered_queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
         serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data)
 
