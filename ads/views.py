@@ -3,11 +3,12 @@ from ads.search_indexes import CarIndex, ExhibitionIndex
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly
-from ads.serializers import AdSerializer, ExhibitionSerializer
-from ads.models import Car, View, Exhibition, ExhView
+from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from rest_framework import generics
 
 
 class AdViewSets(viewsets.ModelViewSet):
@@ -469,3 +470,8 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
         result = self.paginate_queryset(filtered_exh)
         serializer = ExhibitionSerializer(result, many=True, context={"request": request})
         return self.get_paginated_response(serializer.data)
+
+
+class LatestVideosList(generics.ListAPIView):
+    queryset = ExhibitionVideo.objects.all().order_by('-uploaded_at')
+    serializer_class = ExhibitionVideoSerializer
