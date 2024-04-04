@@ -22,7 +22,8 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         # so we'll always allow GET, HEAD or OPTIONS requests.
         if request.method in permissions.SAFE_METHODS:
             return True
-
+        if request.method == 'DELETE':
+            return False
         # Instance must have an attribute named `owner`.
         if request.user.is_authenticated:
             if request.user.is_admin:

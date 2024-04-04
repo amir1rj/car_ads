@@ -38,6 +38,10 @@ class Exhibition(models.Model):
     class Meta:
         verbose_name = "نمایشگاه"
         verbose_name_plural = " نمایشگاه ها"
+        indexes = [
+            models.Index(fields=['city'], name="city_index"),
+            models.Index(fields=["company_name"], name="Company_name_index")
+        ]
 
 
 class ExhibitionVideo(models.Model):
@@ -137,7 +141,7 @@ class Car(models.Model):
     # Heavyweights optional
     weight = models.IntegerField(verbose_name="وزن ماشین", null=True, blank=True)
     payload_capacity = models.IntegerField(verbose_name="حداکثر وزن ناخالص مجاز وسیله نقلیه", null=True, blank=True)
-    wheel_number = models.SmallIntegerField(verbose_name="تعداد چرخ" , default=4)
+    wheel_number = models.SmallIntegerField(verbose_name="تعداد چرخ", default=4)
     # contact information
     phone_numbers = models.CharField(max_length=12, verbose_name="شماره تلفن")
     address = models.CharField(max_length=255, verbose_name="آدرس")
@@ -159,6 +163,9 @@ class Car(models.Model):
         verbose_name = "خودرو"
         verbose_name_plural = "خودروها"
         get_latest_by = "created_at"
+        indexes = [
+            models.Index(fields=['brand', 'model']),
+        ]
 
     def save(self, *args, **kwargs):
         if self.body_condition == 'رنگ شدگی' and not self.color_description:
