@@ -16,6 +16,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["82.115.18.105","dolox.ir","localhost"]
 
+CSRF_TRUSTED_ORIGINS = ["https://dolox.ir"]
+
 # Application definition
 
 INSTALLED_APPS = [
