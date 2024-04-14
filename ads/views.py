@@ -186,10 +186,13 @@ class AdViewSets(viewsets.ModelViewSet):
             queryset = queryset.order_by('year')
 
         modified_get = request.GET.copy()
-        if not modified_get.get("city"):
-            modified_get["city"] = self.request.user.profile.city
+
         if modified_get.get("city") == "همه شهر ها":
             del modified_get["city"]
+
+        if not modified_get.get("city") and request.user.is_authenticated:
+            print(modified_get)
+            modified_get["city"] = self.request.user.profile.city
         filter_set = CarFilter(modified_get, queryset=queryset)
         filtered_queryset = filter_set.qs
         page = self.paginate_queryset(filtered_queryset)
