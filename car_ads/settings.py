@@ -203,3 +203,20 @@ CELERY_IMPORTS = [
     'account.tasks',
     'auction.tasks',
 ]
+# اطمینان از اینکه همه اتصالات از طریق HTTPS انجام شود
+SECURE_SSL_REDIRECT = True
+
+# تنظیمات پروکسی SSL برای nginx
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# اطمینان از اینکه کوکی‌های جلسه و CSRF فقط برای اتصال‌های امن (HTTPS) ارسال شوند
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+# تنظیم HSTS (Strict Transport Security) در صورت نیاز
+# SECURE_HSTS_SECONDS = 31536000  # یک سال
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+# SECURE_HSTS_PRELOAD = True
+
+# تنظیمات سیاست Referrer امن
+SECURE_REFERRER_POLICY = 'same-origin'
