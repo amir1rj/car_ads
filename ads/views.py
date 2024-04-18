@@ -3,12 +3,14 @@ from ads.search_indexes import CarIndex, ExhibitionIndex
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly
-from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer
-from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo
+from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, CarModelSerializer, \
+    BrandSerializer
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, CarModel
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import generics
+from rest_framework.views import APIView
 
 
 class AdViewSets(viewsets.ModelViewSet):
@@ -478,3 +480,19 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
 class LatestVideosList(generics.ListAPIView):
     queryset = ExhibitionVideo.objects.all().order_by('-uploaded_at')
     serializer_class = ExhibitionVideoSerializer
+
+
+class BrandModelsView(APIView):
+    @extend_schema(
+        description="get models from brands example ,you should enter a json with "
+                    "a key of 'brands' that get a list of brands ",
+        request={
+            "application/json": {
+                "type": "object",
+            },
+        }, )
+    def post(self, request):
+        brands = request.data.get('brands', [])
+        queryset = CarModel.objects.filter(brand__name__in=brands)
+        serializer = CarModelSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
