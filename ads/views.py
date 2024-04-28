@@ -5,9 +5,8 @@ from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly
 from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, CarModelSerializer, \
     BrandSerializer
-from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, CarModel
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, CarModel, Brand
 from rest_framework.decorators import action
-from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -366,7 +365,7 @@ class AdViewSets(viewsets.ModelViewSet):
         return self.get_paginated_response(serializer.data)
 
 
-class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
+class ExhibitionViewSet(viewsets.ModelViewSet):
     queryset = Exhibition.objects.all()
     serializer_class = ExhibitionSerializer
     permission_classes = [IsOwnerOrReadOnly]
@@ -416,11 +415,6 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
         queryset = self.get_queryset()
         filter_set = ExhibitionFilter(request.GET, queryset=queryset)
         filtered_queryset = filter_set.qs
-        page = self.paginate_queryset(filtered_queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(filtered_queryset, many=True)
         return Response(serializer.data)
 
@@ -467,14 +461,10 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
         exhibition_ids = [obj.pk for obj in queryset]
         exhibitions = self.queryset.filter(pk__in=exhibition_ids)
         filter_set = ExhibitionFilter(request.GET, queryset=exhibitions)
-
         # Apply additional filters
         filtered_exh = filter_set.qs
-
-        # Paginate filtered results
-        result = self.paginate_queryset(filtered_exh)
-        serializer = ExhibitionSerializer(result, many=True, context={"request": request})
-        return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(filtered_exh, many=True)
+        return Response(serializer.data)
 
 
 class LatestVideosList(generics.ListAPIView):
@@ -495,4 +485,14 @@ class BrandModelsView(APIView):
         brands = request.data.get('brands', [])
         queryset = CarModel.objects.filter(brand__name__in=brands)
         serializer = CarModelSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class BrandListView(generics.ListAPIView):
+    serializer_class = BrandSerializer
+    queryset = Brand.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

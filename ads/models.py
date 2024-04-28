@@ -19,18 +19,17 @@ class Exhibition(models.Model):
     # موقعیت مکانی (اختیاری)
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
-
     address = models.CharField(max_length=255, blank=True, verbose_name="آدرس")
 
     # اطلاعات توصیفی
     description = models.TextField(blank=True, verbose_name="توضیحات")
-
     social_media_links = models.TextField(blank=True, default=dict, verbose_name="لینک‌های شبکه‌های اجتماعی")
     logo = models.ImageField(upload_to='exhibition_logos', blank=True, verbose_name="لوگو", null=True, )
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
     view_count = models.PositiveIntegerField(default=0)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.company_name
