@@ -366,7 +366,7 @@ class AdViewSets(viewsets.ModelViewSet):
 
 
 class ExhibitionViewSet(viewsets.ModelViewSet):
-    queryset = Exhibition.objects.all()
+    queryset = Exhibition.objects.filter(is_deleted=False)
     serializer_class = ExhibitionSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
