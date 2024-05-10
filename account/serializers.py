@@ -9,13 +9,18 @@ from account.utils import check_phone, generate_otp, TokenEnum, is_admin_user, v
 from django.contrib.auth import user_logged_in
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from ads.models import Car
+from ads.models import Car, Exhibition
+
+from ads.serializers import AdSerializer
+
+from ads.pagination import CustomPagination
 
 
-class DemoAdsSerializer(serializers.ModelSerializer):
+
+class ExhibitonDemo(serializers.ModelSerializer):
     class Meta:
-        model = Car
-        fields = '__all__'
+        model = Exhibition
+        fields = "__all__"
 
 
 class JWTSerializer(TokenObtainPairSerializer):
@@ -250,6 +255,7 @@ class UserNameSerializer(serializers.Serializer):
 class ProfileSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField("username", read_only=True)
     cars = serializers.SerializerMethodField(read_only=True)
+    exhibition = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Profile
@@ -296,6 +302,8 @@ class ProfileSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         request = self.context.get('request')
+        print("-" * 100)
+        print(request)
         method = request.resolver_match.url_name
         if method in ['profile-list', ]:
             representation.pop('cars')
@@ -308,4 +316,16 @@ class ProfileSerializer(serializers.ModelSerializer):
             cars = Car.objects.filter(user=obj.user)
         else:
             cars = Car.objects.filter(status="active").filter(user=obj.user)
-        return DemoAdsSerializer(cars, many=True).data
+
+        paginator = CustomPagination()
+        paginated_cars = paginator.paginate_queryset(cars, self.context['request'])
+        serializer = AdSerializer(paginated_cars, many=True, context={'request': request})
+        return paginator.get_paginated_response(serializer.data).data
+
+    def get_exhibition(self, obj):
+        request = self.context.get('request')
+        if request.user == obj.user:
+            exh = Exhibition.objects.filter(user=obj.user)
+        else:
+            exh = Exhibition.objects.filter(is_deleted=False).filter(user=obj.user)
+        return ExhibitonDemo(exh, many=True).data
