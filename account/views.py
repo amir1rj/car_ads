@@ -11,6 +11,7 @@ from account.utils import TokenEnum, is_admin_user, IsAdmin
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
+from rest_framework.views import APIView
 
 
 @method_decorator(ratelimit(key='ip', rate='20/h', block=True, method='POST'), name='post')
@@ -146,5 +147,14 @@ class ProfileViewSets(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.validated_data["user"] = request.user
             serializer.save()
-            return Response({"response": "done"},status= status.HTTP_201_CREATED)
+            return Response({"response": "done"}, status=status.HTTP_201_CREATED)
         return Response({"response": serializer.errors})
+
+
+class GetUserId(APIView):
+    def get(self, request):
+        user = request.user
+        if user.is_authenticated:
+            return Response({"id": request.user.id}, status=status.HTTP_200_OK)
+        else:
+            return Response("you should login first", status=status.HTTP_401_UNAUTHORIZED)

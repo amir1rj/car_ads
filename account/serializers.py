@@ -16,6 +16,11 @@ from ads.serializers import AdSerializer
 from ads.pagination import CustomPagination
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'phone_number', 'roles')
+
 
 class ExhibitonDemo(serializers.ModelSerializer):
     class Meta:
@@ -253,7 +258,7 @@ class UserNameSerializer(serializers.Serializer):
 
 
 class ProfileSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField("username", read_only=True)
+    user = serializers.SerializerMethodField(read_only=True)
     cars = serializers.SerializerMethodField(read_only=True)
     exhibition = serializers.SerializerMethodField(read_only=True)
 
@@ -329,3 +334,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         else:
             exh = Exhibition.objects.filter(is_deleted=False).filter(user=obj.user)
         return ExhibitonDemo(exh, many=True).data
+
+    def get_user(self, obj):
+        user = obj.user
+        return UserSerializer(user).data
