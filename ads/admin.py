@@ -31,11 +31,11 @@ class CarAdmin(admin.ModelAdmin):
     actions = ["make_ads_active", "make_ads_inactive"]
     fieldsets = (
         ('اطلاعات کلی اگهی', {
-            'fields': ('user', 'exhibition', 'description', 'price', 'is_negotiable', 'city')
+            'fields': ('user', 'exhibition', 'description', 'price', 'is_negotiable', 'city','sale_or_rent')
         }),
         ('اطلاعات خودرو', {
             'fields': ('car_type', 'brand', 'model', 'promoted_model', 'year', 'kilometer', 'body_type', 'color',
-                       'color_description', 'fuel_type')
+                       'color_description', 'fuel_type','upholstery_condition','tire_condition')
         }),
         ('ماشین سواری(اختیاری)', {
             'fields': ('transmission', 'body_condition', 'chassis_condition')

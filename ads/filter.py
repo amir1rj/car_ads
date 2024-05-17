@@ -16,7 +16,7 @@ class CarFilter(FilterSet):
         model = Car
         fields = ['brand', "city", 'model', 'price', 'kilometer', 'year', "fuel_type", "body_condition", "transmission",
                   "color", "body_type", "car_type", 'chassis_condition', "weight",
-                  "payload_capacity", "wheel_number"]
+                  "payload_capacity", "wheel_number",'sale_or_rent','upholstery_condition','tire_condition']
 
 
 class ExhibitionFilter(FilterSet):

@@ -34,4 +34,5 @@ jobs:
           git pull -f origin deploy &&
           docker-compose build &&
           docker-compose up -d &&
+          docker exec car_ads_container python3 manage.py makemigrations
           docker exec car_ads_container python3 manage.py migrate "

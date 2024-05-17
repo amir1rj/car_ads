@@ -108,13 +108,18 @@ class Car(models.Model):
     is_negotiable = models.BooleanField(default=True, verbose_name="قابل مذاکره")
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
-
+    sale_or_rent = models.CharField(max_length=255, choices=SALE_OR_RENT_CHOICES, verbose_name="فروشی یا اجاره‌ای",
+                                    default="sale")
     # general information of car
     car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند", blank=True, null=True)
     model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True, blank=True)
     # optional
     promoted_model = models.CharField(max_length=255, verbose_name="مدل پیشنهادی ", null=True, blank=True)
+    tire_condition = models.CharField(max_length=255, choices=TIRE_CONDITION_CHOICES, verbose_name="وضعیت لاستیک",
+                                      blank=True, null=True)
+    upholstery_condition = models.CharField(max_length=255, choices=UPHOLSTERY_CONDITION_CHOICES,
+                                            verbose_name="وضعیت مبلمان", null=True, blank=True)
 
     year = models.PositiveIntegerField(verbose_name="سال ساخت")
     kilometer = models.PositiveIntegerField(verbose_name="کارکرد کیلومتر")
@@ -137,6 +142,7 @@ class Car(models.Model):
         max_length=255, choices=CHASSIS_CONDITION_CHOICES, default=("سالم", "سالم"), verbose_name="وضعیت شاسی",
         null=True, blank=True
     )
+
     # Heavyweights optional
     weight = models.IntegerField(verbose_name="وزن ماشین", null=True, blank=True)
     payload_capacity = models.IntegerField(verbose_name="حداکثر وزن ناخالص مجاز وسیله نقلیه", null=True, blank=True)

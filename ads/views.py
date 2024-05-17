@@ -10,12 +10,22 @@ from rest_framework.decorators import action
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import generics
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 
 class AdViewSets(viewsets.ModelViewSet):
     queryset = Car.objects.filter(status="active")
     serializer_class = AdSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    def get_permissions(self):
+        permission_classes = self.permission_classes
+
+        if self.action in ["retrieve"]:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsOwnerOrReadOnly]
+        return [permission() for permission in permission_classes]
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -36,133 +46,89 @@ class AdViewSets(viewsets.ModelViewSet):
         description="Search for ads based on various filters.",
         parameters=[
             OpenApiParameter(name='brand', description='Filter by car brand.', required=False, type=str),
-            OpenApiParameter(name='car_type', description='Filter by car car type.', required=False, type=str),
-            OpenApiParameter(name='body type', description='Filter by car body type.', required=False, type=str),
-            OpenApiParameter(name='chassis_condition', description='Filter by car chassis_condition.', required=False,
+            OpenApiParameter(name='car_type', description='Filter by car type.', required=False, type=str),
+            OpenApiParameter(name='body_type', description='Filter by car body type.', required=False, type=str),
+            OpenApiParameter(name='chassis_condition', description='Filter by car chassis condition.', required=False,
                              type=str),
-            OpenApiParameter(name='payload_capacity ',
-                             description='Filter by car payload_capacity.( this argument is required only for heavy weight machins)',
-                             required=False,
-                             type=str),
+            OpenApiParameter(name='payload_capacity',
+                             description='Filter by car payload capacity. This argument is required only for heavy weight machines.',
+                             required=False, type=str),
             OpenApiParameter(name='weight',
-                             description='Filter by car weight( this argument is required only for heavy weight machins)',
+                             description='Filter by car weight. This argument is required only for heavy weight machines.',
                              required=False, type=str),
             OpenApiParameter(name='wheel_number',
-                             description='Filter by car wheel_number( this argument is required only for heavy weight machins)',
+                             description='Filter by car wheel number. This argument is required only for heavy weight machines.',
                              required=False, type=str),
             OpenApiParameter(name='model', description='Filter by car model.', required=False, type=str),
-            OpenApiParameter(name='color', description='Filter by car color', required=False, type=str),
-            OpenApiParameter(name='transmission', description='Filter by car transmission', required=False, type=str),
-            OpenApiParameter(name='body_condition', description='Filter by car body_condition', required=False,
+            OpenApiParameter(name='color', description='Filter by car color.', required=False, type=str),
+            OpenApiParameter(name='transmission', description='Filter by car transmission.', required=False, type=str),
+            OpenApiParameter(name='body_condition', description='Filter by car body condition.', required=False,
                              type=str),
-            OpenApiParameter(name='city', description='Filter by car city',
-                             required=False, type=str,
+            OpenApiParameter(name='city', description='Filter by car city.', required=False, type=str, examples=[
+                OpenApiExample('Example 1', summary='Filter for all cities',
+                               description='If we don\'t need to filter by city', value='همه شهر ها'),
+                OpenApiExample('Example 2', summary='Filter by "اصفهان" in cities', description='', value='اصفهان')
+            ]),
+            OpenApiParameter(name='order_by', description='Sort data.', required=False, type=str, examples=[
+                OpenApiExample('Example 1', summary='Sort by newest', description='Sort data from newest to oldest',
+                               value="جدیدترین"),
+                OpenApiExample('Example 2', summary='Sort by oldest', description='Sort data from oldest to newest',
+                               value="قدیمی ترین"),
+                OpenApiExample('Example 3', summary='Sort by highest price',
+                               description='Sort data by highest price first', value="گران ترین"),
+                OpenApiExample('Example 4', summary='Sort by lowest price',
+                               description='Sort data by lowest price first', value="ارزان ترین"),
+                OpenApiExample('Example 5', summary='Sort by kilometer (low to high)',
+                               description='Sort data by kilometer (low to high)', value="کم کار کرده ترین"),
+                OpenApiExample('Example 6', summary='Sort by kilometer (high to low)',
+                               description='Sort data by kilometer (high to low)', value='زیاد کار کرده ترین'),
+                OpenApiExample('Example 7', summary='Sort by year (new to old)',
+                               description='Sort data by year (new to old)', value="نو ترین"),
+                OpenApiExample('Example 8', summary='Sort by year (old to new)',
+                               description='Sort data by year (old to new)', value="کهنه ترین"),
+            ]),
+            OpenApiParameter(name='price', type=str, description='Filter by price range (format: "min,max").',
                              examples=[
-                                 OpenApiExample(
-                                     'Example 1',
-                                     summary='Filter for all cities',
-                                     description='if we dont need to filter by city',
-                                     value='همه شهر ها'
-                                 ),
-                                 OpenApiExample(
-                                     'Example 2',
-                                     summary='filter by"اصفهان" in cities ',
-                                     description='',
-                                     value='اصفهان'
-                                 ),
-                             ]
-                             ),
-            OpenApiParameter(name='order_by', description='sort data',
-                             required=False, type=str,
+                                 OpenApiExample('Example 1',
+                                                summary='Filter for ads with prices between 5000 and 10000',
+                                                description='Use price_min and price_max', value='5000,10000')
+                             ]),
+            OpenApiParameter(name='kilometer', type=str, description='Filter by kilometer range (format: "min,max").',
                              examples=[
-                                 OpenApiExample(
-                                     'Example 1',
-                                     summary='sort bu newest',
-                                     description='it will sort data from newest',
-                                     value="جدیدترین"
-                                 ), OpenApiExample(
-                                     'Example 2',
-                                     summary='sort bu oldest',
-                                     description='it will sort data from oldest',
-                                     value="قدیمی ترین"
-                                 ), OpenApiExample(
-                                     'Example 3',
-                                     summary='sort bu highest_price',
-                                     description='it will sort data from newest',
-                                     value="گران ترین"
-                                 ),
-                                 OpenApiExample(
-                                     'Example 4',
-                                     summary='sort bu lowest_price',
-                                     description='it will sort data from lowest_price',
-                                     value="ارزان ترین"
-                                 ),
-                                 OpenApiExample(
-                                     'Example 5',
-                                     summary='sort bu kilometer(low to high)',
-                                     description='it will sort data from kilometer(low to high)',
-                                     value="کم کار کرده ترین"
-                                 ), OpenApiExample(
-                                     'Example 6',
-                                     summary='sort bu kilometer(high to low )',
-                                     description='it will sort data from kilometer(high to low )',
-                                     value='زیاد کار رده ترین'
-                                 ), OpenApiExample(
-                                     'Example 7',
-                                     summary='sort bu year(new to old)',
-                                     description='it will sort data from year(new to old)',
-                                     value="نو ترین"
-                                 ),
-                                 OpenApiExample(
-                                     'Example 8',
-                                     summary='sort bu year(old to new )',
-                                     description='it will sort data from year(old to new )',
-                                     value="کهنه ترین"
-                                 ),
-
-                             ]
-                             ),
-            OpenApiParameter(
-                name='price',
-                type=str,
-                description='Filter by price range (format: "min,max").',
-                examples=[
-                    OpenApiExample(
-                        'Example 1',
-                        summary='Filter for ads with prices between 5000 and 10000',
-                        description='you should use price_min and price_max',
-                        value='5000,10000'
-                    ),
-                ]
-            ),
-            OpenApiParameter(
-                name='kilometer',
-                type=str,
-                description='Filter by kilometer range (format: "min,max").',
-                examples=[
-                    OpenApiExample(
-                        'Example 1',
-                        summary='Filter for ads with kilometers between 10000 and 50000',
-                        description='you should use kilometer_min and kilometer_max',
-                        value='10000,50000'
-                    ),
-                ]
-            ),
-            OpenApiParameter(
-                name='year',
-                type=str,
-                description='Filter by year range (format: "min,max").',
-                examples=[
-                    OpenApiExample(
-                        'Example 1',
-                        summary='Filter for ads from years 2015 to 2020',
-                        description='you should use year_min and year_max',
-                        value='2015,2020'
-                    ),
-                ]
-            ),
-
-        ],
+                                 OpenApiExample('Example 1',
+                                                summary='Filter for ads with kilometers between 10000 and 50000',
+                                                description='Use kilometer_min and kilometer_max', value='10000,50000')
+                             ]),
+            OpenApiParameter(name='year', type=str, description='Filter by year range (format: "min,max").', examples=[
+                OpenApiExample('Example 1', summary='Filter for ads from years 2015 to 2020',
+                               description='Use year_min and year_max', value='2015,2020')
+            ]),
+            OpenApiParameter(name='tire_condition', description='Filter by tire condition.', required=False, type=str,
+                             examples=[
+                                 OpenApiExample('Example 1', summary='New tires',
+                                                description='Filter cars with new tires', value='new'),
+                                 OpenApiExample('Example 2', summary='Good condition tires',
+                                                description='Filter cars with good condition tires', value='good'),
+                                 OpenApiExample('Example 3', summary='Worn tires',
+                                                description='Filter cars with worn tires', value='worn'),
+                             ]),
+            OpenApiParameter(name='upholstery_condition', description='Filter by upholstery condition.', required=False,
+                             type=str, examples=[
+                    OpenApiExample('Example 1', summary='Leather upholstery',
+                                   description='Filter cars with leather upholstery', value='leather'),
+                    OpenApiExample('Example 2', summary='No upholstery', description='Filter cars without upholstery',
+                                   value='none'),
+                    OpenApiExample('Example 3', summary='Fabric upholstery',
+                                   description='Filter cars with fabric upholstery', value='fabric'),
+                ]),
+            OpenApiParameter(name='sale_or_rent', description='Filter by sale or rent.', required=False, type=str,
+                             examples=[
+                                 OpenApiExample('Example 1', summary='For sale',
+                                                description='Filter cars that are for sale', value='sale'),
+                                 OpenApiExample('Example 2', summary='For rent',
+                                                description='Filter cars that are for rent', value='rent'),
+                             ]),
+        ]
 
     )
     def list(self, request, *args, **kwargs):
@@ -369,6 +335,15 @@ class ExhibitionViewSet(viewsets.ModelViewSet):
     queryset = Exhibition.objects.filter(is_deleted=False)
     serializer_class = ExhibitionSerializer
     permission_classes = [IsOwnerOrReadOnly]
+
+    def get_permissions(self):
+        permission_classes = self.permission_classes
+
+        if self.action in ["retrieve"]:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsOwnerOrReadOnly]
+        return [permission() for permission in permission_classes]
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
