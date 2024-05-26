@@ -22,4 +22,4 @@ class CarFilter(FilterSet):
 class ExhibitionFilter(FilterSet):
     class Meta:
         model = Exhibition
-        fields = ["city"]
+        fields = ["city", "sells_chinese_cars", "sells_foreign_cars", "sells_domestic_cars"]

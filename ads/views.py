@@ -1,16 +1,19 @@
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
+
 from ads.filter import CarFilter, ExhibitionFilter
 from ads.search_indexes import CarIndex, ExhibitionIndex
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
-from account.permisions import IsOwnerOrReadOnly
-from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer
-from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo
+from account.permisions import IsOwnerOrReadOnly,IsOwnerOfCar
+from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import generics
 
-
+# from rest_framework.exceptions import PermissionDenied
 class AdViewSets(viewsets.ModelViewSet):
     queryset = Car.objects.filter(status="active")
     serializer_class = AdSerializer
@@ -147,6 +150,7 @@ class AdViewSets(viewsets.ModelViewSet):
                     ),
                 ]
             ),
+
             OpenApiParameter(
                 name='year',
                 type=str,
@@ -186,7 +190,7 @@ class AdViewSets(viewsets.ModelViewSet):
             queryset = queryset.order_by('year')
 
         modified_get = request.GET.copy()
-        if not modified_get.get("city"):
+        if not modified_get.get("city") and  request.user.is_authenticated:
             modified_get["city"] = self.request.user.profile.city
         if modified_get.get("city") == "همه شهر ها":
             del modified_get["city"]
@@ -403,6 +407,12 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
         description="Search for ads based on various filters.",
         parameters=[
             OpenApiParameter(name='city', description='Filter by car city.', required=False, type=str),
+            OpenApiParameter(name='sells_chinese_cars', description='Filter by exhibitions selling Chinese cars.',
+                             required=False, type=bool),
+            OpenApiParameter(name='sells_foreign_cars', description='Filter by exhibitions selling foreign cars.',
+                             required=False, type=bool),
+            OpenApiParameter(name='sells_domestic_cars', description='Filter by exhibitions selling domestic cars.',
+                             required=False, type=bool),
 
         ],
 
@@ -475,3 +485,60 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
 class LatestVideosList(generics.ListAPIView):
     queryset = ExhibitionVideo.objects.all().order_by('-uploaded_at')
     serializer_class = ExhibitionVideoSerializer
+
+class ExhibitionVideoViewSet(viewsets.ModelViewSet):
+    queryset = ExhibitionVideo.objects.all()
+    serializer_class = ExhibitionVideoSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        exhibition_id = self.kwargs.get('exhibition_pk')
+        if exhibition_id:
+            return self.queryset.filter(exhibition_id=exhibition_id)
+        return self.queryset
+
+    def create(self, request, *args, **kwargs):
+        exhibition_id = self.kwargs.get('exhibition_pk')
+        if not Exhibition.objects.filter(id=exhibition_id).exists():
+            return Response({'error': 'Exhibition not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Update the request data to include the exhibition_id
+        request.data['exhibition'] = exhibition_id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+
+class ImageViewSet(viewsets.ModelViewSet):
+    queryset = Image.objects.all()
+    serializer_class = ImageSerializer
+    permission_classes = [IsAuthenticated,IsOwnerOfCar]
+
+    def get_queryset(self):
+        car_id = self.kwargs.get('car_pk')
+        if car_id:
+            return self.queryset.filter(ad_id=car_id)
+        return self.queryset
+
+    def create(self, request, *args, **kwargs):
+        car_id = self.kwargs.get('car_pk')
+        car =Car.objects.filter(id=car_id)
+
+        if not car.exists():
+            return Response({'error': 'Car not found'}, status=status.HTTP_404_NOT_FOUND)
+        if car.first().user != request.user:
+            return Response({"error":"you are not allowed "},status=status.HTTP_403_FORBIDDEN)
+
+        request.data['ad'] = car_id
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
