@@ -16,11 +16,15 @@ class CarModelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class ImageSerializer(serializers.ModelSerializer):
+class AdImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = ("id", "image")
 
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = '__all__'
 
 class FeatureSerializer(serializers.ModelSerializer):
     class Meta:
@@ -28,15 +32,18 @@ class FeatureSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
-class ExhibitionVideoSerializer(serializers.ModelSerializer):
+class ExhibitionVideoSerializerReadOnly(serializers.ModelSerializer):
     class Meta:
         model = ExhibitionVideo
         exclude = ["exhibition"]
-
+class ExhibitionVideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExhibitionVideo
+        fields = '__all__'
 
 class AdSerializer(serializers.ModelSerializer):
     # autocomplete = serializers.SerializerMethodField()
-    images = ImageSerializer(many=True, read_only=False, required=False)
+    images = AdImageSerializer(many=True, read_only=False, required=False)
     features = FeatureSerializer(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)
     brand = serializers.CharField(max_length=255)
@@ -47,7 +54,7 @@ class AdSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def get_images(self, obj):
-        serializer = ImageSerializer(instance=obj.images.all(), many=True, )
+        serializer = AdImageSerializer(instance=obj.images.all(), many=True, )
         return serializer.data
 
     # def get_autocomplete(self, obj):
@@ -103,7 +110,7 @@ class AdSerializer(serializers.ModelSerializer):
 
 
 class ExhibitionSerializer(serializers.ModelSerializer):
-    videos = ExhibitionVideoSerializer(many=True, read_only=False, required=False)
+    videos = ExhibitionVideoSerializerReadOnly(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)
     cars = serializers.SerializerMethodField(read_only=True, required=False)
 
@@ -171,7 +178,7 @@ class ExhibitionSerializer(serializers.ModelSerializer):
         return representation
 
     def get_videos(self, obj):
-        serializer = ExhibitionVideoSerializer(instance=obj.videos.all(), many=True, )
+        serializer = ExhibitionVideoSerializerReadOnly(instance=obj.videos.all(), many=True, )
         return serializer.data
 
     def get_cars(self, obj):

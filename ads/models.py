@@ -26,6 +26,10 @@ class Exhibition(models.Model):
     social_media_links = models.TextField(blank=True, default=dict, verbose_name="لینک‌های شبکه‌های اجتماعی")
     logo = models.ImageField(upload_to='exhibition_logos', blank=True, verbose_name="لوگو", null=True, )
 
+    sells_chinese_cars = models.BooleanField(default=False, verbose_name="فروش ماشین‌های چینی")
+    sells_foreign_cars = models.BooleanField(default=False, verbose_name="فروش ماشین‌های خارجی")
+    sells_domestic_cars = models.BooleanField(default=False, verbose_name="فروش ماشین‌های داخلی")
+
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
     view_count = models.PositiveIntegerField(default=0)
