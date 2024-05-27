@@ -12,7 +12,7 @@ from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import generics
-
+from rest_framework.views import APIView
 
 # from rest_framework.exceptions import PermissionDenied
 class AdViewSets(viewsets.ModelViewSet):
