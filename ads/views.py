@@ -1,17 +1,18 @@
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.response import Response
 from ads.filter import CarFilter, ExhibitionFilter
 from ads.search_indexes import CarIndex, ExhibitionIndex
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
-from account.permisions import IsOwnerOrReadOnly,IsOwnerOfCar
-from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer
-from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image
+from account.permisions import IsOwnerOrReadOnly, IsOwnerOfCar
+from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer,BrandSerializer,CarModelSerializer
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image,Brand,CarModel
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import generics
+
 
 # from rest_framework.exceptions import PermissionDenied
 class AdViewSets(viewsets.ModelViewSet):
@@ -190,7 +191,7 @@ class AdViewSets(viewsets.ModelViewSet):
             queryset = queryset.order_by('year')
 
         modified_get = request.GET.copy()
-        if not modified_get.get("city") and  request.user.is_authenticated:
+        if not modified_get.get("city") and request.user.is_authenticated:
             modified_get["city"] = self.request.user.profile.city
         if modified_get.get("city") == "همه شهر ها":
             del modified_get["city"]
@@ -486,6 +487,7 @@ class LatestVideosList(generics.ListAPIView):
     queryset = ExhibitionVideo.objects.all().order_by('-uploaded_at')
     serializer_class = ExhibitionVideoSerializer
 
+
 class ExhibitionVideoViewSet(viewsets.ModelViewSet):
     queryset = ExhibitionVideo.objects.all()
     serializer_class = ExhibitionVideoSerializer
@@ -519,7 +521,7 @@ class ExhibitionVideoViewSet(viewsets.ModelViewSet):
 class ImageViewSet(viewsets.ModelViewSet):
     queryset = Image.objects.all()
     serializer_class = ImageSerializer
-    permission_classes = [IsAuthenticated,IsOwnerOfCar]
+    permission_classes = [IsAuthenticated, IsOwnerOfCar]
 
     def get_queryset(self):
         car_id = self.kwargs.get('car_pk')
@@ -529,12 +531,12 @@ class ImageViewSet(viewsets.ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         car_id = self.kwargs.get('car_pk')
-        car =Car.objects.filter(id=car_id)
+        car = Car.objects.filter(id=car_id)
 
         if not car.exists():
             return Response({'error': 'Car not found'}, status=status.HTTP_404_NOT_FOUND)
         if car.first().user != request.user:
-            return Response({"error":"you are not allowed "},status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": "you are not allowed "}, status=status.HTTP_403_FORBIDDEN)
 
         request.data['ad'] = car_id
         serializer = self.get_serializer(data=request.data)
@@ -542,3 +544,26 @@ class ImageViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+class BrandModelsView(APIView):
+    @extend_schema(
+        description="get models from brands example ,you should enter a json with "
+                    "a key of 'brands' that get a list of brands ",
+        request={
+            "application/json": {
+                "type": "object",
+            },
+        }, )
+    def post(self, request):
+        brands = request.data.get('brands', [])
+        queryset = CarModel.objects.filter(brand__name__in=brands)
+        serializer = CarModelSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+class BrandListView(generics.ListAPIView):
+    serializer_class = BrandSerializer
+    queryset = Brand.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
