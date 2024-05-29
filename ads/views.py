@@ -6,13 +6,15 @@ from ads.search_indexes import CarIndex, ExhibitionIndex
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly, IsOwnerOfCar
-from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer,BrandSerializer,CarModelSerializer
-from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image,Brand,CarModel
+from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer, \
+    BrandSerializer, CarModelSerializer
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image, Brand, CarModel
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework import generics
 from rest_framework.views import APIView
+
 
 # from rest_framework.exceptions import PermissionDenied
 class AdViewSets(viewsets.ModelViewSet):
@@ -252,8 +254,9 @@ class AdViewSets(viewsets.ModelViewSet):
         serializer = AdSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.validated_data["user"] = request.user
-            serializer.save()
-            return Response({"response": " your ad was successfully created", }, status.HTTP_201_CREATED)
+            csr = serializer.save()
+            return Response({"response": " your ad was successfully created", "data": csr.data},
+                            status.HTTP_201_CREATED)
         return Response({"response": serializer.errors})
 
     @extend_schema(
@@ -544,6 +547,7 @@ class ImageViewSet(viewsets.ModelViewSet):
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+
 class BrandModelsView(APIView):
     @extend_schema(
         description="get models from brands example ,you should enter a json with "
@@ -558,6 +562,7 @@ class BrandModelsView(APIView):
         queryset = CarModel.objects.filter(brand__name__in=brands)
         serializer = CarModelSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class BrandListView(generics.ListAPIView):
     serializer_class = BrandSerializer
