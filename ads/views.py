@@ -255,7 +255,7 @@ class AdViewSets(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.validated_data["user"] = request.user
             csr = serializer.save()
-            return Response({"response": " your ad was successfully created", "data": csr.data},
+            return Response({"response": " your ad was successfully created", "data": csr},
                             status.HTTP_201_CREATED)
         return Response({"response": serializer.errors})
 
