@@ -25,7 +25,6 @@ cycler==0.12.1
 Cython==3.0.8
 daphne==4.0.0
 Django==4.2.10
-django-admin-persian-fonts
 django-celery-beat==2.6.0
 django-celery-results==2.5.1
 django-filter==23.5

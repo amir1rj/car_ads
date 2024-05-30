@@ -25,7 +25,6 @@ INSTALLED_APPS = [
     'daphne',
     "haystack",
     'drf_spectacular',
-    "admin_persian",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
