@@ -9,4 +9,4 @@ RUN pip install -r requirements.txt
 ENV DJANGO_SETTINGS_MODULE=car_ads.settings
 
 COPY . /source
-CMD ["python","manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8000", "car_ads.asgi:application"]

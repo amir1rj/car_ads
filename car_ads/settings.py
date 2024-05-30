@@ -81,7 +81,7 @@ TEMPLATES = [
     },
 ]
 ASGI_APPLICATION = "car_ads.asgi.application"
-WSGI_APPLICATION = 'car_ads.wsgi.application'
+# WSGI_APPLICATION = 'car_ads.wsgi.application'
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
