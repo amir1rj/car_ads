@@ -21,10 +21,12 @@ class AdImageSerializer(serializers.ModelSerializer):
         model = Image
         fields = ("id", "image")
 
+
 class ImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = '__all__'
+
 
 class FeatureSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,14 +34,25 @@ class FeatureSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
+class ExhibitionSerializerReadOnly(serializers.ModelSerializer):
+    class Meta:
+        model = Exhibition
+        fields = ['company_name']
+
+
 class ExhibitionVideoSerializerReadOnly(serializers.ModelSerializer):
     class Meta:
         model = ExhibitionVideo
         exclude = ["exhibition"]
+
+
 class ExhibitionVideoSerializer(serializers.ModelSerializer):
+    exhibition = ExhibitionSerializerReadOnly(read_only=True)
+
     class Meta:
         model = ExhibitionVideo
         fields = '__all__'
+
 
 class AdSerializer(serializers.ModelSerializer):
     # autocomplete = serializers.SerializerMethodField()
