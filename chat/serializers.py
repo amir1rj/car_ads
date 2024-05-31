@@ -15,6 +15,7 @@ class MessageSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['__str__', 'content', 'timestamp']
 
+
 class ChatSerializer(serializers.ModelSerializer):
     profile = serializers.SerializerMethodField()
 

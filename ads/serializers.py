@@ -61,7 +61,7 @@ class AdSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField("username", read_only=True)
     brand = serializers.CharField(max_length=255)
     model = serializers.CharField(max_length=255)
-
+    email = serializers.EmailField(source='user.profile.email', read_only=True)
     class Meta:
         model = Car
         fields = "__all__"
