@@ -91,36 +91,8 @@ services:
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-  wordpress:
-    image: wordpress:latest
-    container_name: wordpress
-    environment:
-      WORDPRESS_DB_HOST: wordpress_db:3306
-      WORDPRESS_DB_USER: root
-      WORDPRESS_DB_PASSWORD: your_db_password
-      WORDPRESS_DB_NAME: wordpress
-    ports:
-      - "8080:80"
-    networks:
-      - car_ads
-    restart: always
-
-  wordpress_db:
-    image: mysql:5.7
-    container_name: wordpress_db
-    environment:
-      MYSQL_ROOT_PASSWORD: your_db_password
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: root
-      MYSQL_PASSWORD: your_db_password
-    volumes:
-      - wordpress_db_data:/var/lib/mysql
-    networks:
-      - car_ads
-    restart: always
 networks:
   car_ads:
 
 volumes:
   postgres_data:
-  wordpress_db_data:
