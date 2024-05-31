@@ -112,8 +112,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: your_db_password
       MYSQL_DATABASE: wordpress
-      MYSQL_USER: root
-      MYSQL_PASSWORD: your_db_password
     ports:
       - "3306:3306"
     volumes:
