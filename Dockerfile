@@ -6,7 +6,8 @@ COPY requirements.txt /source
 
 RUN pip install -U pipD
 RUN pip install -r requirements.txt
+RUN pip install uvicorn
 ENV DJANGO_SETTINGS_MODULE=car_ads.settings
 
 COPY . /source
-CMD ["python","manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["sh", "-c", "python manage.py migrate && uvicorn car_ads.asgi:application --host 0.0.0.0 --port 8000"]
