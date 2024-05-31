@@ -76,7 +76,6 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
   nginx:
     container_name: nginx
     command: nginx -g 'daemon off;'
