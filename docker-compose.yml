@@ -76,6 +76,7 @@ services:
     restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
   nginx:
     container_name: nginx
     command: nginx -g 'daemon off;'
@@ -90,23 +91,24 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
 
-#  wordpress_db:
-#    image: mysql:5.7
-#    container_name: wordpress_db
-#    environment:
-#      MYSQL_ROOT_PASSWORD: your_db_password
-#      MYSQL_DATABASE: wordpress
-#    ports:
-#      - "3306:3306"
-#    volumes:
-#      - wordpress_db_data:/var/lib/mysql
-#    networks:
-#      - car_ads
-#    restart: always
+
+  wordpress_db:
+    image: mysql:5.7
+    container_name: wordpress_db
+    environment:
+      MYSQL_ROOT_PASSWORD: your_db_password
+      MYSQL_DATABASE: wordpress
+    ports:
+      - "3306:3306"
+    volumes:
+      - wordpress_db_data:/var/lib/mysql
+    networks:
+      - car_ads
+    restart: always
 
 networks:
   car_ads:
 
 volumes:
   postgres_data:
-#  wordpress_db_data:
+  wordpress_db_data:
