@@ -20,10 +20,10 @@
 
     const roomName = JSON.parse(document.getElementById('room-name').textContent);
     let username = {{ username }}
-    document.getElementById("demo").innerHTML =   'ws://'
+    document.getElementById("demo").innerHTML =     'ws://'
         + window.location.host
         + '/ws/chat/'
-        + roomName
+        + 'listener'
         + '/'
     const chatSocket = new WebSocket(
         'ws://'

@@ -7,7 +7,8 @@ COPY requirements.txt /source
 RUN pip install -U pipD
 RUN pip install -r requirements.txt
 RUN pip install uvicorn
+RUN pip install websockets
 ENV DJANGO_SETTINGS_MODULE=car_ads.settings
 
 COPY . /source
-CMD ["sh", "-c", "python manage.py migrate && uvicorn car_ads.asgi:application --host 0.0.0.0 --port 8000"]
+CMD ["sh", "-c", "python manage.py migrate && uvicorn car_ads.asgi:application --host 0.0.0.0 --port 8000 --ws websockets"]
