@@ -54,16 +54,15 @@ def room(request, room_name):
 #         return queryset.filter(users=request.user)
 
 
-class ListRoomsAPIView(generics.ListAPIView):
+class ListRoomsAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    queryset = Chat.objects.all()
-    serializer_class = ChatSerializer
 
-    def get_serializer_context(self):
-        return {"request": self.request}
+    def get(self, request, *args, **kwargs):
+        chats = Chat.objects.filter(users=request.user)
 
-    def get_queryset(self):
-        return self.queryset.filter(users=self.request.user)
+        serializer = ChatSerializer(chats, many=True, context={"request": request})
+
+        return Response(serializer.data)
 
 
 class LeaveRoomAPIView(APIView):
