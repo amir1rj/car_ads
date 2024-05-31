@@ -83,7 +83,6 @@ services:
     image: nginx:latest
     depends_on:
       - main
-      - wordpress
     networks:
       - car_ads
     ports:
