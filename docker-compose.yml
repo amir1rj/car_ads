@@ -93,7 +93,7 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf
 
   wordpress:
-    image: wordpress:latest
+    build: ./wordpress
     container_name: wordpress
     environment:
       WORDPRESS_DB_HOST: wordpress_db:3306
@@ -104,6 +104,8 @@ services:
       - "8080:80"
     networks:
       - car_ads
+    volumes:
+      - wordpress_data:/var/www/html
     restart: always
 
   wordpress_db:
@@ -125,4 +127,5 @@ networks:
 
 volumes:
   postgres_data:
+  wordpress_data:
   wordpress_db_data:
