@@ -114,6 +114,8 @@ services:
       MYSQL_DATABASE: wordpress
       MYSQL_USER: root
       MYSQL_PASSWORD: your_db_password
+    ports:
+      - "3306:3306"
     volumes:
       - wordpress_db_data:/var/lib/mysql
     networks:
