@@ -1,6 +1,7 @@
 version: '3.9'
 
 services:
+
   redis:
     image: "redis:latest"
     ports:
@@ -52,7 +53,7 @@ services:
 
   main:
     build: .
-    command: sh -c "python manage.py migrate && uvicorn car_ads.asgi:application --host 0.0.0.0 --port 8000 --ws websockets"
+    command:  sh -c "python manage.py migrate && uvicorn car_ads.asgi:application --host 0.0.0.0 --port 8000 --ws websockets"
     container_name: car_ads_container
     volumes:
       - .:/source/
@@ -90,26 +91,8 @@ services:
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./fastcgi-php.conf:/etc/nginx/snippets/fastcgi-php.conf
-
-
-  wordpress_db:
-    image: mysql:5.7
-    container_name: wordpress_db
-    environment:
-      MYSQL_ROOT_PASSWORD: your_db_password
-      MYSQL_DATABASE: wordpress
-    ports:
-      - "3306:3306"
-    volumes:
-      - wordpress_db_data:/var/lib/mysql
-    networks:
-      - car_ads
-    restart: always
-
 networks:
   car_ads:
 
 volumes:
   postgres_data:
-  wordpress_db_data:
