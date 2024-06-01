@@ -3,8 +3,8 @@ define('DB_NAME', 'wordpress');
 define('DB_USER', 'root');
 define('DB_PASSWORD', 'your_db_password');
 define('DB_HOST', 'wordpress_db:3306');
-define('WP_HOME', 'http://127.0.0.1/blog');
-define('WP_SITEURL', 'http://127.0.0.1/blog');
+define('WP_HOME', 'http://dolox.ir/blog');
+define('WP_SITEURL', 'http://dolox.ir/blog');
 
 // دیگر تنظیمات مورد نیاز وردپرس...
 
