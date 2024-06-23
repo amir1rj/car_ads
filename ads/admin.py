@@ -24,8 +24,8 @@ class CarAdmin(admin.ModelAdmin):
         '__str__', 'price', "created_at",
         'is_promoted', 'status', "view_count", "created_at",
     ]
-    list_filter = ['brand', 'model', 'fuel_type', 'status']
-    search_fields = ['year', 'description', ]
+    list_filter = ['is_promoted','status','fuel_type']
+    search_fields = ['year', 'description',"brand","model" ]
     inlines = [ImageInline, FeatureInline]
     list_editable = ["is_promoted", "status", ]
     actions = ["make_ads_active", "make_ads_inactive"]
@@ -37,7 +37,7 @@ class CarAdmin(admin.ModelAdmin):
             'fields': ('car_type', 'brand', 'model', 'promoted_model', 'year', 'kilometer', 'body_type', 'color',
                        'color_description', 'fuel_type','upholstery_condition','tire_condition')
         }),
-        ('ماشین سواری(اختیاری)', {
+        ('ماشین سواری', {
             'fields': ('transmission', 'body_condition', 'chassis_condition')
         }),
         ('ماشین سنگین (اختیاری)', {

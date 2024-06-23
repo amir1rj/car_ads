@@ -507,11 +507,10 @@ class ExhibitionVideoViewSet(viewsets.ModelViewSet):
         if not Exhibition.objects.filter(id=exhibition_id).exists():
             return Response({'error': 'Exhibition not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Update the request data to include the exhibition_id
-        request.data['exhibition'] = exhibition_id
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
+        exhibition = Exhibition.objects.get(id=exhibition_id)
+        serializer.save(exhibition=exhibition)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):

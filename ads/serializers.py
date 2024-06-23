@@ -60,7 +60,7 @@ class AdSerializer(serializers.ModelSerializer):
     features = FeatureSerializer(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)
     brand = serializers.CharField(max_length=255)
-    model = serializers.CharField(max_length=255)
+    model = serializers.CharField(max_length=255,required=False)
     email = serializers.EmailField(source='user.profile.email', read_only=True)
     class Meta:
         model = Car
@@ -78,10 +78,13 @@ class AdSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def create(self, validated_data):
-
+        if not validated_data.get("model") and not validated_data.get("promoted_model"):
+            raise serializers.ValidationError({"model": "This field is required."})
         brand = Brand.objects.get(name=validated_data.get('brand'))
-        model = CarModel.objects.get(title=validated_data.get('model'), brand=brand)
-        validated_data['brand'], validated_data["model"] = brand, model
+        if validated_data.get("model"):
+            model = CarModel.objects.get(title=validated_data.get('model'), brand=brand)
+            validated_data["model"] = model
+        validated_data['brand'] = brand
         request = self.context["request"]
         if request.user.is_authenticated:
             validated_data["user"] = request.user
