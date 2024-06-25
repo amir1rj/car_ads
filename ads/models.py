@@ -108,7 +108,7 @@ class Car(models.Model):
     exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE, verbose_name="نمایشگاه", related_name="cars",
                                    null=True, blank=True)
     description = models.TextField(verbose_name="توضیحات")
-    price = models.PositiveIntegerField(verbose_name="قیمت")
+    price = models.PositiveIntegerField(verbose_name="قیمت",null=True,blank=True)
     is_negotiable = models.BooleanField(default=True, verbose_name="قابل مذاکره")
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
@@ -116,14 +116,13 @@ class Car(models.Model):
                                     default="sale")
     # general information of car
     car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
-    brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند", blank=True, null=True)
-    model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True, blank=True)
+    brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند", null=True)
+    model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True)
     # optional
     promoted_model = models.CharField(max_length=255, verbose_name="مدل پیشنهادی ", null=True, blank=True)
-    tire_condition = models.CharField(max_length=255, choices=TIRE_CONDITION_CHOICES, verbose_name="وضعیت لاستیک",
-                                      blank=True, null=True)
+    tire_condition = models.CharField(max_length=255, choices=TIRE_CONDITION_CHOICES, verbose_name="وضعیت لاستیک", null=True , blank=True)
     upholstery_condition = models.CharField(max_length=255, choices=UPHOLSTERY_CONDITION_CHOICES,
-                                            verbose_name="وضعیت مبلمان", null=True, blank=True)
+                blank=True,                             verbose_name="وضعیت مبلمان", null=True)
 
     year = models.PositiveIntegerField(verbose_name="سال ساخت")
     kilometer = models.PositiveIntegerField(verbose_name="کارکرد کیلومتر")
@@ -133,13 +132,12 @@ class Car(models.Model):
     color_description = models.TextField(blank=True, null=True, verbose_name="جزعیات رنگ شدگی")
     fuel_type = models.CharField(max_length=255, choices=FUEL_TYPE_CHOICES, verbose_name="نوع سوخت")
     # Passenger Cars optional
-    transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس", null=True,
-                                    blank=True)
+    transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس", null=True
+         , blank=True       )
     body_condition = models.CharField(
         max_length=255,
         choices=BODY_CONDITION_CHOICES,
-        null=True,
-        blank=True,
+        null=True, blank=True,
         verbose_name="وضعیت بدنه خودرو",
     )
     chassis_condition = models.CharField(

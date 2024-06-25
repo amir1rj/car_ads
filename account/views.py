@@ -128,9 +128,15 @@ class ProfileViewSets(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     permission_classes = [IsOwnerOrReadOnly]
     queryset = Profile.objects.all()
+    def retrieve(self, request, pk=None, **kwargs):
+        user = User.objects.get(id=pk)
+        instance = Profile.objects.get(id=user.profile.id)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def update(self, request, pk=None, **kwargs):
-        instance = Profile.objects.get(id=pk)
+        user = User.objects.get(id=pk)
+        instance = Profile.objects.get(id=user.profile.id)
         self.check_object_permissions(request, instance)
         data = request.data.copy()
         # حذف ایمیل از داده ها در صورت عدم تغییر
