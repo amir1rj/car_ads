@@ -25,7 +25,7 @@ class CarAdmin(admin.ModelAdmin):
         'is_promoted', 'status', "view_count", "created_at",
     ]
     list_filter = ['is_promoted','status','fuel_type']
-    search_fields = ['year', 'description',"brand","model" ]
+    search_fields = ['year', 'description' ]
     inlines = [ImageInline, FeatureInline]
     list_editable = ["is_promoted", "status", ]
     actions = ["make_ads_active", "make_ads_inactive"]
