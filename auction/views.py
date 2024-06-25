@@ -10,17 +10,19 @@ from rest_framework.permissions import IsAuthenticated
 
 class AuctionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AuctionSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [ReadOnly]
 
     def get_permissions(self):
-        if self.action == "retrieve":
-            self.permission_classes = [IsAuthenticated]
+        permission_classes = self.permission_classes
+
+        if self.action in ["retrieve"]:
+            permission_classes = [IsAuthenticated]
         else:
-            self.permission_classes = [AllowAny]
-        return super().get_permissions()
+            permission_classes = [ReadOnly]
+        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
-        return Auction.objects.filter(status='ACTIVE', end_date__gt=datetime.now(timezone.utc))
+        return Auction.get_active_auctions(self)
 
     @extend_schema(
         description="Search for ads based on various filters.",
