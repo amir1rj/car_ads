@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 from auction.filter import AuctionFilter
+from auction.pagination import AuctionPagination
 from auction.serializers import AuctionSerializer
 from auction.models import Auction
 from account.permisions import ReadOnly
@@ -11,6 +12,7 @@ from rest_framework.permissions import IsAuthenticated
 class AuctionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AuctionSerializer
     permission_classes = [ReadOnly]
+    pagination_class = AuctionPagination
 
     def get_permissions(self):
         permission_classes = self.permission_classes
