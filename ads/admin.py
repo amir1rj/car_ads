@@ -65,6 +65,7 @@ class CarAdmin(admin.ModelAdmin):
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
     list_display = ["name"]
+    search_fields = ["name"]
 
 
 @admin.register(CarModel)
