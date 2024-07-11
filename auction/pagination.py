@@ -3,7 +3,7 @@ from rest_framework.response import Response
 
 
 class AuctionPagination(PageNumberPagination):
-    page_size = 10  # Number of items per page for Auction list
+    page_size = 12  # Number of items per page for Auction list
 
     def get_paginated_response(self, data):
         return Response({
