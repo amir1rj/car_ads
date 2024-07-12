@@ -1,3 +1,4 @@
+from django.db.models import Min, Max
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -571,3 +572,11 @@ class BrandListView(generics.ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CarPriceStatsView(APIView):
+
+    def get(self, request, format=None):
+        min_price = Car.objects.aggregate(Min('price'))['price__min']
+        max_price = Car.objects.aggregate(Max('price'))['price__max']
+        return Response({'min_price': min_price, 'max_price': max_price}, status=status.HTTP_200_OK)
