@@ -108,7 +108,7 @@ class Car(models.Model):
     exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE, verbose_name="نمایشگاه", related_name="cars",
                                    null=True, blank=True)
     description = models.TextField(verbose_name="توضیحات")
-    price = models.PositiveIntegerField(verbose_name="قیمت",null=True,blank=True)
+    price = models.PositiveIntegerField(verbose_name="قیمت", null=True, blank=True)
     is_negotiable = models.BooleanField(default=True, verbose_name="قابل مذاکره")
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
@@ -120,9 +120,10 @@ class Car(models.Model):
     model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True)
     # optional
     promoted_model = models.CharField(max_length=255, verbose_name="مدل پیشنهادی ", null=True, blank=True)
-    tire_condition = models.CharField(max_length=255, choices=TIRE_CONDITION_CHOICES, verbose_name="وضعیت لاستیک", null=True , blank=True)
+    tire_condition = models.CharField(max_length=255, choices=TIRE_CONDITION_CHOICES, verbose_name="وضعیت لاستیک",
+                                      null=True, blank=True)
     upholstery_condition = models.CharField(max_length=255, choices=UPHOLSTERY_CONDITION_CHOICES,
-                blank=True,                             verbose_name="وضعیت مبلمان", null=True)
+                                            blank=True, verbose_name="وضعیت مبلمان", null=True)
 
     year = models.PositiveIntegerField(verbose_name="سال ساخت")
     kilometer = models.PositiveIntegerField(verbose_name="کارکرد کیلومتر")
@@ -133,7 +134,7 @@ class Car(models.Model):
     fuel_type = models.CharField(max_length=255, choices=FUEL_TYPE_CHOICES, verbose_name="نوع سوخت")
     # Passenger Cars optional
     transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس", null=True
-         , blank=True       )
+                                    , blank=True)
     body_condition = models.CharField(
         max_length=255,
         choices=BODY_CONDITION_CHOICES,
@@ -230,3 +231,15 @@ class View(models.Model):
 
     class Meta:
         unique_together = ('user', 'ad')
+
+
+class SelectedBrand(models.Model):
+    brand = models.ManyToManyField(to=Brand, related_name='selected_brand', verbose_name='برند های منتخب')
+    parent = models.CharField(max_length=40, choices=BRAND_PARENT_CHOICES, verbose_name='دسته بندی برند')
+
+    def __str__(self):
+        return self.brand
+
+    class Meta:
+        verbose_name = "برند منتخب"
+        verbose_name_plural = "برند های منتخب"
