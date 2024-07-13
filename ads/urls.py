@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from ads.views import AdViewSets, ExhibitionViewSet, LatestVideosList, ExhibitionVideoViewSet, ImageViewSet, \
-    BrandModelsView, BrandListView, CarPriceStatsView
+    BrandModelsView, BrandListView, CarPriceStatsView, SelectedBrandListView
 from django.urls import path, include
 
 app_name = 'ad'
@@ -18,6 +18,7 @@ urlpatterns = [
     path('latest-videos/', LatestVideosList.as_view(), name='latest_videos_list'),
     path('exhibitions/<int:exhibition_pk>/', include(exhibition_video_router.urls)),
     path('cars/<int:car_pk>/', include(car_image_router.urls)),
+    path('selected-brands/<str:parent>/', SelectedBrandListView.as_view(), name='selected-brands-list'),
 ]
 router.register(r'', AdViewSets, basename='main')
 

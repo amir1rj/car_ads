@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition
+from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand
 from ads.utils import is_not_mobile_phone
 from rest_framework import exceptions
 
@@ -8,6 +8,14 @@ class BrandSerializer(serializers.ModelSerializer):
     class Meta:
         model = Brand
         fields = "__all__"
+
+
+class SelectedBrandSerializer(serializers.ModelSerializer):
+    brand = BrandSerializer(many=True)
+
+    class Meta:
+        model = SelectedBrand
+        fields = ['parent', 'brand']
 
 
 class CarModelSerializer(serializers.ModelSerializer):
@@ -60,8 +68,9 @@ class AdSerializer(serializers.ModelSerializer):
     features = FeatureSerializer(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)
     brand = serializers.CharField(max_length=255)
-    model = serializers.CharField(max_length=255,required=False)
+    model = serializers.CharField(max_length=255, required=False)
     email = serializers.EmailField(source='user.profile.email', read_only=True)
+
     class Meta:
         model = Car
         fields = "__all__"

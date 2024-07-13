@@ -8,8 +8,8 @@ from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly, IsOwnerOfCar
 from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer, \
-    BrandSerializer, CarModelSerializer
-from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image, Brand, CarModel
+    BrandSerializer, CarModelSerializer, SelectedBrandSerializer
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image, Brand, CarModel, SelectedBrand
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
@@ -580,3 +580,16 @@ class CarPriceStatsView(APIView):
         min_price = Car.objects.aggregate(Min('price'))['price__min']
         max_price = Car.objects.aggregate(Max('price'))['price__max']
         return Response({'min_price': min_price, 'max_price': max_price}, status=status.HTTP_200_OK)
+
+
+class SelectedBrandListView(generics.ListAPIView):
+    serializer_class = SelectedBrandSerializer
+
+    def get_queryset(self):
+        parent = self.kwargs['parent']
+        return SelectedBrand.objects.filter(parent=parent)
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({kwargs['parent']: serializer.data})
