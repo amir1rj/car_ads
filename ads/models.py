@@ -238,7 +238,7 @@ class SelectedBrand(models.Model):
     parent = models.CharField(max_length=40, choices=BRAND_PARENT_CHOICES, verbose_name='دسته بندی برند')
 
     def __str__(self):
-        return self.brand
+        return self.brand.name
 
     class Meta:
         verbose_name = "برند منتخب"
