@@ -81,6 +81,7 @@ class ExhibitionAdmin(admin.ModelAdmin):
     inlines = [VideoInline]
 
 
+
 @admin.register(SelectedBrand)
 class SelectedBrandAdmin(admin.ModelAdmin):
     list_display = ["brand", 'parent']
