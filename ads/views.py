@@ -582,14 +582,8 @@ class CarPriceStatsView(APIView):
         return Response({'min_price': min_price, 'max_price': max_price}, status=status.HTTP_200_OK)
 
 
-class SelectedBrandListView(generics.ListAPIView):
-    serializer_class = SelectedBrandSerializer
-
-    def get_queryset(self):
-        parent = self.kwargs['parent']
-        return SelectedBrand.objects.filter(parent=parent)
-
-    def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response({kwargs['parent']: serializer.data})
+class SelectedBrandListView(APIView):
+    def get(self, request, parent, *args, **kwargs):
+        brands = Brand.objects.filter(selected_brand__parent=parent)
+        serializer = BrandSerializer(brands, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
