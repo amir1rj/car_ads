@@ -234,7 +234,7 @@ class View(models.Model):
 
 
 class SelectedBrand(models.Model):
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='selected_brand', verbose_name='برند منتخب')
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE,null=True, related_name='selected_brand', verbose_name='برند منتخب')
     parent = models.CharField(max_length=40, choices=BRAND_PARENT_CHOICES, verbose_name='دسته بندی برند')
 
     def __str__(self):
