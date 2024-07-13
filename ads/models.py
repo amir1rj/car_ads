@@ -234,12 +234,12 @@ class View(models.Model):
 
 
 class SelectedBrand(models.Model):
-    brand = models.ManyToManyField(to=Brand, related_name='selected_brand', verbose_name='برند های منتخب')
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, related_name='selected_brand', verbose_name='برند منتخب')
     parent = models.CharField(max_length=40, choices=BRAND_PARENT_CHOICES, verbose_name='دسته بندی برند')
 
     def __str__(self):
-        return self.brand.name
+        return f"{self.brand.name} - {self.parent}"
 
     class Meta:
         verbose_name = "برند منتخب"
-        verbose_name_plural = "برند های منتخب"
+        verbose_name_plural = "برندهای منتخب"

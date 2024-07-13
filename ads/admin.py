@@ -82,16 +82,9 @@ class ExhibitionAdmin(admin.ModelAdmin):
 
 
 class SelectedBrandAdmin(admin.ModelAdmin):
-    list_display = ('parent',)
+    list_display = ('brand', 'parent')
     search_fields = ('parent', 'brand__name')
     list_filter = ('parent', 'brand')
-
-    def get_brands(self, obj):
-        return ", ".join([brand.name for brand in obj.brand.all()])
-
-    get_brands.short_description = 'برند های منتخب'
-
-    list_display = ('parent', 'get_brands')
 
 
 admin.site.register(SelectedBrand, SelectedBrandAdmin)
