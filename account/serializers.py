@@ -84,9 +84,10 @@ class CreateUserSerializer(serializers.Serializer):
             }
         )
         message_info = {
-            'message': f"Account Verification!\nYour OTP for BotoApp is {otp}.\nIt expires in 5 minutes",
+            'message': otp,
             'phone': user.phone
         }
+
         send_sms.delay(message_info)
 
         return user
