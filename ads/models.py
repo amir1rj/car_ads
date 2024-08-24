@@ -19,18 +19,21 @@ class Exhibition(models.Model):
     # موقعیت مکانی (اختیاری)
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
-
     address = models.CharField(max_length=255, blank=True, verbose_name="آدرس")
 
     # اطلاعات توصیفی
     description = models.TextField(blank=True, verbose_name="توضیحات")
-
     social_media_links = models.TextField(blank=True, default=dict, verbose_name="لینک‌های شبکه‌های اجتماعی")
     logo = models.ImageField(upload_to='exhibition_logos', blank=True, verbose_name="لوگو", null=True, )
+
+    sells_chinese_cars = models.BooleanField(default=False, verbose_name="فروش ماشین‌های چینی")
+    sells_foreign_cars = models.BooleanField(default=False, verbose_name="فروش ماشین‌های خارجی")
+    sells_domestic_cars = models.BooleanField(default=False, verbose_name="فروش ماشین‌های داخلی")
 
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="تاریخ به‌روزرسانی")
     view_count = models.PositiveIntegerField(default=0)
+    is_deleted = models.BooleanField(default=False)
 
     def __str__(self):
         return self.company_name
@@ -105,17 +108,22 @@ class Car(models.Model):
     exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE, verbose_name="نمایشگاه", related_name="cars",
                                    null=True, blank=True)
     description = models.TextField(verbose_name="توضیحات")
-    price = models.PositiveIntegerField(verbose_name="قیمت")
+    price = models.PositiveIntegerField(verbose_name="قیمت", null=True, blank=True)
     is_negotiable = models.BooleanField(default=True, verbose_name="قابل مذاکره")
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
-
+    sale_or_rent = models.CharField(max_length=255, choices=SALE_OR_RENT_CHOICES, verbose_name="فروشی یا اجاره‌ای",
+                                    default="sale")
     # general information of car
     car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
-    brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند", blank=True, null=True)
-    model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True, blank=True)
+    brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند", null=True)
+    model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True)
     # optional
     promoted_model = models.CharField(max_length=255, verbose_name="مدل پیشنهادی ", null=True, blank=True)
+    tire_condition = models.CharField(max_length=255, choices=TIRE_CONDITION_CHOICES, verbose_name="وضعیت لاستیک",
+                                      null=True, blank=True)
+    upholstery_condition = models.CharField(max_length=255, choices=UPHOLSTERY_CONDITION_CHOICES,
+                                            blank=True, verbose_name="وضعیت مبلمان", null=True)
 
     year = models.PositiveIntegerField(verbose_name="سال ساخت")
     kilometer = models.PositiveIntegerField(verbose_name="کارکرد کیلومتر")
@@ -125,19 +133,19 @@ class Car(models.Model):
     color_description = models.TextField(blank=True, null=True, verbose_name="جزعیات رنگ شدگی")
     fuel_type = models.CharField(max_length=255, choices=FUEL_TYPE_CHOICES, verbose_name="نوع سوخت")
     # Passenger Cars optional
-    transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس", null=True,
-                                    blank=True)
+    transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس", null=True
+                                    , blank=True)
     body_condition = models.CharField(
         max_length=255,
         choices=BODY_CONDITION_CHOICES,
-        null=True,
-        blank=True,
+        null=True, blank=True,
         verbose_name="وضعیت بدنه خودرو",
     )
     chassis_condition = models.CharField(
         max_length=255, choices=CHASSIS_CONDITION_CHOICES, default=("سالم", "سالم"), verbose_name="وضعیت شاسی",
         null=True, blank=True
     )
+
     # Heavyweights optional
     weight = models.IntegerField(verbose_name="وزن ماشین", null=True, blank=True)
     payload_capacity = models.IntegerField(verbose_name="حداکثر وزن ناخالص مجاز وسیله نقلیه", null=True, blank=True)
@@ -223,3 +231,15 @@ class View(models.Model):
 
     class Meta:
         unique_together = ('user', 'ad')
+
+
+class SelectedBrand(models.Model):
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE,null=True, related_name='selected_brand', verbose_name='برند منتخب')
+    parent = models.CharField(max_length=40, choices=BRAND_PARENT_CHOICES, verbose_name='دسته بندی برند')
+
+    def __str__(self):
+        return f"{self.brand.name} - {self.parent}"
+
+    class Meta:
+        verbose_name = "برند منتخب"
+        verbose_name_plural = "برندهای منتخب"

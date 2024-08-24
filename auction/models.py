@@ -2,11 +2,17 @@ from datetime import timezone, datetime
 from django.db import models
 from account.utils import PROVINCES
 
+AUCTION_TYPES = [
+    ('متفرقه', 'متفرقه'),
+    ('ملک', 'ملک'),
+    ('ماشین', 'ماشین'),
+]
+
 
 class Auction(models.Model):
     title = models.CharField(max_length=255, verbose_name="عنوان")
     description = models.TextField(blank=True, verbose_name="توضیحات")
-    image = models.ImageField(upload_to='auction_images', verbose_name="تصویر")
+    image = models.ImageField(upload_to='auction_images', verbose_name="تصویر", null=True, blank=True)
     start_date = models.DateField(verbose_name="تاریخ شروع")
     end_date = models.DateField(verbose_name="تاریخ پایان")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")
@@ -16,6 +22,7 @@ class Auction(models.Model):
                               verbose_name="وضعیت")
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
+    auction_type = models.CharField(max_length=255, choices=AUCTION_TYPES, verbose_name="نوع مزایده", default="ماشین")
 
     class Meta:
         verbose_name_plural = "مزایده ها"

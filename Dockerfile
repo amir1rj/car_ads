@@ -6,6 +6,8 @@ COPY requirements.txt /source
 
 RUN pip install -U pipD
 RUN pip install -r requirements.txt
+RUN pip install uvicorn
+RUN pip install websockets
 ENV DJANGO_SETTINGS_MODULE=car_ads.settings
 
 COPY . /source

@@ -11,9 +11,10 @@ from account.utils import TokenEnum, is_admin_user, IsAdmin
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
+from rest_framework.views import APIView
 
 
-@method_decorator(ratelimit(key='ip', rate='3/h', block=True, method='POST'), name='post')
+@method_decorator(ratelimit(key='ip', rate='20/h', block=True, method='POST'), name='post')
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = JWTSerializer
 
@@ -65,7 +66,7 @@ class AuthViewSets(viewsets.GenericViewSet):
             permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
-    @method_decorator(ratelimit(key='ip', rate='3/h', method='POST'))
+    @method_decorator(ratelimit(key='ip', rate='20/h', method='POST'))
     @action(
         methods=["POST"],
         detail=False,
@@ -79,7 +80,7 @@ class AuthViewSets(viewsets.GenericViewSet):
         serializer.save()
         return Response({"success": True, "message": "Account Verification Successful"}, status=200)
 
-    @method_decorator(ratelimit(key='user', rate='3/h', method='POST'))
+    @method_decorator(ratelimit(key='user', rate='20/h', method='POST'))
     @action(
         methods=["POST"],
         detail=False,
@@ -114,7 +115,7 @@ class PasswordChangeView(viewsets.GenericViewSet):
     serializer_class = PasswordChangeSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(ratelimit(key='user', rate='3/h', method='POST'))
+    @method_decorator(ratelimit(key='user', rate='20/h', method='POST'))
     def create(self, request, *args, **kwargs):
         context = {"request": request}
         serializer = self.get_serializer(data=request.data, context=context)
@@ -127,9 +128,15 @@ class ProfileViewSets(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     permission_classes = [IsOwnerOrReadOnly]
     queryset = Profile.objects.all()
+    def retrieve(self, request, pk=None, **kwargs):
+        user = User.objects.get(id=pk)
+        instance = Profile.objects.get(id=user.profile.id)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
 
     def update(self, request, pk=None, **kwargs):
-        instance = Profile.objects.get(id=pk)
+        user = User.objects.get(id=pk)
+        instance = Profile.objects.get(id=user.profile.id)
         self.check_object_permissions(request, instance)
         data = request.data.copy()
         # حذف ایمیل از داده ها در صورت عدم تغییر
@@ -146,5 +153,14 @@ class ProfileViewSets(viewsets.ModelViewSet):
         if serializer.is_valid():
             serializer.validated_data["user"] = request.user
             serializer.save()
-            return Response({"response": "done"},status= status.HTTP_201_CREATED)
+            return Response({"response": "done"}, status=status.HTTP_201_CREATED)
         return Response({"response": serializer.errors})
+
+
+class GetUserId(APIView):
+    def get(self, request):
+        user = request.user
+        if user.is_authenticated:
+            return Response({"id": request.user.id}, status=status.HTTP_200_OK)
+        else:
+            return Response("you should login first", status=status.HTTP_401_UNAUTHORIZED)

@@ -23,6 +23,7 @@ BODY_TYPE_CHOICES = (
     ("SUV", "SUV"),
     (" وانت", "وانت"),
     ("کامیون", "کامیون"),
+    ("تجهیزات", "تجهیزات"),
 )
 CAR_TYPE_CHOICES = (
     ("سواری", "سواری"),
@@ -30,14 +31,34 @@ CAR_TYPE_CHOICES = (
     ("اتوبوس", "اتوبوس"),
     ("ماشین‌آلات سنگین", "ماشین‌آلات سنگین"),
 )
-BODY_CONDITION_CHOICES=(
+BODY_CONDITION_CHOICES = (
     ("رنگ شدگی", "رنگ شدگی"),
     ("بی خط و خش", "بی خط و خش"),
     ("دور رنگ", "دور رنگ"),
     ("تمام رنگ", "تمام رنگ"),
 )
 
-CHASSIS_CONDITION_CHOICES=(
+CHASSIS_CONDITION_CHOICES = (
     ("ضربه خورده", "ضربه خورده"),
     ("سالم", "سالم")
 )
+TIRE_CONDITION_CHOICES = [
+    ('new', 'نو'),
+    ('good', 'خوب'),
+    ('worn', 'فرسوده'),
+]
+
+UPHOLSTERY_CONDITION_CHOICES = [
+    ('leather', 'روکش چرم'),
+    ('none', 'بدون روکش'),
+    ('fabric', 'روکش پارچه ای'),
+]
+SALE_OR_RENT_CHOICES = [
+    ('sale', 'فروشی'),
+    ('rent', 'اجاره‌ای'),
+]
+BRAND_PARENT_CHOICES = [
+    ("سواری", "سواری"),
+    ("موتورسیکلت", "موتورسیکلت"),
+    ("ماشین‌آلات سنگین", "ماشین‌آلات سنگین"),
+]

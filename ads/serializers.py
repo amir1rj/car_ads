@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition
+from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand
 from ads.utils import is_not_mobile_phone
 from rest_framework import exceptions
 
@@ -10,16 +10,30 @@ class BrandSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class SelectedBrandSerializer(serializers.ModelSerializer):
+    brand = BrandSerializer()
+
+    class Meta:
+        model = SelectedBrand
+        fields = ['parent', 'brand']
+
+
 class CarModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = CarModel
         fields = "__all__"
 
 
-class ImageSerializer(serializers.ModelSerializer):
+class AdImageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Image
         fields = ("id", "image")
+
+
+class ImageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Image
+        fields = '__all__'
 
 
 class FeatureSerializer(serializers.ModelSerializer):
@@ -28,26 +42,41 @@ class FeatureSerializer(serializers.ModelSerializer):
         fields = ("id", "name")
 
 
-class ExhibitionVideoSerializer(serializers.ModelSerializer):
+class ExhibitionSerializerReadOnly(serializers.ModelSerializer):
+    class Meta:
+        model = Exhibition
+        fields = ['company_name']
+
+
+class ExhibitionVideoSerializerReadOnly(serializers.ModelSerializer):
     class Meta:
         model = ExhibitionVideo
         exclude = ["exhibition"]
 
 
+class ExhibitionVideoSerializer(serializers.ModelSerializer):
+    exhibition = ExhibitionSerializerReadOnly(read_only=True)
+
+    class Meta:
+        model = ExhibitionVideo
+        fields = '__all__'
+
+
 class AdSerializer(serializers.ModelSerializer):
     # autocomplete = serializers.SerializerMethodField()
-    images = ImageSerializer(many=True, read_only=False, required=False)
+    images = AdImageSerializer(many=True, read_only=False, required=False)
     features = FeatureSerializer(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)
     brand = serializers.CharField(max_length=255)
-    model = serializers.CharField(max_length=255)
+    model = serializers.CharField(max_length=255, required=False)
+    email = serializers.EmailField(source='user.profile.email', read_only=True)
 
     class Meta:
         model = Car
         fields = "__all__"
 
     def get_images(self, obj):
-        serializer = ImageSerializer(instance=obj.images.all(), many=True, )
+        serializer = AdImageSerializer(instance=obj.images.all(), many=True, )
         return serializer.data
 
     # def get_autocomplete(self, obj):
@@ -58,10 +87,13 @@ class AdSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def create(self, validated_data):
-
+        if not validated_data.get("model") and not validated_data.get("promoted_model"):
+            raise serializers.ValidationError({"model": "This field is required."})
         brand = Brand.objects.get(name=validated_data.get('brand'))
-        model = CarModel.objects.get(title=validated_data.get('model'), brand=brand)
-        validated_data['brand'], validated_data["model"] = brand, model
+        if validated_data.get("model"):
+            model = CarModel.objects.get(title=validated_data.get('model'), brand=brand)
+            validated_data["model"] = model
+        validated_data['brand'] = brand
         request = self.context["request"]
         if request.user.is_authenticated:
             validated_data["user"] = request.user
@@ -103,7 +135,7 @@ class AdSerializer(serializers.ModelSerializer):
 
 
 class ExhibitionSerializer(serializers.ModelSerializer):
-    videos = ExhibitionVideoSerializer(many=True, read_only=False, required=False)
+    videos = ExhibitionVideoSerializerReadOnly(many=True, read_only=False, required=False)
     user = serializers.SlugRelatedField("username", read_only=True)
     cars = serializers.SerializerMethodField(read_only=True, required=False)
 
@@ -171,7 +203,7 @@ class ExhibitionSerializer(serializers.ModelSerializer):
         return representation
 
     def get_videos(self, obj):
-        serializer = ExhibitionVideoSerializer(instance=obj.videos.all(), many=True, )
+        serializer = ExhibitionVideoSerializerReadOnly(instance=obj.videos.all(), many=True, )
         return serializer.data
 
     def get_cars(self, obj):

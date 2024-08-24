@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition
+from .models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand
 from .tasks import toggle_ad_status
 
 
@@ -24,20 +24,20 @@ class CarAdmin(admin.ModelAdmin):
         '__str__', 'price', "created_at",
         'is_promoted', 'status', "view_count", "created_at",
     ]
-    list_filter = ['brand', 'model', 'fuel_type', 'status']
-    search_fields = ['year', 'description', ]
+    list_filter = ['is_promoted', 'status', 'fuel_type']
+    search_fields = ['year', 'description']
     inlines = [ImageInline, FeatureInline]
     list_editable = ["is_promoted", "status", ]
     actions = ["make_ads_active", "make_ads_inactive"]
     fieldsets = (
         ('اطلاعات کلی اگهی', {
-            'fields': ('user', 'exhibition', 'description', 'price', 'is_negotiable', 'city')
+            'fields': ('user', 'exhibition', 'description', 'price', 'is_negotiable', 'city', 'sale_or_rent')
         }),
         ('اطلاعات خودرو', {
             'fields': ('car_type', 'brand', 'model', 'promoted_model', 'year', 'kilometer', 'body_type', 'color',
-                       'color_description', 'fuel_type')
+                       'color_description', 'fuel_type', 'upholstery_condition', 'tire_condition')
         }),
-        ('ماشین سواری(اختیاری)', {
+        ('ماشین سواری', {
             'fields': ('transmission', 'body_condition', 'chassis_condition')
         }),
         ('ماشین سنگین (اختیاری)', {
@@ -47,7 +47,7 @@ class CarAdmin(admin.ModelAdmin):
             'fields': ('phone_numbers', 'address')
         }),
         ('وضعیت اگهی', {
-            'fields': ('status',  'is_promoted', 'view_count')
+            'fields': ('status', 'is_promoted', 'view_count')
         }),
     )
 
@@ -65,6 +65,7 @@ class CarAdmin(admin.ModelAdmin):
 @admin.register(Brand)
 class BrandAdmin(admin.ModelAdmin):
     list_display = ["name"]
+    search_fields = ["name"]
 
 
 @admin.register(CarModel)
@@ -78,3 +79,12 @@ class ExhibitionAdmin(admin.ModelAdmin):
     list_filter = ['city']
     search_fields = ["company_name", "user", "address"]
     inlines = [VideoInline]
+
+
+class SelectedBrandAdmin(admin.ModelAdmin):
+    list_display = ('brand', 'parent')
+    search_fields = ('parent', 'brand__name')
+    list_filter = ('parent', 'brand')
+
+
+admin.site.register(SelectedBrand, SelectedBrandAdmin)

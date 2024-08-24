@@ -14,7 +14,10 @@ SECRET_KEY = 'django-insecure-!80r%debx%y5qj^6v*4!lvi@ssp5@zv4^*a&&r4s^9ho-jy09)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["82.115.18.105","dolox.ir","localhost"]
+ALLOWED_HOSTS = ["82.115.18.105","dolox.ir","localhost","admin.dolox.ir"]
+# ALLOWED_HOSTS = ["127.0.0.1"]
+
+CSRF_TRUSTED_ORIGINS = ["https://dolox.ir","http://82.115.18.105:9000","https://admin.dolox.ir"]
 
 # Application definition
 
@@ -22,7 +25,6 @@ INSTALLED_APPS = [
     'daphne',
     "haystack",
     'drf_spectacular',
-    "admin_persian",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -55,6 +57,8 @@ MIDDLEWARE = [
     'django_user_agents.middleware.UserAgentMiddleware',
 ]
 
+
+
 ROOT_URLCONF = 'car_ads.urls'
 
 TEMPLATES = [
@@ -74,7 +78,7 @@ TEMPLATES = [
     },
 ]
 ASGI_APPLICATION = "car_ads.asgi.application"
-WSGI_APPLICATION = 'car_ads.wsgi.application'
+# WSGI_APPLICATION = 'car_ads.wsgi.application'
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
@@ -86,7 +90,7 @@ CHANNEL_LAYERS = {
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
+#
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -100,7 +104,12 @@ DATABASES = {
         },
     }
 }
-
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
@@ -163,7 +172,7 @@ SPECTACULAR_SETTINGS = {
 
     # OTHER SETTINGS
 }
-PAGINATION_PAGE_SIZE = 3
+PAGINATION_PAGE_SIZE = 6
 LOCALE_PATHS = os.path.join(BASE_DIR, 'locale/'),
 
 SIMPLE_JWT = {
