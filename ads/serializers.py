@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand
+from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand, Favorite
 from ads.utils import is_not_mobile_phone
 from rest_framework import exceptions
 
@@ -88,7 +88,7 @@ class AdSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         if not validated_data.get("model") and not validated_data.get("promoted_model"):
-            raise serializers.ValidationError({"model": "This field is required."})
+            raise serializers.ValidationError({"model": "این فیلد اجباری است"})
         brand = Brand.objects.get(name=validated_data.get('brand'))
         if validated_data.get("model"):
             model = CarModel.objects.get(title=validated_data.get('model'), brand=brand)
@@ -98,16 +98,16 @@ class AdSerializer(serializers.ModelSerializer):
         if request.user.is_authenticated:
             validated_data["user"] = request.user
         else:
-            raise exceptions.AuthenticationFailed("anonymous user is not allowed to create a new add")
+            raise exceptions.AuthenticationFailed("کاربران ناشناس اجازه قبت اگهی ندارند")
         images_data = validated_data.pop('images', [])
         features_data = validated_data.pop('features', [])
         if not validated_data["user"].roles == "EXHIBITOR":
             if validated_data["user"].cars.filter(status="active").count() >= 3:
-                raise serializers.ValidationError("you can not have more than 3 ads")
+                raise serializers.ValidationError("شما نمیتوانید بیشتر از سه اگهی ثبت کنید")
 
         if validated_data["user"].cars.filter(status="pending").exists():
             raise exceptions.NotAcceptable(
-                "Your request is being reviewed. you cant submit another ads until your current one is registered")
+                "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید")
         car = Car.objects.create(**validated_data)
 
         for image_data in images_data:
@@ -154,7 +154,7 @@ class ExhibitionSerializer(serializers.ModelSerializer):
                 phone = is_not_mobile_phone(phone.strip())  # Remove leading/trailing whitespaces
                 if not phone.isdigit():
                     raise serializers.ValidationError(
-                        f"you should only enter numbers not{phone}. (e.g., 2122334567)")
+                        f"کاراکتر غیر مجاز شما فقط میتوانید اعداد وارد کنید{phone}. (e.g., 2122334567)")
                 # Mobile number check (optional, can be removed if not needed)
 
                 validated_phones.append(phone)
@@ -165,7 +165,7 @@ class ExhibitionSerializer(serializers.ModelSerializer):
         name = attrs.get('company_name')
         if name is not None:
             if Exhibition.objects.filter(company_name=name).exists():
-                raise serializers.ValidationError("your company name is already exists")
+                raise serializers.ValidationError("نام نمایشگاه شما قبلا ثبت شده است")
         return attrs
 
     def create(self, validated_data):
@@ -209,3 +209,9 @@ class ExhibitionSerializer(serializers.ModelSerializer):
     def get_cars(self, obj):
         car_serializer = AdSerializer(instance=obj.cars.filter(status="active"), many=True)
         return car_serializer.data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = ['car', 'added_on']

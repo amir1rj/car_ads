@@ -46,10 +46,10 @@ class CreateUserSerializer(serializers.Serializer):
         """Validates username format and uniqueness."""
         username_regex = r"^[a-zA-Z0-9_]+$"  # Only letters, numbers, and underscores
         if not re.match(username_regex, value):
-            raise serializers.ValidationError("Username can only contain letters, numbers, and underscores.",
+            raise serializers.ValidationError("نام کاربری میتواند فقط شامل حروف اعداد و ـ باشد",
                                               code="Invalid username")
         if User.objects.filter(username__iexact=value).exists():
-            raise serializers.ValidationError("Username already exists.", "existed username")
+            raise serializers.ValidationError("نام کاربری از قبل وجود دارد", "existed username")
         return value
 
     def validate_password(self, value):
@@ -64,9 +64,9 @@ class CreateUserSerializer(serializers.Serializer):
         cleaned_number = check_phone(strip_number)
         if User.objects.filter(phone_number__iexact=cleaned_number).exists():
             raise serializers.ValidationError(
-                {'phone': 'Phone number already exists'})
+                {'phone': 'شماره تلفن  قبلا ثبت شده است '})
         if User.objects.filter(username__iexact=username).exists():
-            raise serializers.ValidationError({'username': 'Username already exists'})
+            raise serializers.ValidationError({'username': 'نام کاربری از قبل وجود دارد'})
         attrs['phone'] = cleaned_number
         return super().validate(attrs)
 
@@ -105,14 +105,14 @@ class AccountVerificationSerializer(serializers.Serializer):
         if pending_user:
             if not pending_user.is_valid():  # Check token lifespan
                 raise serializers.ValidationError(
-                    {'otp': 'Verification failed. OTP has expired.'})
+                    {'otp': 'کد تایید شما منقضی شده است'})
             attrs['phone'] = mobile
             attrs['password'] = pending_user.password
             attrs['pending_user'] = pending_user
             attrs["username"] = pending_user.username
         else:
             raise serializers.ValidationError(
-                {'otp': 'Verification failed. Invalid OTP or number'})
+                {'otp': 'اهراز هویت ناموفق کد تایید یا شماره تلفن نا معتبر است'})
         return super().validate(attrs)
 
     @transaction.atomic
@@ -135,7 +135,7 @@ class InitiatePasswordResetSerializer(serializers.Serializer):
         user = User.objects.filter(phone_number=cleaned_number, is_active=True).first()
 
         if not user:
-            raise serializers.ValidationError({'phone': 'Phone number not registered.'})
+            raise serializers.ValidationError({'phone': 'حسابی با این شماره همراه وجود ندارد'})
         attrs['phone'] = cleaned_number
         attrs['user'] = user
         return super().validate(attrs)
@@ -153,7 +153,7 @@ class InitiatePasswordResetSerializer(serializers.Serializer):
                 "token": otp,
             }
         )
-
+        # todo should synck with new send sms function
         message_info = {
             'message': f"Password Reset!\nUse {otp} to reset your password.\nIt expires in 5 minutes",
             'phone': phone
@@ -181,13 +181,13 @@ class PasswordChangeSerializer(serializers.Serializer):
     def validate(self, attrs):
         new_password, old_password = attrs.get("new_password"), attrs.get("old_password")
         if old_password == new_password:
-            raise serializers.ValidationError({"new_password": "New password cannot be same as old password."})
+            raise serializers.ValidationError({"new_password": "رمز عبور جدید نمیتواند با رمز عبور قبلی یکسان باشد"})
         return super().validate(attrs)
 
     def validate_old_password(self, value):
         request = self.context["request"]
         if not request.user.check_password(value):
-            raise serializers.ValidationError("Old password is incorrect.")
+            raise serializers.ValidationError("رمز عبور قبلی صحیح نیست")
         return value
 
     def validate_new_password(self, value):
@@ -271,7 +271,7 @@ class ProfileSerializer(serializers.ModelSerializer):
         email = attrs.get('email')
         if email is not None:
             if Profile.objects.filter(email=email).exists():
-                raise serializers.ValidationError("your email is already exists")
+                raise serializers.ValidationError("پروفایل با این ایمیل از قبل موجود است")
         return attrs
 
     def update(self, instance, validated_data):

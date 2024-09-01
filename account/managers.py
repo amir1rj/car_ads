@@ -10,7 +10,7 @@ class BaseUserManager(models.Manager):
         """
         username = username or ""
         if len(username) < 4:
-            raise ValueError(_('username must have at least 4 characters'))
+            raise ValueError(_('نام کاربری باید شامل حداقل چهار کاراکتر باشد'))
         return username.lower()
 
     def get_by_natural_key(self, username):
@@ -24,7 +24,7 @@ class UserManager(BaseUserManager):
         Creates and saves a User with the given username and password.
         """
         if not phone_number:
-            raise ValueError("Users must have an phone number")
+            raise ValueError("شماره تلفن اجباری است")
 
         user = self.model(
 
@@ -40,9 +40,9 @@ class UserManager(BaseUserManager):
         Creates and saves a User with the given username,phone number and password.
         """
         if not data["phone"]:
-            raise ValueError("Users must have a phone number")
+            raise ValueError("شماره تلفن اجباری است")
         if not data['username']:
-            raise ValueError("Users must have a username")
+            raise ValueError("نام کاربری اجباری است")
         user = self.model(
 
             phone_number=data['phone_number'], username=data['username'], verified=True, password=data['password']

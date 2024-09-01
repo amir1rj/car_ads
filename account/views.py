@@ -1,3 +1,4 @@
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -8,17 +9,34 @@ from account.serializers import CreateUserSerializer, ListUserSerializer, Update
     AccountVerificationSerializer, InitiatePasswordResetSerializer, CreatePasswordFromResetOTPSerializer, \
     PasswordChangeSerializer, ProfileSerializer, JWTSerializer
 from account.utils import TokenEnum, is_admin_user, IsAdmin
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.utils.decorators import method_decorator
 from django_ratelimit.decorators import ratelimit
 from rest_framework.views import APIView
 
 
 @method_decorator(ratelimit(key='ip', rate='20/h', block=True, method='POST'), name='post')
+@extend_schema(tags=['Authentication'])
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = JWTSerializer
 
 
+@extend_schema(tags=['Authentication'])
+@method_decorator(ratelimit(key='ip', rate='20/h', method='POST'), name='post')
+class CustomTokenRefreshView(TokenRefreshView):
+    """
+    Custom view for handling token refresh with rate limiting and documentation.
+    """
+    pass
+
+
+@extend_schema_view(
+    list=extend_schema(tags=['Users']),
+    retrieve=extend_schema(tags=['Users']),
+    create=extend_schema(tags=['Users']),
+    partial_update=extend_schema(tags=['Users']),
+    destroy=extend_schema(tags=['Users']),
+)
 class UserViewSets(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = ListUserSerializer
@@ -52,9 +70,14 @@ class UserViewSets(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"success": True, "message": "OTP sent for verification!"}, status=200)
+        return Response({"success": True, "message": "کد تایید با موفقیت ارسال شد"}, status=200)
 
 
+@extend_schema_view(
+    verify_account=extend_schema(tags=['Authentication']),
+    initiate_password_reset=extend_schema(tags=['Authentication']),
+    create_password=extend_schema(tags=['Authentication']),
+)
 class AuthViewSets(viewsets.GenericViewSet):
     """Auth viewSets"""
     serializer_class = UserNameSerializer
@@ -78,7 +101,7 @@ class AuthViewSets(viewsets.GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"success": True, "message": "Account Verification Successful"}, status=200)
+        return Response({"success": True, "message": "حساب شما با موفقیت اهراز هویت شد"}, status=200)
 
     @method_decorator(ratelimit(key='user', rate='20/h', method='POST'))
     @action(
@@ -93,7 +116,7 @@ class AuthViewSets(viewsets.GenericViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response({"success": True,
-                         "message": "Temporary password sent to your mobile!"}, status=200)
+                         "message": "کد تایید به شماره تلفن شما ارسال شد"}, status=200)
 
     @action(methods=['POST'], detail=False, serializer_class=CreatePasswordFromResetOTPSerializer,
             url_path='create-password')
@@ -104,12 +127,16 @@ class AuthViewSets(viewsets.GenericViewSet):
         token: Token = Token.objects.filter(
             token=request.data['otp'], token_type=TokenEnum.PASSWORD_RESET).first()
         if not token or not token.is_valid():
-            return Response({'success': False, 'errors': 'Invalid password reset otp'}, status=400)
+            return Response({'success': False, 'errors': 'کد تایید نا معتبر'}, status=400)
         token.reset_user_password(request.data['new_password'])
         token.delete()
-        return Response({'success': True, 'message': 'Password successfully reset'}, status=status.HTTP_200_OK)
+        return Response({'success': True, 'message': 'رمز عبور شما با موفقیت بروزرسانی شد'}, status=status.HTTP_200_OK)
 
 
+@extend_schema_view(
+    create=extend_schema(tags=['Authentication']),
+
+)
 class PasswordChangeView(viewsets.GenericViewSet):
     '''Allows password change to authenticated user'''
     serializer_class = PasswordChangeSerializer
@@ -121,13 +148,14 @@ class PasswordChangeView(viewsets.GenericViewSet):
         serializer = self.get_serializer(data=request.data, context=context)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"message": "Your password has been updated."}, status.HTTP_200_OK)
+        return Response({'success': True, 'message': 'رمز عبور شما با موفقیت بروزرسانی شد '}, status.HTTP_200_OK)
 
 
 class ProfileViewSets(viewsets.ModelViewSet):
     serializer_class = ProfileSerializer
     permission_classes = [IsOwnerOrReadOnly]
     queryset = Profile.objects.all()
+
     def retrieve(self, request, pk=None, **kwargs):
         user = User.objects.get(id=pk)
         instance = Profile.objects.get(id=user.profile.id)
@@ -139,13 +167,12 @@ class ProfileViewSets(viewsets.ModelViewSet):
         instance = Profile.objects.get(id=user.profile.id)
         self.check_object_permissions(request, instance)
         data = request.data.copy()
-        # حذف ایمیل از داده ها در صورت عدم تغییر
         if data.get('email') == instance.email:
             del request.data['email']
         serializer = ProfileSerializer(data=request.data, partial=True)
         if serializer.is_valid():
             serializer.update(instance=instance, validated_data=serializer.validated_data)
-            return Response({"response": " your profile updated"}, status.HTTP_200_OK)
+            return Response({"response": "پروفایل شما با موفقیت بروزرسانی شد"}, status.HTTP_200_OK)
         return Response({"response": serializer.errors})
 
     def create(self, request, **kwargs):
@@ -163,4 +190,4 @@ class GetUserId(APIView):
         if user.is_authenticated:
             return Response({"id": request.user.id}, status=status.HTTP_200_OK)
         else:
-            return Response("you should login first", status=status.HTTP_401_UNAUTHORIZED)
+            return Response("اطلاعات هویتی یافت نشد", status=status.HTTP_401_UNAUTHORIZED)

@@ -10,7 +10,7 @@ services:
     restart: always
 
   celery_worker:
-    container_name: celery_worker
+    container_name: car_celery_worker
     command: "celery -A car_ads worker -l INFO"
     depends_on:
       - main
@@ -30,7 +30,7 @@ services:
     restart: always
 
   celery_beat:
-    container_name: celery_beat
+    container_name: car_celery_beat
     command: "celery -A car_ads beat -l info"
     build: .
     depends_on:
@@ -64,7 +64,7 @@ services:
     restart: always
 
   postgres:
-    container_name: postgres
+    container_name: car_postgres
     image: postgres:latest
     environment:
       - POSTGRES_DB=car_ads_db
@@ -78,23 +78,23 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  frontend:
-    build:
-      context: ./front
-    container_name: frontend_container
-    ports:
-      - "3000:3000"
-    networks:
-      - car_ads
-    restart: always
+#  frontend:
+#    build:
+#      context: ./front
+#    container_name: frontend_container
+ #   ports:
+  #    - "3000:3000"
+  #  networks:
+ #     - car_ads
+#    restart: always
 
   nginx:
-    container_name: nginx_container
+    container_name: car_nginx_container
     command: nginx -g 'daemon off;'
     image: nginx:latest
     depends_on:
       - main
-      - frontend
+#      - frontend
     networks:
       - car_ads
     ports:

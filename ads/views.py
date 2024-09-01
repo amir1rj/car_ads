@@ -1,23 +1,27 @@
 from django.db.models import Min, Max
-from rest_framework.exceptions import PermissionDenied
+from django.shortcuts import get_object_or_404
+from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
+
 from ads.filter import CarFilter, ExhibitionFilter
 from ads.search_indexes import CarIndex, ExhibitionIndex
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly, IsOwnerOfCar
 from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer, \
-    BrandSerializer, CarModelSerializer, SelectedBrandSerializer
-from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image, Brand, CarModel, SelectedBrand
+    BrandSerializer, CarModelSerializer, SelectedBrandSerializer, FavoriteSerializer
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image, Brand, CarModel, SelectedBrand, Favorite
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
 from rest_framework import generics
 from rest_framework.views import APIView
 
 
 # from rest_framework.exceptions import PermissionDenied
+
 class AdViewSets(viewsets.ModelViewSet):
     queryset = Car.objects.filter(status="active")
     serializer_class = AdSerializer
@@ -370,6 +374,15 @@ class AdViewSets(viewsets.ModelViewSet):
         return self.get_paginated_response(serializer.data)
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['Exhibitions']),
+    retrieve=extend_schema(tags=['Exhibitions']),
+    create=extend_schema(tags=['Exhibitions']),
+    update=extend_schema(tags=['Exhibitions']),
+    partial_update=extend_schema(tags=['Exhibitions']),
+    destroy=extend_schema(tags=['Exhibitions']),
+    search=extend_schema(tags=['Exhibitions']),
+)
 class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
     queryset = Exhibition.objects.all()
     serializer_class = ExhibitionSerializer
@@ -492,6 +505,15 @@ class LatestVideosList(generics.ListAPIView):
     serializer_class = ExhibitionVideoSerializer
 
 
+@extend_schema_view(
+    list=extend_schema(tags=['Exhibitions']),
+    retrieve=extend_schema(tags=['Exhibitions']),
+    update=extend_schema(tags=['Exhibitions']),
+    create=extend_schema(tags=['Exhibitions']),
+    partial_update=extend_schema(tags=['Exhibitions']),
+    destroy=extend_schema(tags=['Exhibitions']),
+
+)
 class ExhibitionVideoViewSet(viewsets.ModelViewSet):
     queryset = ExhibitionVideo.objects.all()
     serializer_class = ExhibitionVideoSerializer
@@ -537,9 +559,9 @@ class ImageViewSet(viewsets.ModelViewSet):
         car = Car.objects.filter(id=car_id)
 
         if not car.exists():
-            return Response({'error': 'Car not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'اگهی پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
         if car.first().user != request.user:
-            return Response({"error": "you are not allowed "}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"error": " شما مجاز به انجام این کار نیستید"}, status=status.HTTP_403_FORBIDDEN)
 
         request.data['ad'] = car_id
         serializer = self.get_serializer(data=request.data)
@@ -586,4 +608,54 @@ class SelectedBrandListView(APIView):
     def get(self, request, parent, *args, **kwargs):
         brands = Brand.objects.filter(selected_brand__parent=parent)
         serializer = BrandSerializer(brands, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class CheckSubmitAddAuthorization(APIView):
+    """check user authorization for submit add"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        user = self.request.user
+        if not user.roles == "EXHIBITOR":
+            if user.cars.filter(status="active").count() > 3:
+                raise ValidationError("شما نمیتوانید بیشتر از سه ماشین ثبت کنید")
+        if user.cars.filter(status="pending").exists():
+            raise ValidationError(
+                "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید")
+        return Response({"success": True, "message": "authorized"}, status=status.HTTP_202_ACCEPTED)
+
+
+@extend_schema_view(
+    add_to_favorites=extend_schema(tags=['Favorites']),
+    remove_from_favorites=extend_schema(tags=['Favorites']),
+    list_favorites=extend_schema(tags=['Favorites']),
+)
+class FavoriteViewSet(GenericViewSet):
+
+    @action(detail=True, methods=['get'], url_path='add')
+    def add_to_favorites(self, request, pk=None):
+        """add car to favorite"""
+        user = request.user
+        car = get_object_or_404(Car, pk=pk)
+        favorite, created = Favorite.objects.get_or_create(user=user, car=car)
+        if created:
+            return Response({"message": "آگهی به لیست علاقه‌مندی‌ها اضافه شد."}, status=status.HTTP_201_CREATED)
+        else:
+            return Response({"message": "این آگهی قبلاً در لیست علاقه‌مندی‌ها موجود بود."}, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=['get'], url_path='remove')
+    def remove_from_favorites(self, request, pk=None):
+        """remove car from favorite"""
+        user = request.user
+        favorite = get_object_or_404(Favorite, user=user, car_id=pk)
+        favorite.delete()
+        return Response({"message": "آگهی از لیست علاقه‌مندی‌ها حذف شد."}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['get'], url_path='list')
+    def list_favorites(self, request):
+        """list of favorite ads of users"""
+        user = request.user
+        favorites = Favorite.objects.filter(user=user)
+        serializer = FavoriteSerializer(favorites, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)

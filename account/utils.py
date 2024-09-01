@@ -90,7 +90,7 @@ def check_phone(value):
     if bool(patter4.match(value)):
         return "0" + value[3:]
 
-    raise serializers.ValidationError(f'{value} is not a valid phone')
+    raise serializers.ValidationError(f'{value} شماره نا معتبر است')
 
 
 def generate_otp() -> int:
@@ -108,7 +108,7 @@ def is_admin_user(user: User) -> bool:
 
 class IsAdmin(permissions.BasePermission):
     """Allows access only to Admin users."""
-    message = "Only Admins are authorized to perform this action."
+    message = "فقط ادمین میتواند این عمل را اجرا کند"
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
@@ -120,9 +120,9 @@ def validate_password_strength(value):
     """Validates password strength."""
 
     if not any(char.isdigit() for char in value):
-        raise serializers.ValidationError("Password must contain at least one digit.", code="easy password")
+        raise serializers.ValidationError("رمز عبور شما باید حداقل  شامل یک عدد باشد", code="easy password")
     if not any(char.islower() for char in value):
-        raise serializers.ValidationError("", code="easy password")
+        raise serializers.ValidationError("رمزعبور شما باید حداقل  شامل یک حرف کوچک باشد", code="easy password")
     if not any(char.isupper() for char in value):
-        raise serializers.ValidationError("رمزعبور شما حداقل باید شامل یک حرف بزرگ باشد", code="easy password")
+        raise serializers.ValidationError("رمزعبور شما باید حداقل شامل یک حرف بزرگ باشد", code="easy password")
     return value

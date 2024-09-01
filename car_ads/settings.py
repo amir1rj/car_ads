@@ -14,10 +14,10 @@ SECRET_KEY = 'django-insecure-!80r%debx%y5qj^6v*4!lvi@ssp5@zv4^*a&&r4s^9ho-jy09)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["82.115.18.105","dolox.ir","localhost","admin.dolox.ir"]
-# ALLOWED_HOSTS = ["127.0.0.1"]
+# ALLOWED_HOSTS = ["82.115.18.105","dolox.ir","localhost","admin.dolox.ir"]
+ALLOWED_HOSTS = ["127.0.0.1"]
 
-CSRF_TRUSTED_ORIGINS = ["https://dolox.ir","http://82.115.18.105:9000","https://admin.dolox.ir"]
+CSRF_TRUSTED_ORIGINS = ["https://dolox.ir", "http://82.115.18.105:9000", "https://admin.dolox.ir"]
 
 # Application definition
 
@@ -56,8 +56,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_user_agents.middleware.UserAgentMiddleware',
 ]
-
-
 
 ROOT_URLCONF = 'car_ads.urls'
 
@@ -149,6 +147,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "media/"
 REST_FRAMEWORK = {
     # YOUR SETTINGS
+    'EXCEPTION_HANDLER': 'account.exceptions.custom_exception_handler',
+
     'DEFAULT_PAGINATION_CLASS': 'ads.pagination.CustomPagination',
     'PAGE_SIZE': 6,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',

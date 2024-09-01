@@ -179,26 +179,40 @@ class Car(models.Model):
         if self.body_condition == 'رنگ شدگی' and not self.color_description:
             raise ValidationError("اگر وضعیت بدنه خودرو رنگ شدگی است، توضیحات رنگ الزامی است.")
         if self.exhibition and not (self.user.roles == "EXHIBITOR"):
-            raise ValidationError("this car could not have exhibition")
+            raise ValidationError("این ماشین را نمیتوان در نمایشگاه ثبت کرد")
         if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
-            raise ValidationError("you must fill brand and model or promoted model")
+            raise ValidationError("شما باید فیلد های برند و مدل یا مدل پیشنهادی را پر کنید")
         if not self.user.roles == "EXHIBITOR":
             if self.user.cars.filter(status="active").count() > 3:
-                raise ValidationError("you can not have more than 3 cars")
+                raise ValidationError("شما نمیتوانید بیشتر از سه ماشین ثبت کنید")
         if self.car_type == 'ماشین‌آلات سنگین' and not (self.weight or self.payload_capacity or self.wheel_number):
-            raise ValidationError("you must fill weight, payload_capacity and wheel_number")
+            raise ValidationError("شما باید مقادیر مربوط به ماشین سنگین را پر کنید")
         return super().save(*args, **kwargs)
 
     def clean(self):
         if (self.body_condition == 'رنگ شدگی') and not self.color_description:
             raise ValidationError("اگر وضعیت بدنه خودرو رنگ شدگی است، توضیحات رنگ الزامی است.")
         if (self.exhibition) and not (self.user.roles == "EXHIBITOR"):
-            raise ValidationError("this car could not have exhibition")
+            raise ValidationError("این ماشین را نمیتوان در نمایشگاه ثبت کرد")
         if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
-            raise ValidationError("you must fill brand and model or promoted model")
+            raise ValidationError("شما باید فیلد های برند و مدل یا مدل پیشنهادی را پر کنید")
         if self.car_type == 'ماشین‌آلات سنگین' and not (self.weight or self.payload_capacity or self.wheel_number):
-            raise ValidationError("you must fill weight, payload_capacity and wheel_number")
+            raise ValidationError("شما باید مقادیر مربوط به ماشین سنگین را پر کنید")
         return super().clean()
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorites')
+    car = models.ForeignKey(Car, on_delete=models.CASCADE, related_name='favorited_by')
+    added_on = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'car')
+        verbose_name = "علاقه‌مندی"
+        verbose_name_plural = "علاقه‌مندی‌ها"
+
+    def __str__(self):
+        return f"{self.user.username} - {self.car.brand.name} {self.car.model.name}"
 
 
 class Image(models.Model):
@@ -234,7 +248,8 @@ class View(models.Model):
 
 
 class SelectedBrand(models.Model):
-    brand = models.ForeignKey(Brand, on_delete=models.CASCADE,null=True, related_name='selected_brand', verbose_name='برند منتخب')
+    brand = models.ForeignKey(Brand, on_delete=models.CASCADE, null=True, related_name='selected_brand',
+                              verbose_name='برند منتخب')
     parent = models.CharField(max_length=40, choices=BRAND_PARENT_CHOICES, verbose_name='دسته بندی برند')
 
     def __str__(self):

@@ -9,6 +9,7 @@ import requests
 API_KEY = "7150623768587371314335626843775455477949473769785655642B456E38554137637A5979456E6143593D"
 
 
+# todo need uncomment
 @shared_task
 def send_sms(message_info):
     token, phone = message_info.get("message"), message_info.get("phone")
@@ -19,8 +20,8 @@ def send_sms(message_info):
         'token': token,
         'template': template
     }
-    response = requests.get(url, params=params)
-    return response.json()
+    # response = requests.get(url, params=params)
+    # return response.json()
 
 
 @shared_task
