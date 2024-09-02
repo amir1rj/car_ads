@@ -632,6 +632,7 @@ class CheckSubmitAddAuthorization(APIView):
     list_favorites=extend_schema(tags=['Favorites']),
 )
 class FavoriteViewSet(GenericViewSet):
+    permission_classes = [IsAuthenticated]
 
     @action(detail=True, methods=['get'], url_path='add')
     def add_to_favorites(self, request, pk=None):
