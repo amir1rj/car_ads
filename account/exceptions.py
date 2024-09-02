@@ -33,7 +33,7 @@ def custom_exception_handler(exc, context):
     elif isinstance(exc, NotAuthenticated):
         custom_response_data = {
             'success': False,
-            'message': 'اطلاعات اهراز هویت یافت نشد'
+            'message': 'اطلاعات احراز هویت یافت نشد'
         }
         return Response(custom_response_data, status=response.status_code)
 

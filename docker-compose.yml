@@ -78,15 +78,15 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-#  frontend:
-#    build:
-#      context: ./front
-#    container_name: frontend_container
- #   ports:
-  #    - "3000:3000"
-  #  networks:
- #     - car_ads
-#    restart: always
+  frontend:
+    build:
+      context: ./front
+    container_name: frontend_container
+    ports:
+      - "3000:3000"
+    networks:
+      - car_ads
+    restart: always
 
   nginx:
     container_name: car_nginx_container
@@ -94,7 +94,7 @@ services:
     image: nginx:latest
     depends_on:
       - main
-#      - frontend
+      - frontend
     networks:
       - car_ads
     ports:

@@ -101,7 +101,7 @@ class AuthViewSets(viewsets.GenericViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response({"success": True, "message": "حساب شما با موفقیت اهراز هویت شد"}, status=200)
+        return Response({"success": True, "message": "حساب شما با موفقیت احراز هویت شد"}, status=200)
 
     @method_decorator(ratelimit(key='user', rate='20/h', method='POST'))
     @action(

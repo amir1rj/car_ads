@@ -112,7 +112,7 @@ class AccountVerificationSerializer(serializers.Serializer):
             attrs["username"] = pending_user.username
         else:
             raise serializers.ValidationError(
-                {'otp': 'اهراز هویت ناموفق کد تایید یا شماره تلفن نا معتبر است'})
+                {'otp': 'احراز هویت ناموفق کد تایید یا شماره تلفن نا معتبر است'})
         return super().validate(attrs)
 
     @transaction.atomic
