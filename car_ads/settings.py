@@ -44,7 +44,7 @@ INSTALLED_APPS = [
     'django_celery_results',
     'django_celery_beat',
     'django_user_agents',
-    'debug_toolbar',
+    # 'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -56,24 +56,24 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django_user_agents.middleware.UserAgentMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
-INTERNAL_IPS = [
-    '127.0.0.1',
-    '172.20.0.4',
-    '172.20.0.1'
-]
-DEBUG_TOOLBAR_CONFIG = {
-    "SHOW_TOOLBAR_CALLBACK": lambda request: True,
-}
-DEBUG_TOOLBAR_PANELS = [
-    'debug_toolbar.panels.sql.SQLPanel',
-    'debug_toolbar.panels.cache.CachePanel',
-    'debug_toolbar.panels.request.RequestPanel',
-    # 'debug_toolbar.panels.time.TimePanel',
-    'debug_toolbar.panels.templates.TemplatesPanel',
-    # سایر پنل‌ها
-]
+# INTERNAL_IPS = [
+#     '127.0.0.1',
+#     '172.20.0.4',
+#     '172.20.0.1'
+# ]
+# DEBUG_TOOLBAR_CONFIG = {
+#     "SHOW_TOOLBAR_CALLBACK": lambda request: True,
+# }
+# DEBUG_TOOLBAR_PANELS = [
+#     'debug_toolbar.panels.sql.SQLPanel',
+#     'debug_toolbar.panels.cache.CachePanel',
+#     'debug_toolbar.panels.request.RequestPanel',
+#     # 'debug_toolbar.panels.time.TimePanel',
+#     'debug_toolbar.panels.templates.TemplatesPanel',
+#     # سایر پنل‌ها
+# ]
 ROOT_URLCONF = 'car_ads.urls'
 
 TEMPLATES = [
