@@ -1,8 +1,7 @@
 from django.db.models import Min, Max
 from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import PermissionDenied, ValidationError
+from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from ads.filter import CarFilter, ExhibitionFilter
@@ -177,38 +176,35 @@ class AdViewSets(viewsets.ModelViewSet):
 
     )
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        order_by = request.query_params.get('order_by')
+        queryset = self.get_queryset().select_related('user__profile', 'brand', 'model').prefetch_related('images',
+                                                                                                          'features')
 
-        if order_by == 'جدیدترین':
-            queryset = queryset.order_by('-created_at')
-        elif order_by == 'قدیمی ترین':
-            queryset = queryset.order_by('created_at')
-        elif order_by == 'گران ترین':
-            queryset = queryset.order_by('-price')
-        elif order_by == 'ارزان ترین':
-            queryset = queryset.order_by('price')
-        elif order_by == "کم کار کرده ترین":
-            queryset = queryset.order_by('kilometer')
-        elif order_by == 'زیاد کار رده ترین':
-            queryset = queryset.order_by('-kilometer')
-        elif order_by == "نو ترین":
-            queryset = queryset.order_by('-year')
-        elif order_by == "کهنه ترین":
-            queryset = queryset.order_by('year')
+        # Filter by city if not provided and user is authenticated
+        city = request.query_params.get('city') or (request.user.is_authenticated and request.user.profile.city)
+        if city and city != "همه شهر ها":
+            queryset = queryset.filter(city=city)
 
-        modified_get = request.GET.copy()
-        if not modified_get.get("city") and request.user.is_authenticated:
-            modified_get["city"] = self.request.user.profile.city
-        if modified_get.get("city") == "همه شهر ها":
-            del modified_get["city"]
-        filter_set = CarFilter(modified_get, queryset=queryset)
-        filtered_queryset = filter_set.qs
+        # Order by specified parameter
+        order_by = {
+            'جدیدترین': '-created_at',
+            'قدیمی ترین': 'created_at',
+            'گران ترین': '-price',
+            'ارزان ترین': 'price',
+            'کم کار کرده ترین': 'kilometer',
+            'زیاد کار رفته ترین': '-kilometer',
+            'نو ترین': '-year',
+            'کهنه ترین': 'year',
+        }.get(request.query_params.get('order_by'), '-created_at')
+
+        queryset = queryset.order_by(order_by)
+        filtered_queryset = self.filter_queryset(queryset)
+
         page = self.paginate_queryset(filtered_queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(page, many=True, context={'request': request})
             return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(filtered_queryset, many=True)
+
+        serializer = self.get_serializer(filtered_queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
     @extend_schema(
@@ -660,3 +656,9 @@ class FavoriteViewSet(GenericViewSet):
         favorites = Favorite.objects.filter(user=user)
         serializer = FavoriteSerializer(favorites, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# class RenewAd(APIView):
+#     def get(self, request, id, *args, **kwargs):
+#         car = get_object_or_404(Car, pk=id)
+#         car.renew()

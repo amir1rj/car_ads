@@ -15,14 +15,12 @@ from django_ratelimit.decorators import ratelimit
 from rest_framework.views import APIView
 
 
-@method_decorator(ratelimit(key='ip', rate='20/h', block=True, method='POST'), name='post')
 @extend_schema(tags=['Authentication'])
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = JWTSerializer
 
 
 @extend_schema(tags=['Authentication'])
-@method_decorator(ratelimit(key='ip', rate='20/h', method='POST'), name='post')
 class CustomTokenRefreshView(TokenRefreshView):
     """
     Custom view for handling token refresh with rate limiting and documentation.
@@ -89,7 +87,6 @@ class AuthViewSets(viewsets.GenericViewSet):
             permission_classes = [AllowAny]
         return [permission() for permission in permission_classes]
 
-    @method_decorator(ratelimit(key='ip', rate='20/h', method='POST'))
     @action(
         methods=["POST"],
         detail=False,
@@ -103,7 +100,6 @@ class AuthViewSets(viewsets.GenericViewSet):
         serializer.save()
         return Response({"success": True, "message": "حساب شما با موفقیت احراز هویت شد"}, status=200)
 
-    @method_decorator(ratelimit(key='user', rate='20/h', method='POST'))
     @action(
         methods=["POST"],
         detail=False,
@@ -142,7 +138,6 @@ class PasswordChangeView(viewsets.GenericViewSet):
     serializer_class = PasswordChangeSerializer
     permission_classes = [IsAuthenticated]
 
-    @method_decorator(ratelimit(key='user', rate='20/h', method='POST'))
     def create(self, request, *args, **kwargs):
         context = {"request": request}
         serializer = self.get_serializer(data=request.data, context=context)

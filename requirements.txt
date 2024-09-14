@@ -101,3 +101,4 @@ Whoosh==2.7.4
 zope.interface==6.1
 kavenegar==1.1.2
 django-cors-headers==4.3.1
+django-debug-toolbar

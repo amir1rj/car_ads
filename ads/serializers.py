@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand, Favorite
+from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand, Favorite, Color
 from ads.utils import is_not_mobile_phone
 from rest_framework import exceptions
 
@@ -63,74 +63,122 @@ class ExhibitionVideoSerializer(serializers.ModelSerializer):
 
 
 class AdSerializer(serializers.ModelSerializer):
-    # autocomplete = serializers.SerializerMethodField()
-    images = AdImageSerializer(many=True, read_only=False, required=False)
-    features = FeatureSerializer(many=True, read_only=False, required=False)
-    user = serializers.SlugRelatedField("username", read_only=True)
+    """
+    Serializer for car ads (Car model).
+
+    Handles image and feature data, user information, brand and model validation,
+    and additional logic for favorite status, posting restrictions, and color selection.
+    """
+    images = AdImageSerializer(many=True, required=False)
+    features = FeatureSerializer(many=True, required=False)
+    user = serializers.SlugRelatedField(slug_field="username", read_only=True)
     brand = serializers.CharField(max_length=255)
     model = serializers.CharField(max_length=255, required=False)
     email = serializers.EmailField(source='user.profile.email', read_only=True)
+    is_favorited = serializers.SerializerMethodField()
+    color = serializers.CharField(max_length=255, required=False)  # Color chosen from available colors
+    suggested_color = serializers.CharField(max_length=255, required=False)  # User suggested color
 
     class Meta:
         model = Car
         fields = "__all__"
 
-    def get_images(self, obj):
-        serializer = AdImageSerializer(instance=obj.images.all(), many=True, )
-        return serializer.data
-
-    # def get_autocomplete(self, obj):
-    #     return CarIndex.prepare_autocomplete(obj)
-
-    def get_features(self, obj):
-        serializer = FeatureSerializer(instance=obj.features.all(), many=True, )
-        return serializer.data
-
     def create(self, validated_data):
+        """
+        Handle the creation of a car ad, including color validation logic.
+        """
+        # Validate the presence of either 'model' or 'promoted_model'
         if not validated_data.get("model") and not validated_data.get("promoted_model"):
             raise serializers.ValidationError({"model": "این فیلد اجباری است"})
+
+        # Validate color selection
+        color = validated_data.get("color")
+        suggested_color = validated_data.get("suggested_color")
+
+        if color:
+            # Check if the selected color exists in the Color table
+            if not Color.objects.filter(name=color).exists():
+                raise serializers.ValidationError({"color": "رنگ انتخاب‌شده موجود نیست."})
+        elif not suggested_color:
+            raise serializers.ValidationError(
+                {"color": "باید یا رنگ انتخاب‌شده را انتخاب کنید یا رنگ پیشنهادی را وارد کنید."})
+
+        # Fetch brand and model objects
         brand = Brand.objects.get(name=validated_data.get('brand'))
         if validated_data.get("model"):
             model = CarModel.objects.get(title=validated_data.get('model'), brand=brand)
             validated_data["model"] = model
+
         validated_data['brand'] = brand
+
+        # Ensure the request user is authenticated
         request = self.context["request"]
         if request.user.is_authenticated:
             validated_data["user"] = request.user
         else:
             raise exceptions.AuthenticationFailed("کاربران ناشناس اجازه قبت اگهی ندارند")
+
+        # Process images and features
         images_data = validated_data.pop('images', [])
         features_data = validated_data.pop('features', [])
-        if not validated_data["user"].roles == "EXHIBITOR":
+
+        # Limit active ads to 3 for non-exhibitor users
+        if validated_data["user"].roles != "EXHIBITOR":
             if validated_data["user"].cars.filter(status="active").count() >= 3:
                 raise serializers.ValidationError("شما نمیتوانید بیشتر از سه اگهی ثبت کنید")
 
+        # Prevent new ad creation if a pending request exists
         if validated_data["user"].cars.filter(status="pending").exists():
             raise exceptions.NotAcceptable(
-                "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید")
+                "درخواست شما در حال برسی است و تا مشخص شدن وضعیت اجازه ثبت اگهی دیگری ندارید")
+
+        # Create the car ad
         car = Car.objects.create(**validated_data)
 
+        # Save related images and features
         for image_data in images_data:
             Image.objects.create(ad=car, **image_data)
 
         for feature in features_data:
             Feature.objects.create(car=car, **feature)
+
         return car
 
     def update(self, instance, validated_data):
+        """
+        Handle updates to the car ad, including color validation logic.
+        """
+        # Fetch the brand and model objects
         brand = Brand.objects.get(name=validated_data['brand'])
         model = CarModel.objects.get(title=validated_data['model'], brand=brand)
-        validated_data['brand'], validated_data["model"] = brand, model
-        request = self.context["request"]
-        if request.user.is_authenticated:
-            validated_data["user"] = request.user
+        validated_data['brand'], validated_data['model'] = brand, model
+
+        # Validate color selection during update
+        color = validated_data.get("color")
+        suggested_color = validated_data.get("suggested_color")
+
+        if color:
+            # Check if the selected color exists in the Color table
+            if not Color.objects.filter(name=color).exists():
+                raise serializers.ValidationError({"color": "رنگ انتخاب‌شده موجود نیست."})
+        elif not suggested_color:
+            raise serializers.ValidationError(
+                {"color": "باید یا رنگ انتخاب‌شده را انتخاب کنید یا رنگ پیشنهادی را وارد کنید."})
+
+        # Process images and features
         images_data = validated_data.pop('images', [])
         features_data = validated_data.pop('features', [])
+
+        # Update the car instance
         instance = super().update(instance, validated_data)
+
+        # Update or create related images and features
         for image_data in images_data:
             Image.objects.update_or_create(ad=instance, **image_data)
+
         for feature_data in features_data:
             Feature.objects.update_or_create(car=instance, **feature_data)
+
         return instance
 
 

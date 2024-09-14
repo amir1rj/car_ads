@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils import timezone
+
 from account.models import User
 from account.utils import PROVINCES
 from ads.constants import *
@@ -96,7 +98,14 @@ class CarModel(models.Model):
         return self.title
 
 
-# مدل مربوط به آگهی خودرو
+class Color(models.Model):
+    """
+    Model representing predefined colors.
+    """
+    name = models.CharField(max_length=255, unique=True, verbose_name="رنگ")
+
+    def __str__(self):
+        return self.name
 
 
 class Car(models.Model):
@@ -129,7 +138,8 @@ class Car(models.Model):
     kilometer = models.PositiveIntegerField(verbose_name="کارکرد کیلومتر")
     body_type = models.CharField(max_length=255, choices=BODY_TYPE_CHOICES, verbose_name="نوع بدنه", null=True,
                                  blank=True)
-    color = models.CharField(max_length=255, verbose_name="رنگ", null=True, blank=True)
+    color = models.ForeignKey(Color, on_delete=models.SET_NULL, verbose_name="رنگ", null=True, blank=True)
+    suggested_color = models.CharField(max_length=255, blank=True, null=True, verbose_name="رنگ پیشنهادی")
     color_description = models.TextField(blank=True, null=True, verbose_name="جزعیات رنگ شدگی")
     fuel_type = models.CharField(max_length=255, choices=FUEL_TYPE_CHOICES, verbose_name="نوع سوخت")
     # Passenger Cars optional
@@ -199,6 +209,14 @@ class Car(models.Model):
         if self.car_type == 'ماشین‌آلات سنگین' and not (self.weight or self.payload_capacity or self.wheel_number):
             raise ValidationError("شما باید مقادیر مربوط به ماشین سنگین را پر کنید")
         return super().clean()
+
+    def renew(self):
+        if self.status == "expired":
+            self.created_at = timezone.now()
+            self.status = 'active'
+            self.save()
+        else:
+            raise ValidationError('برای تمدید کردن اگهی وضعیت اگهی شما باید منقضی شده باشد')
 
 
 class Favorite(models.Model):
