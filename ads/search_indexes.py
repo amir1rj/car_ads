@@ -12,19 +12,19 @@ class CarIndex(indexes.SearchIndex, indexes.Indexable):
     def get_model(self):
         return Car
 
-
-
     def prepare_text(self, obj):
-        if (obj.model is None ) or (obj.model is None):
-
+        # Check if model or brand is None
+        if obj.model is None or obj.brand is None:
             return None
-        else:
 
-            return ' '.join([
-                obj.description,
-                obj.brand.name,
-                obj.model.title,
-            ])
+        # Provide a fallback for description if it's None or empty
+        description = obj.description if obj.description else ''
+
+        return ' '.join([
+            description,
+            obj.brand.name,
+            obj.model.title,
+        ])
 
 
 class ExhibitionIndex(indexes.SearchIndex, indexes.Indexable):

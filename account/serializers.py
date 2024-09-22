@@ -203,7 +203,15 @@ class PasswordChangeSerializer(serializers.Serializer):
         user.save(update_fields=["password"])
 
 
+class ProfileSerializerForUserRetrieve(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['email', 'picture', 'last_name', 'first_name']
+
+
 class ListUserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializerForUserRetrieve()
+
     class Meta:
         model = User
         fields = [
@@ -213,6 +221,7 @@ class ListUserSerializer(serializers.ModelSerializer):
             "verified",
             "created_at",
             "roles",
+            'profile'
         ]
 
         extra_kwargs = {

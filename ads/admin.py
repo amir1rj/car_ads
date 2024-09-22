@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand
+from .models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand, Color
 from .tasks import toggle_ad_status
 
 
@@ -18,6 +18,9 @@ class VideoInline(admin.StackedInline):
     extra = 1
 
 
+admin.site.register(Color)
+
+
 @admin.register(Car)
 class CarAdmin(admin.ModelAdmin):
     list_display = [
@@ -34,11 +37,11 @@ class CarAdmin(admin.ModelAdmin):
             'fields': ('user', 'exhibition', 'description', 'price', 'is_negotiable', 'city', 'sale_or_rent')
         }),
         ('اطلاعات خودرو', {
-            'fields': ('car_type', 'brand', 'model', 'promoted_model', 'year', 'kilometer', 'body_type', 'color',
-                       'color_description', 'fuel_type', 'upholstery_condition', 'tire_condition')
+            'fields': ('brand', 'model', 'promoted_model', 'year', 'kilometer', 'body_type', 'suggested_color', 'color',
+                       'fuel_type', 'upholstery_condition', 'tire_condition')
         }),
         ('ماشین سواری', {
-            'fields': ('transmission', 'body_condition', 'chassis_condition')
+            'fields': ('transmission', 'body_condition', 'front_chassis_condition', 'behind_chassis_condition')
         }),
         ('ماشین سنگین (اختیاری)', {
             'fields': ('weight', 'payload_capacity', 'wheel_number')

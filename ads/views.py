@@ -4,14 +4,16 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from account.logging_config import logger
 from ads.filter import CarFilter, ExhibitionFilter
 from ads.search_indexes import CarIndex, ExhibitionIndex
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly, IsOwnerOfCar
 from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer, \
-    BrandSerializer, CarModelSerializer, SelectedBrandSerializer, FavoriteSerializer
-from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image, Brand, CarModel, SelectedBrand, Favorite
+    BrandSerializer, CarModelSerializer, SelectedBrandSerializer, FavoriteSerializer, ColorSerializer
+from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image, Brand, CarModel, SelectedBrand, Favorite, \
+    Color
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
@@ -255,8 +257,9 @@ class AdViewSets(viewsets.ModelViewSet):
         serializer = AdSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             serializer.validated_data["user"] = request.user
+            logger.info(str(serializer.validated_data))
             serializer.save()
-            return Response({"response": " your ad was successfully created", "data": serializer.data},
+            return Response({"response": " your ad was successfully created"},
                             status.HTTP_201_CREATED)
         return Response({"response": serializer.errors})
 
@@ -662,3 +665,6 @@ class FavoriteViewSet(GenericViewSet):
 #     def get(self, request, id, *args, **kwargs):
 #         car = get_object_or_404(Car, pk=id)
 #         car.renew()
+class ColorListView(generics.ListAPIView):
+    queryset = Color.objects.all()
+    serializer_class = ColorSerializer

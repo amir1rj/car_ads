@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from account.exceptions import CustomValidationError
+from account.logging_config import logger
 from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand, Favorite, Color
 from ads.utils import is_not_mobile_phone
 from rest_framework import exceptions
@@ -87,22 +89,15 @@ class AdSerializer(serializers.ModelSerializer):
         """
         Handle the creation of a car ad, including color validation logic.
         """
-        # Validate the presence of either 'model' or 'promoted_model'
-        if not validated_data.get("model") and not validated_data.get("promoted_model"):
-            raise serializers.ValidationError({"model": "این فیلد اجباری است"})
-
-        # Validate color selection
         color = validated_data.get("color")
         suggested_color = validated_data.get("suggested_color")
 
         if color:
             # Check if the selected color exists in the Color table
             if not Color.objects.filter(name=color).exists():
-                raise serializers.ValidationError({"color": "رنگ انتخاب‌شده موجود نیست."})
+                raise CustomValidationError({"color": "رنگ انتخاب‌شده موجود نیست"})
         elif not suggested_color:
-            raise serializers.ValidationError(
-                {"color": "باید یا رنگ انتخاب‌شده را انتخاب کنید یا رنگ پیشنهادی را وارد کنید."})
-
+            raise CustomValidationError({"color": "باید یا رنگ انتخاب‌شده را انتخاب کنید یا رنگ پیشنهادی را وارد کنید"})
         # Fetch brand and model objects
         brand = Brand.objects.get(name=validated_data.get('brand'))
         if validated_data.get("model"):
@@ -149,21 +144,38 @@ class AdSerializer(serializers.ModelSerializer):
         Handle updates to the car ad, including color validation logic.
         """
         # Fetch the brand and model objects
-        brand = Brand.objects.get(name=validated_data['brand'])
-        model = CarModel.objects.get(title=validated_data['model'], brand=brand)
-        validated_data['brand'], validated_data['model'] = brand, model
+        brand = validated_data.get('brand')
+        model = validated_data.get('model')
+
+        if brand:
+
+            brand_obj = Brand.objects.filter(name=brand).first()
+            if brand_obj:
+                validated_data['brand'] = brand_obj
+            else:
+
+                raise CustomValidationError({'brand': "برند موجود نیست"})
+        else:
+
+            raise CustomValidationError({'brand': "این فیلد اجباری است"})
+        if model:
+
+            model_obj = CarModel.objects.filter(title=model).first()
+
+            if model_obj:
+                validated_data['model'] = model_obj
+            else:
+                raise CustomValidationError({'model': "مدل موجود نیست"})
+        else:
+            raise CustomValidationError({'model': "این فیلد اجباری است"})
 
         # Validate color selection during update
         color = validated_data.get("color")
-        suggested_color = validated_data.get("suggested_color")
 
         if color:
             # Check if the selected color exists in the Color table
             if not Color.objects.filter(name=color).exists():
-                raise serializers.ValidationError({"color": "رنگ انتخاب‌شده موجود نیست."})
-        elif not suggested_color:
-            raise serializers.ValidationError(
-                {"color": "باید یا رنگ انتخاب‌شده را انتخاب کنید یا رنگ پیشنهادی را وارد کنید."})
+                raise CustomValidationError({"color": "رنگ انتخاب‌شده موجود نیست."})
 
         # Process images and features
         images_data = validated_data.pop('images', [])
@@ -180,6 +192,12 @@ class AdSerializer(serializers.ModelSerializer):
             Feature.objects.update_or_create(car=instance, **feature_data)
 
         return instance
+
+    def get_is_favorited(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return Favorite.objects.filter(user=user, car=obj).exists()
+        return False
 
 
 class ExhibitionSerializer(serializers.ModelSerializer):
@@ -263,3 +281,9 @@ class FavoriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Favorite
         fields = ['car', 'added_on']
+
+
+class ColorSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Color
+        fields = ['id', 'name']

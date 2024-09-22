@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 
@@ -77,6 +78,7 @@ class ExhView(models.Model):
 class Brand(models.Model):
     name = models.CharField(max_length=255, verbose_name="برند")
     logo = models.ImageField(upload_to="brand/logos", null=True, blank=True, verbose_name="لوگو")
+    type = models.CharField(max_length=255, choices=BRAND_TYPE_CHOICES, verbose_name="نوع خودرو")
 
     class Meta:
         verbose_name = "برند"
@@ -89,6 +91,7 @@ class Brand(models.Model):
 class CarModel(models.Model):
     title = models.CharField(max_length=255, verbose_name="مدل خودرو")
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name="models", verbose_name="برند")
+    car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
 
     class Meta:
         verbose_name = "مدل"
@@ -116,7 +119,7 @@ class Car(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="فروشنده", related_name="cars")
     exhibition = models.ForeignKey(Exhibition, on_delete=models.CASCADE, verbose_name="نمایشگاه", related_name="cars",
                                    null=True, blank=True)
-    description = models.TextField(verbose_name="توضیحات")
+    description = models.TextField(verbose_name="توضیحات", null=True, blank=True)
     price = models.PositiveIntegerField(verbose_name="قیمت", null=True, blank=True)
     is_negotiable = models.BooleanField(default=True, verbose_name="قابل مذاکره")
     city = models.CharField(
@@ -124,7 +127,6 @@ class Car(models.Model):
     sale_or_rent = models.CharField(max_length=255, choices=SALE_OR_RENT_CHOICES, verbose_name="فروشی یا اجاره‌ای",
                                     default="sale")
     # general information of car
-    car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, verbose_name="برند", null=True)
     model = models.ForeignKey(CarModel, on_delete=models.PROTECT, verbose_name="مدل خودرو", null=True)
     # optional
@@ -140,7 +142,6 @@ class Car(models.Model):
                                  blank=True)
     color = models.ForeignKey(Color, on_delete=models.SET_NULL, verbose_name="رنگ", null=True, blank=True)
     suggested_color = models.CharField(max_length=255, blank=True, null=True, verbose_name="رنگ پیشنهادی")
-    color_description = models.TextField(blank=True, null=True, verbose_name="جزعیات رنگ شدگی")
     fuel_type = models.CharField(max_length=255, choices=FUEL_TYPE_CHOICES, verbose_name="نوع سوخت")
     # Passenger Cars optional
     transmission = models.CharField(max_length=255, choices=TRANSMISSION_CHOICES, verbose_name="نوع گیربکس", null=True
@@ -151,8 +152,12 @@ class Car(models.Model):
         null=True, blank=True,
         verbose_name="وضعیت بدنه خودرو",
     )
-    chassis_condition = models.CharField(
-        max_length=255, choices=CHASSIS_CONDITION_CHOICES, default=("سالم", "سالم"), verbose_name="وضعیت شاسی",
+    front_chassis_condition = models.CharField(
+        max_length=255, choices=CHASSIS_CONDITION_CHOICES, default=("سالم", "سالم"), verbose_name="وضعیت شاسی جلو",
+        null=True, blank=True
+    )
+    behind_chassis_condition = models.CharField(
+        max_length=255, choices=CHASSIS_CONDITION_CHOICES, default=("سالم", "سالم"), verbose_name="وضعیت شاسی عقب",
         null=True, blank=True
     )
 
@@ -169,6 +174,7 @@ class Car(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="زمان بروزرسانی")
     is_promoted = models.BooleanField(default=False, verbose_name="پیشنهادی")
     view_count = models.PositiveIntegerField(default=0)
+    insurance = models.IntegerField(verbose_name='بیمه', validators=[MinValueValidator(0), MaxValueValidator(12)])
 
     def __str__(self):
         if self.brand and self.model:
@@ -186,8 +192,6 @@ class Car(models.Model):
         ]
 
     def save(self, *args, **kwargs):
-        if self.body_condition == 'رنگ شدگی' and not self.color_description:
-            raise ValidationError("اگر وضعیت بدنه خودرو رنگ شدگی است، توضیحات رنگ الزامی است.")
         if self.exhibition and not (self.user.roles == "EXHIBITOR"):
             raise ValidationError("این ماشین را نمیتوان در نمایشگاه ثبت کرد")
         if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
@@ -195,18 +199,19 @@ class Car(models.Model):
         if not self.user.roles == "EXHIBITOR":
             if self.user.cars.filter(status="active").count() > 3:
                 raise ValidationError("شما نمیتوانید بیشتر از سه ماشین ثبت کنید")
-        if self.car_type == 'ماشین‌آلات سنگین' and not (self.weight or self.payload_capacity or self.wheel_number):
+        if self.model.car_type == 'ماشین‌آلات سنگین' and not (
+                self.weight or self.payload_capacity or self.wheel_number):
             raise ValidationError("شما باید مقادیر مربوط به ماشین سنگین را پر کنید")
         return super().save(*args, **kwargs)
 
     def clean(self):
-        if (self.body_condition == 'رنگ شدگی') and not self.color_description:
-            raise ValidationError("اگر وضعیت بدنه خودرو رنگ شدگی است، توضیحات رنگ الزامی است.")
+
         if (self.exhibition) and not (self.user.roles == "EXHIBITOR"):
             raise ValidationError("این ماشین را نمیتوان در نمایشگاه ثبت کرد")
         if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
             raise ValidationError("شما باید فیلد های برند و مدل یا مدل پیشنهادی را پر کنید")
-        if self.car_type == 'ماشین‌آلات سنگین' and not (self.weight or self.payload_capacity or self.wheel_number):
+        if self.model.car_type == 'ماشین‌آلات سنگین' and not (
+                self.weight or self.payload_capacity or self.wheel_number):
             raise ValidationError("شما باید مقادیر مربوط به ماشین سنگین را پر کنید")
         return super().clean()
 
@@ -230,7 +235,7 @@ class Favorite(models.Model):
         verbose_name_plural = "علاقه‌مندی‌ها"
 
     def __str__(self):
-        return f"{self.user.username} - {self.car.brand.name} {self.car.model.name}"
+        return f"{self.user.username} - {self.car.brand.name} {self.car.model.title}"
 
 
 class Image(models.Model):
