@@ -1,6 +1,7 @@
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from account.models import User, Token, Profile
@@ -161,22 +162,29 @@ class ProfileViewSets(viewsets.ModelViewSet):
         user = User.objects.get(id=pk)
         instance = Profile.objects.get(id=user.profile.id)
         self.check_object_permissions(request, instance)
+
+        # Create a mutable copy of request.data
         data = request.data.copy()
+
+        # Remove the email from the mutable copy if it's the same as the current email
         if data.get('email') == instance.email:
-            del request.data['email']
-        serializer = ProfileSerializer(data=request.data, partial=True)
-        if serializer.is_valid():
+            del data['email']
+
+        # Use the modified data for the serializer
+        serializer = ProfileSerializer(data=data, partial=True)
+
+        if serializer.is_valid(raise_exception=True):
             serializer.update(instance=instance, validated_data=serializer.validated_data)
-            return Response({"response": "پروفایل شما با موفقیت بروزرسانی شد"}, status.HTTP_200_OK)
-        return Response({"response": serializer.errors})
+            return Response({'success': True, "message": "پروفایل شما با موفقیت بروزرسانی شد"}, status.HTTP_200_OK)
+
+        # return Response({"response": serializer.errors})
 
     def create(self, request, **kwargs):
         serializer = ProfileSerializer(data=request.data, context={"request": request})
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.validated_data["user"] = request.user
             serializer.save()
-            return Response({"response": "done"}, status=status.HTTP_201_CREATED)
-        return Response({"response": serializer.errors})
+            return Response({'success': True, "message": "پروفایل شما با موفقیت ساخته شد"}, status.HTTP_200_OK)
 
 
 class GetUserId(APIView):
@@ -185,4 +193,4 @@ class GetUserId(APIView):
         if user.is_authenticated:
             return Response({"id": request.user.id}, status=status.HTTP_200_OK)
         else:
-            return Response("اطلاعات هویتی یافت نشد", status=status.HTTP_401_UNAUTHORIZED)
+            raise NotAuthenticated

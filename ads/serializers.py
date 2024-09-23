@@ -94,8 +94,11 @@ class AdSerializer(serializers.ModelSerializer):
 
         if color:
             # Check if the selected color exists in the Color table
-            if not Color.objects.filter(name=color).exists():
+            color_obj = Color.objects.filter(name=color)
+            if not color_obj.exists():
                 raise CustomValidationError({"color": "رنگ انتخاب‌شده موجود نیست"})
+            else:
+                validated_data['color'] = color_obj.first()
         elif not suggested_color:
             raise CustomValidationError({"color": "باید یا رنگ انتخاب‌شده را انتخاب کنید یا رنگ پیشنهادی را وارد کنید"})
         # Fetch brand and model objects

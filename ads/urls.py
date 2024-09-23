@@ -1,7 +1,7 @@
 from rest_framework.routers import DefaultRouter
 from ads.views import AdViewSets, ExhibitionViewSet, LatestVideosList, ExhibitionVideoViewSet, ImageViewSet, \
     BrandModelsView, BrandListView, CarPriceStatsView, SelectedBrandListView, CheckSubmitAddAuthorization, \
-    FavoriteViewSet, ColorListView
+    FavoriteViewSet, ColorListView, BrandByTypeAPIView
 from django.urls import path, include
 
 app_name = 'ad'
@@ -22,6 +22,7 @@ urlpatterns = [
     path('selected-brands/<str:parent>/', SelectedBrandListView.as_view(), name='selected-brands-list'),
     path('check-athorization', CheckSubmitAddAuthorization.as_view(), name="check-user-create-add-authorization"),
     path('colors/', ColorListView.as_view(), name='color-list'),
+    path('brand_type/', BrandByTypeAPIView.as_view(), name='brand_type'),
 ]
 router.register(r'', AdViewSets, basename='main')
 router.register(r'favorites', FavoriteViewSet, basename='favorites')

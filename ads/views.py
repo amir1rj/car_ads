@@ -1,9 +1,10 @@
 from django.db.models import Min, Max
 from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError, NotAuthenticated
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
+from account.exceptions import CustomValidationError
 from account.logging_config import logger
 from ads.filter import CarFilter, ExhibitionFilter
 from ads.search_indexes import CarIndex, ExhibitionIndex
@@ -255,13 +256,12 @@ class AdViewSets(viewsets.ModelViewSet):
     )
     def create(self, request, **kwargs):
         serializer = AdSerializer(data=request.data, context={"request": request})
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.validated_data["user"] = request.user
             logger.info(str(serializer.validated_data))
             serializer.save()
-            return Response({"response": " your ad was successfully created"},
+            return Response({'success': True, "message": "اگهی شما با موفقیت ساخته شد"},
                             status.HTTP_201_CREATED)
-        return Response({"response": serializer.errors})
 
     @extend_schema(
         description="Search for ads based on various filters.",
@@ -357,7 +357,7 @@ class AdViewSets(viewsets.ModelViewSet):
         """
         query = request.GET.get('q')
         if not query:
-            return Response({"error": "Missing query parameter 'q'."})
+            raise CustomValidationError({'q': 'No query provided.'})
 
         queryset = CarIndex.objects.filter(text__icontains=query)
         car_ids = [obj.pk for obj in queryset]
@@ -399,10 +399,9 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
         if data.get('company_name') == instance.company_name:
             del request.data['company_name']
         serializer = ExhibitionSerializer(data=request.data, partial=True, context={"request": request})
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             serializer.update(instance=instance, validated_data=serializer.validated_data)
-            return Response({"response": " your exhibition updated"}, status.HTTP_200_OK)
-        return Response({"response": serializer.errors})
+            return Response({'success': True, "message": " your exhibition updated"}, status.HTTP_200_OK)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -483,7 +482,7 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
         """
         query = request.GET.get('q')
         if not query:
-            return Response({"error": "Missing query parameter 'q'."})
+            raise CustomValidationError({'q': 'No query provided.'})
 
         queryset = ExhibitionIndex.objects.filter(text__icontains=query)
         exhibition_ids = [obj.pk for obj in queryset]
@@ -527,7 +526,7 @@ class ExhibitionVideoViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         exhibition_id = self.kwargs.get('exhibition_pk')
         if not Exhibition.objects.filter(id=exhibition_id).exists():
-            return Response({'error': 'Exhibition not found'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"success": False, 'message': 'Exhibition not found'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -558,9 +557,10 @@ class ImageViewSet(viewsets.ModelViewSet):
         car = Car.objects.filter(id=car_id)
 
         if not car.exists():
-            return Response({'error': 'اگهی پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"success": False, 'message': 'اگهی پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
         if car.first().user != request.user:
-            return Response({"error": " شما مجاز به انجام این کار نیستید"}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"success": False, "error": " شما مجاز به انجام این کار نیستید"},
+                            status=status.HTTP_403_FORBIDDEN)
 
         request.data['ad'] = car_id
         serializer = self.get_serializer(data=request.data)
@@ -618,10 +618,12 @@ class CheckSubmitAddAuthorization(APIView):
         user = self.request.user
         if not user.roles == "EXHIBITOR":
             if user.cars.filter(status="active").count() > 3:
-                raise ValidationError("شما نمیتوانید بیشتر از سه ماشین ثبت کنید")
+                raise CustomValidationError({
+                    'non_fild_error': "شما نمیتوانید بیشتر از سه ماشین ثبت کنید"})
         if user.cars.filter(status="pending").exists():
-            raise ValidationError(
-                "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید")
+            raise CustomValidationError(
+                {
+                    'non_fild_error': "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید"})
         return Response({"success": True, "message": "authorized"}, status=status.HTTP_202_ACCEPTED)
 
 
@@ -640,9 +642,11 @@ class FavoriteViewSet(GenericViewSet):
         car = get_object_or_404(Car, pk=pk)
         favorite, created = Favorite.objects.get_or_create(user=user, car=car)
         if created:
-            return Response({"message": "آگهی به لیست علاقه‌مندی‌ها اضافه شد."}, status=status.HTTP_201_CREATED)
+            return Response({"success": True, "message": "آگهی به لیست علاقه‌مندی‌ها اضافه شد."},
+                            status=status.HTTP_201_CREATED)
         else:
-            return Response({"message": "این آگهی قبلاً در لیست علاقه‌مندی‌ها موجود بود."}, status=status.HTTP_200_OK)
+            return Response({"success": False, "message": "این آگهی قبلاً در لیست علاقه‌مندی‌ها موجود بود."},
+                            status=status.HTTP_200_OK)
 
     @action(detail=True, methods=['get'], url_path='remove')
     def remove_from_favorites(self, request, pk=None):
@@ -650,7 +654,7 @@ class FavoriteViewSet(GenericViewSet):
         user = request.user
         favorite = get_object_or_404(Favorite, user=user, car_id=pk)
         favorite.delete()
-        return Response({"message": "آگهی از لیست علاقه‌مندی‌ها حذف شد."}, status=status.HTTP_200_OK)
+        return Response({"success": True, "message": "آگهی از لیست علاقه‌مندی‌ها حذف شد."}, status=status.HTTP_200_OK)
 
     @action(detail=False, methods=['get'], url_path='list')
     def list_favorites(self, request):
@@ -668,3 +672,27 @@ class FavoriteViewSet(GenericViewSet):
 class ColorListView(generics.ListAPIView):
     queryset = Color.objects.all()
     serializer_class = ColorSerializer
+
+
+@extend_schema(
+    parameters=[
+        OpenApiParameter(name='type', description='Filter brands  by type.', required=True, type=str),
+
+    ],
+
+)
+class BrandByTypeAPIView(APIView):
+    """get brands base on body type"""
+
+    def get(self, request, *args, **kwargs):
+        brand_type = request.query_params.get('type')
+        if not brand_type:
+            return Response({"success": False, "message": "نوع ماشین اجباری است"}, status=status.HTTP_400_BAD_REQUEST)
+
+        brands = Brand.objects.filter(type=brand_type)
+        if not brands.exists():
+            return Response({"success": False, "message": "هیچ برندی با نوع ماشینی که شما دادید یافت نشد"},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        serializer = BrandSerializer(brands, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

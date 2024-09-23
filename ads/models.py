@@ -91,7 +91,7 @@ class Brand(models.Model):
 class CarModel(models.Model):
     title = models.CharField(max_length=255, verbose_name="مدل خودرو")
     brand = models.ForeignKey(Brand, on_delete=models.PROTECT, related_name="models", verbose_name="برند")
-    car_type = models.CharField(max_length=255, choices=CAR_TYPE_CHOICES, verbose_name="نوع خودرو")
+    car_type = models.CharField(max_length=255, choices=BODY_TYPE_CHOICES, verbose_name="نوع خودرو")
 
     class Meta:
         verbose_name = "مدل"
