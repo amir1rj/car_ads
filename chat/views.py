@@ -2,6 +2,7 @@ import json
 from django.shortcuts import render
 from django.utils.safestring import mark_safe
 from rest_framework import generics, filters, status
+from rest_framework.exceptions import NotAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -75,7 +76,7 @@ class LeaveRoomAPIView(APIView):
             chat.save()
             return Response({'success': True, "message": "you have left the room successfully"})
         else:
-            return Response({'success': False, "message": "you are not authenticated"})
+            raise NotAuthenticated
 
 
 class JoinRoomAPIView(APIView):
@@ -89,4 +90,4 @@ class JoinRoomAPIView(APIView):
             return Response({'success': True, "roomName": {chat.roomName}, "username": request.user.username,
                              "profile": seller_profile.data})
         else:
-            return Response({'success': False, "message": "you are not authenticated"})
+            raise NotAuthenticated

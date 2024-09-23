@@ -123,7 +123,7 @@ class AdSerializer(serializers.ModelSerializer):
         # Limit active ads to 3 for non-exhibitor users
         if validated_data["user"].roles != "EXHIBITOR":
             if validated_data["user"].cars.filter(status="active").count() >= 3:
-                raise serializers.ValidationError("شما نمیتوانید بیشتر از سه اگهی ثبت کنید")
+                raise exceptions.NotAcceptable("شما نمیتوانید بیشتر از سه اگهی ثبت کنید")
 
         # Prevent new ad creation if a pending request exists
         if validated_data["user"].cars.filter(status="pending").exists():
@@ -222,9 +222,8 @@ class ExhibitionSerializer(serializers.ModelSerializer):
             for phone in phones:
                 phone = is_not_mobile_phone(phone.strip())  # Remove leading/trailing whitespaces
                 if not phone.isdigit():
-                    raise serializers.ValidationError(
-                        f"کاراکتر غیر مجاز شما فقط میتوانید اعداد وارد کنید{phone}. (e.g., 2122334567)")
-                # Mobile number check (optional, can be removed if not needed)
+                    raise CustomValidationError({
+                        'contact_phone': f"کاراکتر غیر مجاز شما فقط میتوانید اعداد وارد کنید{phone}. (e.g., 2122334567)"})
 
                 validated_phones.append(phone)
             return validated_phones  # Return a list of validated phone numbers
@@ -234,7 +233,7 @@ class ExhibitionSerializer(serializers.ModelSerializer):
         name = attrs.get('company_name')
         if name is not None:
             if Exhibition.objects.filter(company_name=name).exists():
-                raise serializers.ValidationError("نام نمایشگاه شما قبلا ثبت شده است")
+                raise CustomValidationError({'company_name': "نام نمایشگاه شما قبلا ثبت شده است"})
         return attrs
 
     def create(self, validated_data):

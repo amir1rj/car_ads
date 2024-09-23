@@ -617,13 +617,13 @@ class CheckSubmitAddAuthorization(APIView):
     def get(self, request, *args, **kwargs):
         user = self.request.user
         if not user.roles == "EXHIBITOR":
-            if user.cars.filter(status="active").count() > 3:
+            if user.cars.filter(status="active").count() >= 3:
                 raise CustomValidationError({
-                    'non_fild_error': "شما نمیتوانید بیشتر از سه ماشین ثبت کنید"})
+                    'none_fild_error': "شما نمیتوانید بیشتر از سه ماشین ثبت کنید"})
         if user.cars.filter(status="pending").exists():
             raise CustomValidationError(
                 {
-                    'non_fild_error': "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید"})
+                    'none_fild_error': "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید"})
         return Response({"success": True, "message": "authorized"}, status=status.HTTP_202_ACCEPTED)
 
 
