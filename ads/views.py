@@ -1,6 +1,6 @@
 from django.db.models import Min, Max
 from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import ValidationError, NotAuthenticated
+from rest_framework.exceptions import ValidationError, NotAuthenticated, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
@@ -619,11 +619,11 @@ class CheckSubmitAddAuthorization(APIView):
         if not user.roles == "EXHIBITOR":
             if user.cars.filter(status="active").count() >= 3:
                 raise CustomValidationError({
-                    'none_fild_error': "شما نمیتوانید بیشتر از سه ماشین ثبت کنید"})
+                    '': "شما نمیتوانید بیشتر از سه ماشین ثبت کنید"})
         if user.cars.filter(status="pending").exists():
             raise CustomValidationError(
                 {
-                    'none_fild_error': "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید"})
+                    '': "درخواست شما  در حال برسی است تا مشخص شدن وضعیت درخواست شما اجازه ثبت اگهی دیگری ندارید"})
         return Response({"success": True, "message": "authorized"}, status=status.HTTP_202_ACCEPTED)
 
 
@@ -665,10 +665,18 @@ class FavoriteViewSet(GenericViewSet):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# class RenewAd(APIView):
-#     def get(self, request, id, *args, **kwargs):
-#         car = get_object_or_404(Car, pk=id)
-#         car.renew()
+class RenewAd(APIView):
+    """"an api for renew ad one month more"""
+
+    def get(self, request, id, *args, **kwargs):
+        car = get_object_or_404(Car, pk=id)
+        if car.user == request.user:
+            car.renew()
+            return Response({"success": True, "message": 'اگهی با موفقیت تمدید شد'})
+        else:
+            raise PermissionDenied
+
+
 class ColorListView(generics.ListAPIView):
     queryset = Color.objects.all()
     serializer_class = ColorSerializer

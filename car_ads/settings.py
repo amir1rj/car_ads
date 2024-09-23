@@ -186,8 +186,17 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
 
     'SERVE_INCLUDE_SCHEMA': False,
-
-    # OTHER SETTINGS
+    'SWAGGER_UI_SETTINGS': {
+        'persistAuthorization': True,
+    },
+    'COMPONENT_SPLIT_REQUEST': True,
+    'SECURITY': [
+        {
+            'BearerAuth': [],
+        },
+    ],
+    'AUTHENTICATION_WHITELIST': ['rest_framework_simplejwt.authentication.JWTAuthentication'],
+    'SERVE_PERMISSIONS': ['rest_framework.permissions.AllowAny'],
 }
 PAGINATION_PAGE_SIZE = 6
 LOCALE_PATHS = os.path.join(BASE_DIR, 'locale/'),
@@ -224,7 +233,7 @@ CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
-CELETY_TASK_DEFAULT_QUEUE = "default"
+CELERY_TASK_DEFAULT_QUEUE = "default"
 CELERY_IMPORTS = [
     'account.tasks',
     'auction.tasks',

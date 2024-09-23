@@ -1,11 +1,12 @@
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.utils import timezone
 
+from account.exceptions import CustomValidationError
 from account.models import User
 from account.utils import PROVINCES
 from ads.constants import *
-from django.core.exceptions import ValidationError
 
 
 class Exhibition(models.Model):
@@ -221,7 +222,7 @@ class Car(models.Model):
             self.status = 'active'
             self.save()
         else:
-            raise ValidationError('برای تمدید کردن اگهی وضعیت اگهی شما باید منقضی شده باشد')
+            raise CustomValidationError({"": 'برای تمدید کردن اگهی وضعیت اگهی شما باید منقضی شده باشد'})
 
 
 class Favorite(models.Model):
