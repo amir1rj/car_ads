@@ -666,7 +666,7 @@ class FavoriteViewSet(GenericViewSet):
 
 
 class RenewAd(APIView):
-    """"an api for renew ad one month more"""
+    """an api for renew ad one month more"""
 
     def get(self, request, id, *args, **kwargs):
         car = get_object_or_404(Car, pk=id)
