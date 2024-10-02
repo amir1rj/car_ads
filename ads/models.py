@@ -176,6 +176,7 @@ class Car(models.Model):
     is_promoted = models.BooleanField(default=False, verbose_name="پیشنهادی")
     view_count = models.PositiveIntegerField(default=0)
     insurance = models.IntegerField(verbose_name='بیمه', validators=[MinValueValidator(0), MaxValueValidator(12)])
+    is_urgent = models.BooleanField(default=False, verbose_name="فوری")
 
     def __str__(self):
         if self.brand and self.model:
@@ -223,6 +224,14 @@ class Car(models.Model):
             self.save()
         else:
             raise CustomValidationError({"": 'برای تمدید کردن اگهی وضعیت اگهی شما باید منقضی شده باشد'})
+
+    def make_ad_global(self):
+        self.city = "همه شهر ها"
+        self.save()
+
+    def make_ad_urgent(self):
+        self.city = "همه شهر ها"
+        self.save()
 
 
 class Favorite(models.Model):

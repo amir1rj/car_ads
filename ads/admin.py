@@ -34,7 +34,8 @@ class CarAdmin(admin.ModelAdmin):
     actions = ["make_ads_active", "make_ads_inactive"]
     fieldsets = (
         ('اطلاعات کلی اگهی', {
-            'fields': ('user', 'exhibition', 'description', 'price', 'is_negotiable', 'city', 'sale_or_rent')
+            'fields': (
+                'user', 'exhibition', 'description', 'price', 'is_negotiable', 'city', 'sale_or_rent')
         }),
         ('اطلاعات خودرو', {
             'fields': ('brand', 'model', 'promoted_model', 'year', 'kilometer', 'body_type', 'suggested_color', 'color',
@@ -50,7 +51,7 @@ class CarAdmin(admin.ModelAdmin):
             'fields': ('phone_numbers', 'address')
         }),
         ('وضعیت اگهی', {
-            'fields': ('status', 'is_promoted', 'view_count')
+            'fields': ('status', 'is_urgent', 'is_promoted', 'view_count')
         }),
     )
 

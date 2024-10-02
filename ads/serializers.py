@@ -84,11 +84,13 @@ class AdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
         fields = "__all__"
+        read_only_fields = ['status', 'created_at', 'updated_at', 'view_count', 'is_promoted', 'is_urgent']
 
     def create(self, validated_data):
         """
         Handle the creation of a car ad, including color validation logic.
         """
+
         color = validated_data.get("color")
         suggested_color = validated_data.get("suggested_color")
 
@@ -195,6 +197,11 @@ class AdSerializer(serializers.ModelSerializer):
             Feature.objects.update_or_create(car=instance, **feature_data)
 
         return instance
+
+    def validate(self, attrs):
+        if attrs['city'] == "همه شهر ها":
+            raise CustomValidationError({'city': "شما باید یک شهر انتخاب کنید "})
+        return attrs
 
     def get_is_favorited(self, obj):
         user = self.context['request'].user
