@@ -23,7 +23,7 @@ class Exhibition(models.Model):
     # موقعیت مکانی (اختیاری)
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
-    address = models.CharField(max_length=255, blank=True, verbose_name="آدرس")
+    address = models.CharField(max_length=255, null=True, blank=True, verbose_name="آدرس")
 
     # اطلاعات توصیفی
     description = models.TextField(blank=True, verbose_name="توضیحات")
@@ -168,7 +168,7 @@ class Car(models.Model):
     wheel_number = models.SmallIntegerField(verbose_name="تعداد چرخ", default=4)
     # contact information
     phone_numbers = models.CharField(max_length=12, verbose_name="شماره تلفن")
-    address = models.CharField(max_length=255, verbose_name="آدرس")
+    address = models.CharField(max_length=255, verbose_name="آدرس", null=True, blank=True)
     # ads status
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="pending", verbose_name="وضعیت")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="زمان ایجاد")

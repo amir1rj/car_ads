@@ -39,7 +39,7 @@ class CarAdmin(admin.ModelAdmin):
         }),
         ('اطلاعات خودرو', {
             'fields': ('brand', 'model', 'promoted_model', 'year', 'kilometer', 'body_type', 'suggested_color', 'color',
-                       'fuel_type', 'upholstery_condition', 'tire_condition')
+                       'fuel_type', 'upholstery_condition', 'tire_condition', "insurance")
         }),
         ('ماشین سواری', {
             'fields': ('transmission', 'body_condition', 'front_chassis_condition', 'behind_chassis_condition')
