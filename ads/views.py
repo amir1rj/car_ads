@@ -259,7 +259,7 @@ class AdViewSets(viewsets.ModelViewSet):
         if serializer.is_valid(raise_exception=True):
             serializer.validated_data["user"] = request.user
             serializer.save()
-            return Response({'success': True, "message": "اگهی شما با موفقیت ساخته شد"},
+            return Response({'success': True, "message": serializer.data},
                             status.HTTP_201_CREATED)
 
     @extend_schema(
