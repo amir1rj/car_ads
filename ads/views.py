@@ -551,21 +551,64 @@ class ImageViewSet(viewsets.ModelViewSet):
             return self.queryset.filter(ad_id=car_id)
         return self.queryset
 
+    # def create(self, request, *args, **kwargs):
+    #     car_id = self.kwargs.get('car_pk')
+    #     car = Car.objects.filter(id=car_id)
+    #
+    #     if not car.exists():
+    #         return Response({"success": False, 'message': 'اگهی پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+    #     if car.first().user != request.user:
+    #         return Response({"success": False, "error": " شما مجاز به انجام این کار نیستید"},
+    #                         status=status.HTTP_403_FORBIDDEN)
+    #
+    #     request.data['ad'] = car_id
+    #     serializer = self.get_serializer(data=request.data)
+    #     serializer.is_valid(raise_exception=True)
+    #     self.perform_create(serializer)
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def create(self, request, *args, **kwargs):
         car_id = self.kwargs.get('car_pk')
         car = Car.objects.filter(id=car_id)
 
         if not car.exists():
             return Response({"success": False, 'message': 'اگهی پیدا نشد'}, status=status.HTTP_404_NOT_FOUND)
+
         if car.first().user != request.user:
             return Response({"success": False, "error": " شما مجاز به انجام این کار نیستید"},
                             status=status.HTTP_403_FORBIDDEN)
 
-        request.data['ad'] = car_id
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        if 'images' not in request.FILES:
+            return Response({"success": False, "error": "کلید 'images' یافت نشد."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        images = request.FILES.getlist('images')  # لیست تصاویر
+
+        if not images:
+            return Response({"success": False, "error": "هیچ تصویری ارسال نشده است."},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        if len(images) > 6:
+            return Response({"success": False, "error": "شما فقط می‌توانید تا سقف ۶ عکس آپلود کنید"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+        created_images = []
+        for image in images:
+            if not image.content_type.startswith('image/'):
+                return Response({"success": False,
+                                 "error": f"فایل '{image.name}' معتبر نیست. لطفا فقط فایل‌های تصویری ارسال کنید."},
+                                status=status.HTTP_400_BAD_REQUEST)
+
+            data = {
+                'ad': car_id,
+                'image': image
+            }
+            serializer = self.get_serializer(data=data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            created_images.append(serializer.data)
+
+        return Response({"success": True, "images": created_images}, status=status.HTTP_201_CREATED)
 
 
 class BrandModelsView(APIView):
