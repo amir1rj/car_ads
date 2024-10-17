@@ -1,6 +1,8 @@
 from datetime import timezone, datetime
 from django.db import models
 from account.utils import PROVINCES
+from django.contrib.postgres.search import SearchVector, SearchVectorField
+from django.db.models import F
 
 AUCTION_TYPES = [
     ('متفرقه', 'متفرقه'),
@@ -23,6 +25,7 @@ class Auction(models.Model):
     city = models.CharField(
         max_length=30, choices=PROVINCES, verbose_name="شهر", blank=True, null=True)
     auction_type = models.CharField(max_length=255, choices=AUCTION_TYPES, verbose_name="نوع مزایده", default="ماشین")
+    search_vector = SearchVectorField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "مزایده ها"
