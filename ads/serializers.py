@@ -84,7 +84,7 @@ class AdSerializer(serializers.ModelSerializer):
     class Meta:
         model = Car
         fields = "__all__"
-        read_only_fields = ['status', 'created_at', 'updated_at', 'view_count', 'is_promoted', 'is_urgent']
+        read_only_fields = ['created_at', 'updated_at', 'view_count', 'is_promoted', 'is_urgent']
 
     def create(self, validated_data):
         """
@@ -185,14 +185,13 @@ class AdSerializer(serializers.ModelSerializer):
         # Process images and features
         images_data = validated_data.pop('images', [])
         features_data = validated_data.pop('features', [])
-
+        logger.info(validated_data)
         # Update the car instance
         instance = super().update(instance, validated_data)
 
         # Update or create related images and features
         for image_data in images_data:
             Image.objects.update_or_create(ad=instance, **image_data)
-
         for feature_data in features_data:
             Feature.objects.update_or_create(car=instance, **feature_data)
 

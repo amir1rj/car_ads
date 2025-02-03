@@ -368,7 +368,7 @@ class AdViewSets(viewsets.ModelViewSet):
 
         # Paginate filtered results
         result = self.paginate_queryset(filtered_cars)
-        serializer = AdSerializer(result, many=True)
+        serializer = AdSerializer(result, many=True,context={"request": request})
         return self.get_paginated_response(serializer.data)
 
 
