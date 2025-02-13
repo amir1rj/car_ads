@@ -281,7 +281,7 @@ class ExhibitionSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_cars(self, obj):
-        car_serializer = AdSerializer(instance=obj.cars.filter(status="active"), many=True)
+        car_serializer = AdSerializer(instance=obj.cars.filter(status="active"), many=True,context={'request': self.context['request']})
         return car_serializer.data
 
 

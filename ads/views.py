@@ -434,14 +434,14 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
     )
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        filter_set = ExhibitionFilter(request.GET, queryset=queryset)
+        filter_set = ExhibitionFilter(request.GET, queryset=queryset,)
         filtered_queryset = filter_set.qs
         page = self.paginate_queryset(filtered_queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
+            serializer = self.get_serializer(page, many=True, context={"request": request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(filtered_queryset, many=True)
+        serializer = self.get_serializer(filtered_queryset, many=True,context={"request": request})
         return Response(serializer.data)
 
     @extend_schema(
