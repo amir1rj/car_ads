@@ -291,3 +291,41 @@ class SelectedBrand(models.Model):
     class Meta:
         verbose_name = "برند منتخب"
         verbose_name_plural = "برندهای منتخب"
+
+
+class SubscriptionPlans(models.Model):
+    price = models.IntegerField(verbose_name='قیمت')
+    amount = models.IntegerField(verbose_name='تعداد', default=1)
+    name = models.CharField(max_length=255, verbose_name='اسم')
+    type = models.CharField(max_length=255, choices=SUB_CHOICE, verbose_name="نوع اشتراک")
+    ad = models.ForeignKey(Car, on_delete=models.PROTECT, related_name='ad_subscription_plans', null=True, blank=True,
+                           verbose_name='اگهی مربوطه')
+
+
+class TransactionLog(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_transactions')
+    subscription_plan = models.ForeignKey(SubscriptionPlans, on_delete=models.SET_NULL, null=True)
+    amount = models.IntegerField(verbose_name='Amount')
+    ref_id = models.CharField(max_length=255, verbose_name='Reference ID')
+    status = models.CharField(max_length=50, verbose_name='Status')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Transaction {self.ref_id} - {self.status}"
+
+    class Meta:
+        verbose_name = "تراکنش"
+        verbose_name_plural = "تراکنش ها"
+
+    def apply(self):
+        if self.subscription_plan.type == 'extra_ad':
+            self.user.extra_ads += self.amount
+        elif self.subscription_plan.type == 'is_urgent':
+            self.subscription_plan.ad.is_urgent = True
+            self.subscription_plan.save()
+        elif self.subscription_plan.type == 'is_promoted':
+            self.subscription_plan.ad.is_promoted = True
+            self.subscription_plan.save()
+        elif self.subscription_plan.type == 'nationwide':
+            self.subscription_plan.ad.city = 'همه شهر ها'
+            self.subscription_plan.ad.save()

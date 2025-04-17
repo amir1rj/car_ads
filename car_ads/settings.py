@@ -238,3 +238,6 @@ CELERY_IMPORTS = [
     'account.tasks',
     'auction.tasks',
 ]
+
+MERCHANT ='4dc2a7fd-aa4f-420d-9405-9428edf4d718'
+DOMAIN = '127.0.0.1'

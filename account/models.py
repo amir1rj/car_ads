@@ -26,6 +26,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     verified = models.BooleanField(default=False, verbose_name="تایید شده")
     objects = UserManager()
     USERNAME_FIELD = 'phone_number'
+    extra_ads =models.IntegerField(verbose_name='اگهی اضافه',default=0, blank=True)
 
     class Meta:
         ordering = ("-created_at",)
