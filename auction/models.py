@@ -15,6 +15,8 @@ class Auction(models.Model):
     title = models.CharField(max_length=255, verbose_name="عنوان")
     description = models.TextField(blank=True, verbose_name="توضیحات")
     image = models.ImageField(upload_to='auction_images', verbose_name="تصویر", null=True, blank=True)
+    auction_code = models.CharField(max_length=255, verbose_name='کد اگهی', null=True, blank=True)
+    organizer = models.CharField(max_length=255, verbose_name='برگذار کننده', null=True, blank=True)
     start_date = models.DateField(verbose_name="تاریخ شروع")
     end_date = models.DateField(verbose_name="تاریخ پایان")
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="تاریخ ایجاد")

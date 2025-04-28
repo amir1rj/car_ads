@@ -18,9 +18,9 @@ from rest_framework.response import Response
 from account.permisions import IsOwnerOrReadOnly, IsOwnerOfCar
 from ads.serializers import AdSerializer, ExhibitionSerializer, ExhibitionVideoSerializer, ImageSerializer, \
     BrandSerializer, CarModelSerializer, SelectedBrandSerializer, FavoriteSerializer, ColorSerializer, \
-    ZarinpalPaymentRequestSerializer, SubscriptionPlansSerializer
+    ZarinpalPaymentRequestSerializer, SubscriptionPlansSerializer, SubscriptionSerializer, SubscriptionCreateSerializer
 from ads.models import Car, View, Exhibition, ExhView, ExhibitionVideo, Image, Brand, CarModel, SelectedBrand, Favorite, \
-    Color, SubscriptionPlans, TransactionLog
+    Color, SubscriptionPlans, TransactionLog, Subscription
 from rest_framework.decorators import action
 from ads.pagination import StandardResultSetPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample, extend_schema_view
@@ -33,41 +33,49 @@ ZP_API_REQUEST = f"https://{sandbox}.zarinpal.com/pg/rest/WebGate/PaymentRequest
 ZP_API_VERIFY = f"https://{sandbox}.zarinpal.com/pg/rest/WebGate/PaymentVerification.json"
 ZP_API_STARTPAY = f"https://{sandbox}.zarinpal.com/pg/StartPay/"
 
+
 @extend_schema(tags=['Subscription & Payments'])
 class ZarinpalPaymentView(APIView):
     serializer_class = ZarinpalPaymentRequestSerializer
 
     def post(self, request):
         """ send subscription plan id and des if needed and get Payment gateway """
-        serializer = ZarinpalPaymentRequestSerializer(data=request.data)
-        if serializer.is_valid():
-            # amount = serializer.validated_data['amount']
-            subscription_plan_id = serializer.validated_data['subscription_plan_id']
-            subscription_plan = SubscriptionPlans.objects.get(id=subscription_plan_id)
-            amount = subscription_plan.price
-            description = serializer.validated_data['description']
-            phone = serializer.validated_data.get('phone', '')
+        try:
+            serializer = ZarinpalPaymentRequestSerializer(data=request.data)
+            if serializer.is_valid():
+                # amount = serializer.validated_data['amount']
+                subscription_id = serializer.validated_data['subscription_id']
+                subscription = Subscription.objects.get(id=subscription_id)
+                subscription_plan = subscription.subscription_plan
+                amount = subscription_plan.price
+                description = serializer.validated_data['description']
+                phone = serializer.validated_data.get('phone', '')
 
-            data = {
-                "MerchantID": settings.MERCHANT,
-                "Amount": amount,
-                "Description": description,
-                "Phone": phone,
-                "CallbackURL": f"{domain}/ads/verify-payment/?subscription_plan_id={subscription_plan_id}&user_id={self.request.user.id}",
-            }
-            # return Response(data)
-            response = self.send_request(data)
-            if response['status']:
-                return Response({"url": response['url'], "authority": response['authority']})
+                data = {
+                    "MerchantID": settings.MERCHANT,
+                    "Amount": amount,
+                    "Description": description,
+                    "Phone": phone,
+                    "CallbackURL": f"{domain}/ads/verify-payment/?subscription_plan_id={subscription_id}&user_id={self.request.user.id}",
+                }
+                # return Response(data)
+                response = self.send_request(data)
+                logger.info(response)
+                if response['status']:
+                    return Response({"url": response['url'], "authority": response['authority']})
+                else:
+                    return Response({"error": "Payment request failed", "code": response['code']}, status=400)
             else:
-                return Response({"error": "Payment request failed", "code": response['code']}, status=400)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({'success': False, "message": 'مشکلی پیش آمده لطفا با پشتیبانی تماس بگیرید'},
+                            status=status.HTTP_400_BAD_REQUEST)
 
     def send_request(self, data):
         headers = {'content-type': 'application/json', 'content-length': str(len(json.dumps(data)))}
         try:
             response = requests.post(ZP_API_REQUEST, data=json.dumps(data), headers=headers, timeout=10)
+            logger.info(ZP_API_REQUEST)
             if response.status_code == 200:
                 response = response.json()
                 if response['Status'] == 100:
@@ -88,12 +96,13 @@ class ZarinpalPaymentVerifyView(APIView):
     def get(self, request):
         """callback url for zarin pall"""
         authority = request.GET.get('Authority')
-        subscription_plan_id = request.GET.get('subscription_plan_id')
+        subscription_id = request.GET.get('subscription_id')
         transaction_user_id = request.GET.get('user_id')
         transaction_user = User.objects.get(id=transaction_user_id)
 
         # Validate Subscription Plan ID
-        subscription_plan = get_object_or_404(SubscriptionPlans, id=int(subscription_plan_id))
+        subscription = get_object_or_404(Subscription, id=int(subscription_id))
+        subscription_plan = subscription.subscription_plan
         amount = subscription_plan.price
 
         # Prepare data for verification request
@@ -111,8 +120,7 @@ class ZarinpalPaymentVerifyView(APIView):
                 response = response.json()
                 # Log the transaction
                 transaction = TransactionLog.objects.create(
-                    user=transaction_user,
-                    subscription_plan=subscription_plan,
+                    subscription=subscription,
                     amount=amount,
                     ref_id=response.get('RefID', ''),
                     status='Success' if response['Status'] == 100 else 'Failed'
@@ -139,6 +147,7 @@ class ZarinpalPaymentVerifyView(APIView):
             return Response({"status": "failed", "message": "Request timed out"}, status=status.HTTP_400_BAD_REQUEST)
         except requests.exceptions.ConnectionError:
             return Response({"status": "failed", "message": "Connection error"}, status=status.HTTP_400_BAD_REQUEST)
+
 
 class AdViewSets(viewsets.ModelViewSet):
     queryset = Car.objects.filter(status="active")
@@ -484,7 +493,7 @@ class AdViewSets(viewsets.ModelViewSet):
 
         # Paginate filtered results
         result = self.paginate_queryset(filtered_cars)
-        serializer = AdSerializer(result, many=True,context={"request": request})
+        serializer = AdSerializer(result, many=True, context={"request": request})
         return self.get_paginated_response(serializer.data)
 
 
@@ -550,14 +559,14 @@ class ExhibitionViewSet(viewsets.ModelViewSet, StandardResultSetPagination):
     )
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        filter_set = ExhibitionFilter(request.GET, queryset=queryset,)
+        filter_set = ExhibitionFilter(request.GET, queryset=queryset, )
         filtered_queryset = filter_set.qs
         page = self.paginate_queryset(filtered_queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={"request": request})
             return self.get_paginated_response(serializer.data)
 
-        serializer = self.get_serializer(filtered_queryset, many=True,context={"request": request})
+        serializer = self.get_serializer(filtered_queryset, many=True, context={"request": request})
         return Response(serializer.data)
 
     @extend_schema(
@@ -775,7 +784,7 @@ class CheckSubmitAddAuthorization(APIView):
     def get(self, request, *args, **kwargs):
         user = self.request.user
         if not user.roles == "EXHIBITOR":
-            if user.cars.filter(status="active").count() >= 3:
+            if user.cars.filter(status="active").count() >= 3 and user.extra_ads < 1:
                 raise CustomValidationError({
                     '': "شما نمیتوانید بیشتر از سه ماشین ثبت کنید"})
         if user.cars.filter(status="pending").exists():
@@ -862,8 +871,28 @@ class BrandByTypeAPIView(APIView):
 
         serializer = BrandSerializer(brands, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 @extend_schema(tags=['Subscription & Payments'])
 class SubscriptionPlansListView(generics.ListAPIView):
     """ get a list of all subscription plans """
     queryset = SubscriptionPlans.objects.all()
     serializer_class = SubscriptionPlansSerializer
+
+
+@extend_schema(tags=['Subscription & Payments'])
+class SubscriptionCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = SubscriptionCreateSerializer
+
+    def post(self, request):
+        """create a subscription for user with ad and sub pan and return it """
+        user = request.user
+        serializer = SubscriptionCreateSerializer(data=request.data)
+
+        if serializer.is_valid():
+            subscription = serializer.save(user=user)
+            response_serializer = SubscriptionSerializer(subscription)
+            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

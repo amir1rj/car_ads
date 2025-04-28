@@ -1,27 +1,22 @@
 from rest_framework import viewsets
+from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
+
+from account.exceptions import CustomValidationError
 from auction.filter import AuctionFilter
 from auction.pagination import AuctionPagination
 from auction.serializers import AuctionSerializer, RetrieveAuctionSerializer
 from auction.models import Auction
-from account.permisions import ReadOnly
+from account.permisions import ReadOnly, HasViewAuction
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from rest_framework.permissions import IsAuthenticated
 
 
 class AuctionViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = AuctionSerializer
-    permission_classes = [ReadOnly]
+    permission_classes = [HasViewAuction]
     pagination_class = AuctionPagination
 
-    def get_permissions(self):
-        permission_classes = self.permission_classes
-
-        if self.action in ["retrieve"]:
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [ReadOnly]
-        return [permission() for permission in permission_classes]
 
     def get_queryset(self):
         return Auction.get_active_auctions(self)

@@ -23,5 +23,9 @@ app.conf.beat_schedule = {
         "schedule": crontab(hour=0, minute=0),
 
     },
+    "handle_expire_times": {
+        "task": "account.tasks.handle_expire_times",
+        "schedule": crontab(hour=3, minute=30),
+    },
 
 }

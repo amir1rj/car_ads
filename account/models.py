@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from django.db import models
 from account.managers import UserManager
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, User
@@ -26,7 +26,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     verified = models.BooleanField(default=False, verbose_name="تایید شده")
     objects = UserManager()
     USERNAME_FIELD = 'phone_number'
-    extra_ads =models.IntegerField(verbose_name='اگهی اضافه',default=0, blank=True)
+    extra_ads = models.IntegerField(verbose_name='اگهی اضافه', default=0, blank=True)
 
     class Meta:
         ordering = ("-created_at",)
@@ -36,18 +36,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return self.username
 
-   # def has_perm(self, perm, obj=None):
-  #      return True
-
- #   def has_module_perms(self, app_label):
-#        return True
-
     @property
     def is_staff(self):
         return self.is_admin
 
     def save_last_login(self) -> None:
         self.last_login = datetime.now()
+        self.save()
+
+    def make_user_exhibitor(self, days: int):
+        now = timezone.now()
+        date = timedelta(days=days)
+        if self.roles != 'EXHIBITOR':
+            self.roles = 'EXHIBITOR'
+            self.profile.exhibition_expire_time = now + date
+        else:
+            self.profile.exhibition_expire_time += date
         self.save()
 
 
@@ -104,6 +108,7 @@ class Token(models.Model):
         self.user.set_password(password)
         self.user.save()
 
+
 class Profile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, related_name="profile", verbose_name="کاربر"
@@ -122,6 +127,21 @@ class Profile(models.Model):
     gender = models.CharField(
         max_length=3, choices=(("مرد", "مرد"), ("زن", "زن")), verbose_name="جنسیت", null=True, blank=True
     )
+    view_auction = models.BooleanField(default=False, verbose_name='دیدن مزایده')
+    view_auction_expire_time = models.DateTimeField(blank=True, null=True,
+                                                    verbose_name='تاریخ انقضای اشتراک دیدن مزایده ')
+    exhibition_expire_time = models.DateTimeField(blank=True, null=True, verbose_name='تاریخ انقضای نمایشگاه')
+
+    def buy_view_auction_subscription(self, days: int, ) -> None:
+        now = timezone.now()
+        date = timedelta(days=days)
+        # if user has view auction role it would increase days and if it has not it will add this and set days
+        if not self.view_auction:
+            self.view_auction_expire_time = now + date
+            self.view_auction = True
+        else:
+            self.view_auction_expire_time += date
+        self.save()
 
     @property
     def username(self):
@@ -133,6 +153,15 @@ class Profile(models.Model):
     class Meta:
         verbose_name = "پروفایل"
         verbose_name_plural = "پروفایل‌ها"
+
+    def handle_expire_times(self):
+        now = timezone.now()
+        if self.user.roles == 'EXHIBITOR' and self.exhibition_expire_time and self.exhibition_expire_time <= now:
+            self.user.roles = "CUSTOMER"
+        if self.view_auction and self.view_auction_expire_time and self.view_auction_expire_time <= now:
+            self.view_auction = False
+        self.save()
+        self.user.save()
 
 
 class Log(models.Model):

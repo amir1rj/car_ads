@@ -1,6 +1,6 @@
 from celery import shared_task
 from django.db import transaction
-from account.models import PendingUser
+from account.models import PendingUser, Profile
 from django.utils import timezone
 from datetime import timedelta
 from kavenegar import *
@@ -34,3 +34,11 @@ def delete_pending_users():
     for p_user in expired_otp_tokens:
         if not p_user.is_valid():
             p_user.delete()
+
+@shared_task
+def handle_expire_times():
+    profiles = Profile.objects.all()
+
+    with transaction.atomic():
+        for profile in profiles:
+            profile.handle_expire_times()

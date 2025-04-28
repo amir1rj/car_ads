@@ -198,9 +198,9 @@ class Car(models.Model):
             raise ValidationError("این ماشین را نمیتوان در نمایشگاه ثبت کرد")
         if ((self.model is None) or (self.brand is None)) and self.promoted_model is None:
             raise ValidationError("شما باید فیلد های برند و مدل یا مدل پیشنهادی را پر کنید")
-        if not self.user.roles == "EXHIBITOR":
-            if self.user.cars.filter(status="active").count() > 3:
-                raise ValidationError("شما نمیتوانید بیشتر از سه ماشین ثبت کنید")
+        # if not self.user.roles == "EXHIBITOR":
+        #     if self.user.cars.filter(status="active").count() > 3:
+        #         raise ValidationError("شما نمیتوانید بیشتر از سه ماشین ثبت کنید")
         if self.model.car_type == 'ماشین‌آلات سنگین' and not (
                 self.weight or self.payload_capacity or self.wheel_number):
             raise ValidationError("شما باید مقادیر مربوط به ماشین سنگین را پر کنید")
@@ -231,6 +231,10 @@ class Car(models.Model):
 
     def make_ad_urgent(self):
         self.city = "همه شهر ها"
+        self.save()
+
+    def make_ad_promoted(self):
+        self.is_promoted = True
         self.save()
 
 
@@ -298,13 +302,25 @@ class SubscriptionPlans(models.Model):
     amount = models.IntegerField(verbose_name='تعداد', default=1)
     name = models.CharField(max_length=255, verbose_name='اسم')
     type = models.CharField(max_length=255, choices=SUB_CHOICE, verbose_name="نوع اشتراک")
-    ad = models.ForeignKey(Car, on_delete=models.PROTECT, related_name='ad_subscription_plans', null=True, blank=True,
+    description = models.TextField(verbose_name='توضیحات', null=True, blank=True)
+    is_default = models.BooleanField(verbose_name='اشتراک پایه', default=False)
+
+    class Meta:
+        verbose_name = "اشتراک "
+        verbose_name_plural = 'اشتراک ها'
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_subscriptions')
+    ad = models.ForeignKey(Car, on_delete=models.PROTECT, related_name='ad_subscriptions', null=True, blank=True,
                            verbose_name='اگهی مربوطه')
+    subscription_plan = models.ForeignKey(SubscriptionPlans, on_delete=models.SET_NULL, null=True,
+                                          related_name='plan_subscriptions', )
 
 
 class TransactionLog(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_transactions')
-    subscription_plan = models.ForeignKey(SubscriptionPlans, on_delete=models.SET_NULL, null=True)
+    subscription = models.ForeignKey(Subscription, on_delete=models.SET_NULL, null=True,
+                                     related_name='subscription_transactions', )
     amount = models.IntegerField(verbose_name='Amount')
     ref_id = models.CharField(max_length=255, verbose_name='Reference ID')
     status = models.CharField(max_length=50, verbose_name='Status')
@@ -318,14 +334,20 @@ class TransactionLog(models.Model):
         verbose_name_plural = "تراکنش ها"
 
     def apply(self):
-        if self.subscription_plan.type == 'extra_ad':
-            self.user.extra_ads += self.amount
-        elif self.subscription_plan.type == 'is_urgent':
-            self.subscription_plan.ad.is_urgent = True
-            self.subscription_plan.save()
-        elif self.subscription_plan.type == 'is_promoted':
-            self.subscription_plan.ad.is_promoted = True
-            self.subscription_plan.save()
-        elif self.subscription_plan.type == 'nationwide':
-            self.subscription_plan.ad.city = 'همه شهر ها'
-            self.subscription_plan.ad.save()
+        sub_type = self.subscription.subscription_plan.type
+        ad, user = self.subscription.ad, self.subscription.user
+        match sub_type:
+            case 'extra_ad':
+                user.extra_ads += self.amount
+            case 'is_urgent':
+                ad.make_ad_urgent()
+            case 'is_promoted':
+                ad.make_ad_promoted()
+            case 'nationwide':
+                ad.make_ad_global()
+            case 'renew':
+                ad.renew()
+            case 'view_auction':
+                user.profile.buy_view_auction_subscription(self.subscription.subscription_plan.amount)
+            case 'submit_exhibition':
+                user.make_user_exhibitor(self.subscription.subscription_plan.amount)

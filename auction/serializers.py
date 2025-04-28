@@ -15,6 +15,7 @@ class RetrieveAuctionSerializer(AuctionSerializer):
     class Meta(AuctionSerializer.Meta):
         exclude = ('search_vector',)
         extra_fields = ['related_auctions']
+
     def get_related_auctions(self, obj):
         # Start with auctions that have the same city and type
         related_auctions = Auction.objects.filter(

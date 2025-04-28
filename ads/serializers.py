@@ -2,7 +2,7 @@ from rest_framework import serializers
 from account.exceptions import CustomValidationError
 from account.logging_config import logger
 from ads.models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand, Favorite, \
-    Color, SubscriptionPlans
+    Color, SubscriptionPlans, Subscription
 from ads.utils import is_not_mobile_phone
 from rest_framework import exceptions
 
@@ -125,8 +125,11 @@ class AdSerializer(serializers.ModelSerializer):
 
         # Limit active ads to 3 for non-exhibitor users
         if validated_data["user"].roles != "EXHIBITOR":
-            if validated_data["user"].cars.filter(status="active").count() >= 3:
-                raise exceptions.NotAcceptable("شما نمیتوانید بیشتر از سه اگهی ثبت کنید")
+            if request.user.cars.filter(status="active").count() >= 3:
+                if request.user.extra_ads < 1:
+                    raise exceptions.NotAcceptable("شما نمیتوانید بیشتر از سه اگهی ثبت کنید")
+                else:
+                    request.user.extra_ads -= 1
 
         # Prevent new ad creation if a pending request exists
         if validated_data["user"].cars.filter(status="pending").exists():
@@ -282,7 +285,8 @@ class ExhibitionSerializer(serializers.ModelSerializer):
         return serializer.data
 
     def get_cars(self, obj):
-        car_serializer = AdSerializer(instance=obj.cars.filter(status="active"), many=True,context={'request': self.context['request']})
+        car_serializer = AdSerializer(instance=obj.cars.filter(status="active"), many=True,
+                                      context={'request': self.context['request']})
         return car_serializer.data
 
 
@@ -302,7 +306,7 @@ class ZarinpalPaymentRequestSerializer(serializers.Serializer):
     description = serializers.CharField(max_length=255, required=True, help_text="Description of the transaction.")
     phone = serializers.CharField(max_length=15, required=False, allow_blank=True,
                                   help_text="User's phone number (optional).")
-    subscription_plan_id = serializers.IntegerField(required=True, help_text="ID of the Subscription Plan.")
+    subscription_id = serializers.IntegerField(required=True, help_text="ID of the Subscription.")
 
     def validate_subscription_plan_id(self, value):
         try:
@@ -315,4 +319,18 @@ class ZarinpalPaymentRequestSerializer(serializers.Serializer):
 class SubscriptionPlansSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubscriptionPlans
-        fields = ['id', 'ad', 'type', "price", 'name']
+        fields = ['id', 'type', "price", 'name', 'description']
+
+
+class SubscriptionCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = ['ad', 'subscription_plan']
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    subscription_plan = SubscriptionPlansSerializer(read_only=True)
+
+    class Meta:
+        model = Subscription
+        fields = ['id', 'ad', 'subscription_plan']
