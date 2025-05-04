@@ -99,7 +99,6 @@ services:
       - car_ads
     ports:
       - "80:80"
-      - "9000:9000"
     restart: always
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf
