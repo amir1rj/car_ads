@@ -14,9 +14,10 @@ SECRET_KEY = 'django-insecure-!80r%debx%y5qj^6v*4!lvi@ssp5@zv4^*a&&r4s^9ho-jy09)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["dolox.ir", "127.0.0.1", "localhost", "admin.dolox.ir"]
+ALLOWED_HOSTS = ["*"]
 
-CSRF_TRUSTED_ORIGINS = ["https://dolox.ir", "https://admin.dolox.ir"]
+CSRF_TRUSTED_ORIGINS = ["https://dolox.ir", "https://admin.dolox.ir",
+                        'http://158.255.74.78:8000', 'http://158.255.74.78']
 
 # Application definition
 
