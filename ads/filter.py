@@ -1,5 +1,5 @@
 from django_filters import FilterSet, CharFilter, RangeFilter
-from ads.models import Car, Exhibition
+from ads.models import Car, Exhibition, SubscriptionPlans
 import django_filters
 from django_filters import FilterSet, CharFilter, RangeFilter, BaseInFilter, NumberFilter
 
@@ -43,3 +43,9 @@ class ExhibitionFilter(FilterSet):
     class Meta:
         model = Exhibition
         fields = ["city", "sells_chinese_cars", "sells_foreign_cars", "sells_domestic_cars"]
+
+
+class SubscriptionPlansFilter(FilterSet):
+    class Meta:
+        model = SubscriptionPlans
+        fields = ['type']

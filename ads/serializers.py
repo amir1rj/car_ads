@@ -319,7 +319,7 @@ class ZarinpalPaymentRequestSerializer(serializers.Serializer):
 class SubscriptionPlansSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubscriptionPlans
-        fields = ['id', 'type', "price", 'name', 'description']
+        fields = ['id', 'type',"amount", "price", 'name', 'description']
 
 
 class SubscriptionCreateSerializer(serializers.ModelSerializer):

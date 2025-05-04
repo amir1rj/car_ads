@@ -4,6 +4,7 @@ import requests
 from django.conf import settings
 from django.db.models import Min, Max
 from django.shortcuts import get_object_or_404
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.exceptions import ValidationError, NotAuthenticated, PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
@@ -11,7 +12,7 @@ from rest_framework.exceptions import PermissionDenied
 from account.exceptions import CustomValidationError
 from account.logging_config import logger
 from account.models import User
-from ads.filter import CarFilter, ExhibitionFilter
+from ads.filter import CarFilter, ExhibitionFilter, SubscriptionPlansFilter
 from ads.search_indexes import CarIndex, ExhibitionIndex
 from rest_framework import viewsets, status, permissions
 from rest_framework.response import Response
@@ -878,6 +879,8 @@ class SubscriptionPlansListView(generics.ListAPIView):
     """ get a list of all subscription plans """
     queryset = SubscriptionPlans.objects.all()
     serializer_class = SubscriptionPlansSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = SubscriptionPlansFilter
 
 
 @extend_schema(tags=['Subscription & Payments'])
