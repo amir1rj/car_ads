@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Car, Image, Feature, SubscriptionPlans, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand, \
+from .models import Car, Image, Feature, Brand, CarModel, ExhibitionVideo, Exhibition, SelectedBrand, \
     Color
 from .tasks import toggle_ad_status
 
@@ -95,6 +95,3 @@ class SelectedBrandAdmin(admin.ModelAdmin):
 admin.site.register(SelectedBrand, SelectedBrandAdmin)
 
 
-@admin.register(SubscriptionPlans)
-class SubscriptionPlansAdmin(admin.ModelAdmin):
-    list_display = ["type",'name']

@@ -32,14 +32,13 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-
     # apps
     'account.apps.AccountConfig',
     'ads.apps.AdsConfig',
     'chat.apps.ChatConfig',
     "auction.apps.AuctionConfig",
     "notification.apps.NotificationConfig",
-
+    'finance.apps.FinanceConfig',
     # third party
     'storages',
     'django_celery_results',

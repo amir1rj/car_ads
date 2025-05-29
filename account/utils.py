@@ -5,6 +5,17 @@ from dataclasses import dataclass
 import pyotp as pyotp
 from rest_framework import serializers, permissions
 from account.models import User
+import uuid
+
+
+def generate_free_transaction_uuid():
+    """
+    Generates a string in the format 'free transaction {uuid}'.
+
+    :return: A string like 'free transaction 123e4567-e89b-12d3-a456-426614174000'
+    """
+    return f"free transaction {uuid.uuid4()}"
+
 
 PROVINCES = [("آذربایجان شرقی", "آذربایجان شرقی"),
              ("آذربایجان غربی", "آذربایجان غربی"),

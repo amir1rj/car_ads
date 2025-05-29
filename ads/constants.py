@@ -76,12 +76,4 @@ BRAND_PARENT_CHOICES = [
     ("موتورسیکلت", "موتورسیکلت"),
     ("ماشین‌آلات سنگین", "ماشین‌آلات سنگین"),
 ]
-SUB_CHOICE = [
-    ('extra_ad', 'اگهی اضافه '),
-    ('is_urgent', 'فوری'),
-    ('is_promoted', 'پیشنهادی'),
-    ('nationwide', 'سراسری'),
-    ('renew', 'تمدید'),
-    ('view_auction', 'دیدن مزایده'),
-    ('submit_exhibition', 'ثبت نمایشگاه')
-]
+

@@ -28,6 +28,7 @@ urlpatterns = [
     path("ads/", include("ads.urls")),
     path("auction/", include("auction.urls")),
     path("notif/", include("notification.urls")),
+    path("payment/", include("finance.urls")),
 
 ]
 # if settings.DEBUG:

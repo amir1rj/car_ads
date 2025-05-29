@@ -3,7 +3,8 @@ from django.contrib.auth.signals import user_logged_in, user_logged_out, user_lo
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from account.models import User, Profile
-from ads.models import SubscriptionPlans, Subscription, TransactionLog
+from finance.models import SubscriptionPlans, Subscription, Payment
+from account.utils import generate_free_transaction_uuid
 
 
 @receiver(post_save, sender=User)
@@ -13,11 +14,12 @@ def create_profile(sender, instance, created, **kwargs):
         subscription_plans = SubscriptionPlans.objects.filter(is_default=True)
         for plan in subscription_plans:
             subscription = Subscription.objects.create(plan=plan, user=instance)
-            transaction = TransactionLog.objects.create(
+            transaction = Payment.objects.create(
                 subscription=subscription,
                 amount=0,
                 ref_id="free",
-                status='Success'
+                status=1,
+                authority=generate_free_transaction_uuid()
             )
             transaction.apply()
 
